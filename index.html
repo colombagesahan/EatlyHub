@@ -52,6 +52,7 @@
         .text-right { text-align: right; }
         .text-red { color: var(--primary); }
         .text-green { color: var(--green); }
+        .text-white { color: white !important; }
         .bold { font-weight: 700; }
         .relative { position: relative; }
         
@@ -60,7 +61,6 @@
         small { color: #747d8c; font-size: 0.8rem; }
 
         /* --- 300px SCREEN OPTIMIZATION --- */
-        /* Ensures flexible layouts don't break on tiny screens */
         .card, .hero, nav, .container { min-width: 0; word-break: break-word; }
         
         @media (max-width: 340px) {
@@ -119,14 +119,16 @@
         .nav-brand { display: flex; align-items: center; gap: 8px; font-size: 1.4rem; font-weight: 900; color: var(--primary); }
         .nav-logo-svg { width: 32px; height: 32px; fill: var(--primary); }
 
-        /* Dashboard Tabs (Horizontal Scroll Fix) */
+        /* Dashboard Tabs (Fixed Horizontal Slide) */
         .tabs-wrapper { 
             background: var(--surface); border-bottom: 1px solid #eee; position: sticky; top: 62px; z-index: 90; 
             box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+            width: 100%; overflow: hidden; /* Prevent vertical overflow */
         }
         .tabs-container { 
             display: flex; flex-wrap: nowrap; overflow-x: auto; padding: 10px 15px; 
             -webkit-overflow-scrolling: touch; scrollbar-width: none; gap: 10px;
+            width: 100%;
         }
         .tabs-container::-webkit-scrollbar { display: none; }
         .tab-btn { 
@@ -145,7 +147,7 @@
         }
 
         /* Status Badges */
-        .status-badge { padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; display: inline-block; }
+        .status-badge { padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; display: inline-block; cursor: pointer; }
         .st-new { background: #eafff3; color: #00b894; border: 1px solid #00b894; }
         .st-unverified { background: #fff0f0; color: var(--primary); border: 1px solid var(--primary); }
         
@@ -275,23 +277,22 @@
 
 <script>
     // --- 1. CONFIGURATION ---
-    // TODO: REPLACE THIS WITH YOUR FIREBASE CONFIG
-   const firebaseConfig = {
-  apiKey: "AIzaSyA4mlpgLA8l1N8VHqwpVLbPXvDvPxGPcSI",
-  authDomain: "eatlyhub.firebaseapp.com",
-  projectId: "eatlyhub",
-  storageBucket: "eatlyhub.firebasestorage.app",
-  messagingSenderId: "1094045089044",
-  appId: "1:1094045089044:web:397e0fd73412a07c3ad601",
-  measurementId: "G-V3K3QB1715"
-};
+    const firebaseConfig = {
+      apiKey: "AIzaSyA4mlpgLA8l1N8VHqwpVLbPXvDvPxGPcSI",
+      authDomain: "eatlyhub.firebaseapp.com",
+      projectId: "eatlyhub",
+      storageBucket: "eatlyhub.firebasestorage.app",
+      messagingSenderId: "1094045089044",
+      appId: "1:1094045089044:web:397e0fd73412a07c3ad601",
+      measurementId: "G-V3K3QB1715"
+    };
 
     // --- 2. INIT FIREBASE ---
     try {
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     } catch(e) { 
-        console.error("Firebase Init Error - Make sure to add your config!", e); 
-        alert("System Error: Firebase Config missing. Please edit the code.");
+        console.error("Firebase Init Error", e); 
+        alert("System Error: Firebase Config missing.");
     }
     const auth = firebase.auth();
     const db = firebase.firestore();
@@ -301,17 +302,17 @@
     let currentUser = null;
     let bizProfile = {};
     let bizOrders = [];
+    let bizReviews = [];
     let currentTab = 'Dashboard';
 
-    // Tabs List
+    // Tabs List (Updated with Reviews)
     const TABS = [
-        'Dashboard', 'Profile', 'Open/Close', 'Add Foods', 'My Webpage',
+        'Dashboard', 'Profile', 'Open/Close', 'Add Foods', 'My Webpage', 'Reviews',
         'New Orders', 'Confirmed Orders', 'Active Orders', 'Ready Orders', 
         'Completed Orders', 'Unpaid Bills', 'Reports', 'Admin Messages'
     ];
 
-    // --- 4. IMAGE COMPRESSION UTILITY (Client Side) ---
-    // Resizes image to max 800px and converts to Base64
+    // --- 4. IMAGE COMPRESSION UTILITY ---
     function compressImage(file) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -327,7 +328,7 @@
                     canvas.height = img.height * scaleSize;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    resolve(canvas.toDataURL('image/jpeg', 0.7)); // Compress to 70% quality
+                    resolve(canvas.toDataURL('image/jpeg', 0.7)); 
                 };
                 img.onerror = (err) => reject(err);
             };
@@ -388,7 +389,6 @@
             if(doc.exists) {
                 bizProfile = doc.data();
             } else {
-                // Initialize new user
                 bizProfile = { locked: false, verified: false, foods: [], schedule: {} };
                 db.collection('users').doc(currentUser.uid).set(bizProfile);
             }
@@ -400,14 +400,18 @@
           .orderBy('time', 'desc').limit(50)
           .onSnapshot(snap => {
               bizOrders = snap.docs.map(d => ({id: d.id, ...d.data()}));
-              
-              // Notification for New Orders
               const newOrders = bizOrders.filter(o => o.status === 'new' && !o.seen);
               if(newOrders.length > 0) {
                   showToast(`🔔 ${newOrders.length} New Order(s)!`, 'success');
-                  // Play Sound (Optional)
-                  // markAsSeen(newOrders);
               }
+              refreshTabContent();
+          });
+          
+        // Real-time Listener Reviews
+        db.collection('users').doc(currentUser.uid).collection('reviews')
+          .orderBy('time', 'desc').limit(20)
+          .onSnapshot(snap => {
+              bizReviews = snap.docs.map(d => ({id: d.id, ...d.data()}));
               refreshTabContent();
           });
 
@@ -415,20 +419,16 @@
     }
 
     function switchTab(name) {
-        // Guard: Force Profile Completion
-        // If profile is NOT locked (meaning not complete), force user to Profile tab
         if (name !== 'Dashboard' && name !== 'Profile' && name !== 'Admin Messages' && (!bizProfile.locked)) {
             showToast("⚠ Please Complete & LOCK your Profile first.", "error");
             name = 'Profile';
         }
 
         currentTab = name;
-        // Update UI Tabs
         document.querySelectorAll('.tab-btn').forEach(b => {
             b.classList.toggle('active', b.innerText === name);
         });
         
-        // Auto scroll active tab into view
         const activeBtn = document.querySelector('.tab-btn.active');
         if(activeBtn) activeBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
 
@@ -439,14 +439,14 @@
         const container = document.getElementById('dash-content');
         if (!container || !currentUser) return;
 
-        container.innerHTML = ''; // Clear
+        container.innerHTML = ''; 
 
-        // Route logic
         if(currentTab === 'Dashboard') renderDashHome(container);
         else if(currentTab === 'Profile') renderProfile(container);
         else if(currentTab === 'Open/Close') renderSchedule(container);
         else if(currentTab === 'Add Foods') renderAddFoods(container);
         else if(currentTab === 'My Webpage') renderWebpageInfo(container);
+        else if(currentTab === 'Reviews') renderReviews(container);
         else if(currentTab === 'Reports') renderReports(container);
         else if(currentTab === 'Admin Messages') renderAdminChat(container);
         else renderOrdersList(container, currentTab);
@@ -458,6 +458,13 @@
     function renderDashHome(target) {
         const newCount = bizOrders.filter(o => o.status === 'new').length;
         const activeCount = bizOrders.filter(o => ['confirmed', 'active', 'ready'].includes(o.status)).length;
+        
+        // "All Datas" Display
+        const completedCount = bizOrders.filter(o => o.status === 'completed').length;
+        const totalRev = bizOrders.filter(o => o.status === 'completed').reduce((a,b) => a + Number(b.total), 0);
+
+        // Not Verified Click Action
+        const verifyAction = `onclick="switchTab('Profile'); setTimeout(() => document.getElementById('verify-section').scrollIntoView({behavior:'smooth'}), 500)"`;
 
         target.innerHTML = `
             <div class="card center flex-col">
@@ -465,7 +472,7 @@
                 <h3>${bizProfile.businessName || 'Setup Your Business'}</h3>
                 ${bizProfile.verified 
                     ? '<div class="status-badge st-new">✔ Verified Business</div>' 
-                    : '<div class="status-badge st-unverified">❌ Not Verified</div>'}
+                    : `<div class="status-badge st-unverified" ${verifyAction}>❌ Not Verified (Click to Fix)</div>`}
             </div>
 
             <div class="flex" style="gap:10px; margin-bottom:20px;">
@@ -477,6 +484,12 @@
                     <h1>${activeCount}</h1>
                     <small>In Kitchen</small>
                 </div>
+            </div>
+            
+            <div class="card">
+                <h4>📊 Quick Stats</h4>
+                <div class="flex justify-between" style="border-bottom:1px solid #eee; padding:5px 0;"><span>Total Revenue</span><b>Rs. ${totalRev}</b></div>
+                <div class="flex justify-between" style="padding:5px 0;"><span>Completed Orders</span><b>${completedCount}</b></div>
             </div>
             
             <div class="card">
@@ -500,14 +513,25 @@
         const p = bizProfile;
         const disabled = p.locked ? 'disabled' : '';
         
+        let logoHtml = '';
+        if(p.logo && p.locked) {
+            logoHtml = `<img src="${p.logo}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;">`;
+        } else if(p.logo) {
+             logoHtml = `
+                <img src="${p.logo}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;">
+                <button class="btn btn-outline mt-1" style="padding:5px 10px; font-size:0.8rem; width:auto;" onclick="removeLogo()">Remove Logo</button>
+             `;
+        } else {
+            logoHtml = `<label class="btn btn-secondary mt-1" style="width:auto;padding:5px 10px;font-size:0.8rem">Upload Logo <input type="file" hidden onchange="handleImageUpload(this, 'logo')"></label>`;
+        }
+        
         let html = `
             <div class="card">
                 <h3>Business Profile</h3>
                 <p class="text-red" style="font-size:0.85rem">All fields required. Lock profile to enable other tabs.</p>
                 
-                <div class="center flex-col mb-1">
-                    <img id="prev-logo" src="${p.logo||'https://via.placeholder.com/100'}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;">
-                    ${!p.locked ? `<label class="btn btn-secondary mt-1" style="width:auto;padding:5px 10px;font-size:0.8rem">Upload Logo <input type="file" hidden onchange="handleImageUpload(this, 'logo')"></label>` : ''}
+                <div class="center flex-col mb-1" id="logo-section">
+                    ${logoHtml}
                 </div>
 
                 <div class="input-group"><label>Business Name</label><input id="p-name" value="${p.businessName||''}" ${disabled}></div>
@@ -522,7 +546,7 @@
                     : `<button class="btn btn-primary" onclick="saveProfile()">Save & Lock Profile</button>`}
             </div>
 
-            <div class="card">
+            <div class="card" id="verify-section">
                 <h3>Verification Badge (Rs 2500)</h3>
                 ${p.verified ? '<div class="text-green bold text-center" style="font-size:1.2rem; padding:20px;">✅ You are Verified!</div>' : `
                     <p class="mb-1">Get the Green Badge to build trust. One-time payment.</p>
@@ -555,8 +579,9 @@
             try {
                 const base64 = await compressImage(input.files[0]);
                 if(type === 'logo') {
-                    document.getElementById('prev-logo').src = base64;
-                    bizProfile.tempLogo = base64; // Stored temporarily until save
+                    // Update locally first for preview
+                    bizProfile.tempLogo = base64;
+                    renderProfile(document.getElementById('dash-content')); 
                 } else {
                     bizProfile['temp_' + type] = base64;
                     document.getElementById('stat-' + type).classList.remove('hidden');
@@ -565,6 +590,15 @@
             } catch (e) {
                 showToast("Image Error", "error");
             }
+        }
+    }
+    
+    function removeLogo() {
+        if(confirm("Remove current logo?")) {
+            db.collection('users').doc(currentUser.uid).update({ logo: firebase.firestore.FieldValue.delete() });
+            delete bizProfile.logo;
+            delete bizProfile.tempLogo;
+            renderProfile(document.getElementById('dash-content'));
         }
     }
 
@@ -586,7 +620,7 @@
             logo, businessName: name, address: addr, ownerName: owner, 
             nic, hotline: hot, whatsapp: wa, locked: true
         };
-        delete updatedProfile.tempLogo; // Clean up
+        delete updatedProfile.tempLogo; 
 
         db.collection('users').doc(currentUser.uid).set(updatedProfile, {merge:true})
             .then(() => { showToast("Profile Locked & Saved", "success"); switchTab('Dashboard'); })
@@ -599,9 +633,7 @@
 
     function requestVerification() {
         if(!bizProfile.temp_letter || !bizProfile.temp_slip) return showToast("Please upload both documents.", "error");
-        // In a real app, send these to an admin collection
         showToast("Documents Submitted! Admin will review.", "success");
-        // Simulate sending to Admin Messages
         db.collection('admin_requests').add({
             uid: currentUser.uid, 
             name: bizProfile.businessName, 
@@ -638,9 +670,11 @@
                 </div>
                 <div class="text-center text-green" style="font-size:0.8rem">Settings auto-save for ${today}</div>
             </div>
-            <div class="card" style="background:${s.open ? 'var(--green)' : 'var(--primary)'}; color:white;">
-                <h3 style="color:white; margin:0;">Preview</h3>
-                <p style="margin:0;">Webpage Status: ${s.open ? `WE ARE OPEN (${s.start} - ${s.end})` : 'WE ARE CLOSED TODAY'}</p>
+            
+            <!-- Fixed Preview Card Contrast -->
+            <div class="card text-white" style="background:${s.open ? 'var(--green)' : 'var(--primary)'};">
+                <h3 class="text-white" style="margin:0;">Preview</h3>
+                <p class="text-white" style="margin:0;">Webpage Status: ${s.open ? `WE ARE OPEN (${s.start} - ${s.end})` : 'WE ARE CLOSED TODAY'}</p>
             </div>
         `;
     }
@@ -736,9 +770,11 @@
         .then(() => renderAddFoods(document.getElementById('dash-content')));
     }
 
-    // E) MY WEBPAGE
+    // E) MY WEBPAGE (Social & YouTube)
     function renderWebpageInfo(target) {
         const url = `${window.location.origin}${window.location.pathname}?biz=${currentUser.uid}`;
+        const links = bizProfile.socialLinks || {};
+        
         target.innerHTML = `
             <div class="card text-center">
                 <img src="${bizProfile.logo}" style="width:80px;height:80px;border-radius:50%;margin:0 auto 10px;">
@@ -754,14 +790,65 @@
                 <h3>Hero Settings</h3>
                 <div class="input-group">
                     <label>Welcome Message</label>
-                    <input id="hero-txt" value="${bizProfile.heroText || 'Welcome to ' + bizProfile.businessName}" onchange="updateHero(this.value)">
+                    <input id="hero-txt" value="${bizProfile.heroText || 'Welcome to ' + bizProfile.businessName}" onchange="updateWebSettings()">
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3>Social Media & Gallery</h3>
+                <div class="input-group"><label>Facebook Link</label><input id="s-fb" value="${links.fb||''}" onchange="updateWebSettings()"></div>
+                <div class="input-group"><label>Instagram Link</label><input id="s-ig" value="${links.ig||''}" onchange="updateWebSettings()"></div>
+                <div class="input-group">
+                    <label>YouTube Video Links (Comma separated)</label>
+                    <textarea id="s-yt" rows="3" placeholder="https://youtube.com/watch?v=..., https://youtu.be/..." onchange="updateWebSettings()">${links.yt||''}</textarea>
                 </div>
             </div>
         `;
     }
     
-    function updateHero(txt) {
-        db.collection('users').doc(currentUser.uid).update({heroText: txt});
+    function updateWebSettings() {
+        const heroText = document.getElementById('hero-txt').value;
+        const fb = document.getElementById('s-fb').value;
+        const ig = document.getElementById('s-ig').value;
+        const yt = document.getElementById('s-yt').value;
+        
+        db.collection('users').doc(currentUser.uid).update({
+            heroText,
+            socialLinks: { fb, ig, yt }
+        }).then(() => showToast("Webpage Settings Saved"));
+    }
+
+    // NEW: REVIEWS TAB
+    function renderReviews(target) {
+        if(bizReviews.length === 0) {
+            target.innerHTML = `<div class="card text-center text-gray"><h3>No reviews yet.</h3></div>`;
+            return;
+        }
+
+        target.innerHTML = bizReviews.map(r => `
+            <div class="card">
+                <div class="flex justify-between">
+                    <b>${r.name || 'Anonymous'}</b>
+                    <span class="text-yellow">${'★'.repeat(r.stars)}</span>
+                </div>
+                <p class="mt-1">${r.text}</p>
+                <small>${new Date(r.time).toLocaleDateString()}</small>
+                <div class="mt-1 flex" style="gap:10px;">
+                    ${r.status === 'pending' ? `<button class="btn btn-green" style="width:auto; padding:5px 10px;" onclick="updateReview('${r.id}', 'published')">Post to Webpage</button>` : '<span class="status-badge st-new">Published</span>'}
+                    <button class="btn btn-outline" style="width:auto; padding:5px 10px; border-color:red; color:red;" onclick="deleteReview('${r.id}')">Delete</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function updateReview(id, status) {
+        db.collection('users').doc(currentUser.uid).collection('reviews').doc(id).update({status});
+    }
+
+    function deleteReview(id) {
+        if(confirm("Delete this review?")) {
+            db.collection('users').doc(currentUser.uid).collection('reviews').doc(id).delete();
+        }
     }
 
     // F) ORDERS WORKFLOW
@@ -783,18 +870,15 @@
         target.innerHTML = list.map(o => {
             let actions = '';
             
-            // 1. New -> Confirmed / Cancel
             if(status === 'new') {
                 actions = `
                     <button class="btn btn-yellow" onclick="reqConfirm('${o.id}', '${o.custWa}')">Request Confirmation (WhatsApp)</button>
                     <button class="btn btn-outline" style="border-color:var(--primary); color:var(--primary);" onclick="setStatus('${o.id}', 'canceled')">Decline Order</button>
                 `;
             }
-            // 2. Confirmed -> Active (Bill)
             else if(status === 'confirmed') {
                 actions = `<button class="btn btn-primary" onclick="generateBill('${o.id}')">🖨 Print Bill & Start Cooking</button>`;
             }
-            // 3. Active -> Ready
             else if(status === 'active') {
                 actions = `
                     <div class="bill-wrapper">
@@ -811,7 +895,6 @@
                     <button class="btn btn-green mt-1" onclick="markReady('${o.id}', '${o.custWa}')">✅ Mark Ready & Notify Customer</button>
                 `;
             }
-            // 4. Ready -> Complete / Unpaid
             else if(status === 'ready') {
                 actions = `
                     <button class="btn btn-secondary" onclick="setStatus('${o.id}', 'completed')">💰 Payment Received (Complete)</button>
@@ -843,7 +926,6 @@
         const link = `${window.location.origin}${window.location.pathname}?biz=${currentUser.uid}&orderId=${id}`;
         const msg = `Hello! Please confirm your *${bizProfile.businessName}* order by clicking here: ${link}`;
         window.open(`https://wa.me/${wa}?text=${encodeURIComponent(msg)}`);
-        // We do NOT change status yet. Customer changes it.
     }
 
     function generateBill(id) {
@@ -943,35 +1025,94 @@
 
     async function loadPublicPage(bizId) {
         bizIdForCart = bizId;
-        render('tpl-public'); // We'll create this dynamically below to keep file clean
+        render('tpl-public');
         
-        // Dynamic HTML injection for public page to avoid cluttering templates
+        // Helper to extract YouTube ID
+        const getYoutubeId = (url) => {
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+            const match = url.match(regExp);
+            return (match && match[2].length === 11) ? match[2] : null;
+        };
+
+        const doc = await db.collection('users').doc(bizId).get();
+        if(!doc.exists) return app.innerHTML = "<h2 class='text-center p-2'>Business Not Found</h2>";
+        const data = doc.data();
+        bizOwnerWa = data.whatsapp;
+
+        // Load Reviews
+        const reviewSnap = await db.collection('users').doc(bizId).collection('reviews').where('status', '==', 'published').limit(10).get();
+        const reviews = reviewSnap.docs.map(d => d.data());
+
+        // Parse YouTube Links
+        const social = data.socialLinks || {};
+        let ytGalleryHtml = '';
+        if(social.yt) {
+            const urls = social.yt.split(',');
+            ytGalleryHtml = urls.map(u => {
+                const id = getYoutubeId(u.trim());
+                return id ? `<iframe src="https://www.youtube.com/embed/${id}" style="width:100%; height:200px; border-radius:12px; margin-bottom:10px; border:none;"></iframe>` : '';
+            }).join('');
+        }
+
+        // Generate HTML
         app.innerHTML = `
             <div id="public-view">
                 <div id="public-status" class="p-1 text-center bold text-white" style="position:sticky; top:0; z-index:900; font-size:0.9rem"></div>
                 
-                <div class="container p-2" style="background:white; border-radius:0 0 20px 20px; box-shadow:0 5px 15px rgba(0,0,0,0.05);">
+                <div class="container p-2" style="background:white; border-radius:0 0 20px 20px; box-shadow:0 5px 15px rgba(0,0,0,0.05); text-align:center;">
                     <div class="center flex-col">
-                        <img id="pub-logo" src="" style="width:110px; height:110px; border-radius:50%; object-fit:cover; border:5px solid var(--primary); margin-bottom:10px; margin-top:-10px;">
-                        <h2 id="pub-name" style="margin:0; text-align:center;"></h2>
-                        <div id="pub-verified-badge" class="hidden mt-1"><span class="status-badge st-new">✔ Verified Business</span></div>
-                        <p id="pub-address" style="color:#888; margin-top:5px; font-size:0.9rem; text-align:center;"></p>
+                        <img id="pub-logo" src="${data.logo || 'https://via.placeholder.com/100'}" style="width:110px; height:110px; border-radius:50%; object-fit:cover; border:5px solid var(--primary); margin-bottom:10px; margin-top:-10px;">
+                        <h2 id="pub-name" style="margin:0;">${data.businessName}</h2>
+                        ${data.verified ? `<div class="mt-1"><span class="status-badge st-new">✔ Verified Business</span></div>` : ''}
+                        <p style="color:#888; margin-top:5px; font-size:0.9rem;">${data.address}</p>
                         
+                        <!-- Social Icons -->
+                        <div class="flex center mt-1" style="gap:15px;">
+                            ${social.fb ? `<a href="${social.fb}" target="_blank" style="font-size:1.5rem; text-decoration:none;">🔵</a>` : ''}
+                            ${social.ig ? `<a href="${social.ig}" target="_blank" style="font-size:1.5rem; text-decoration:none;">🟣</a>` : ''}
+                        </div>
+
                         <div class="flex center mt-1" style="gap:10px; width:100%;">
-                            <a id="pub-hotline" class="btn btn-green" style="flex:1;">📞 Call</a>
-                            <a id="pub-wa" class="btn btn-green" style="flex:1;">💬 WhatsApp</a>
+                            <a href="tel:${data.hotline}" class="btn btn-green" style="flex:1;">📞 ${data.hotline}</a>
+                            <a href="https://wa.me/${data.whatsapp}" class="btn btn-green" style="flex:1;">💬 WhatsApp</a>
                         </div>
                     </div>
                 </div>
 
                 <div class="hero mt-2" style="border-radius:20px; padding:30px 20px; margin: 15px;">
-                    <h2 id="pub-hero-text" style="font-size:1.5rem;"></h2>
+                    <h2 style="font-size:1.5rem;">${data.heroText || "Welcome!"}</h2>
                     <button class="btn btn-secondary mt-1" style="background:white; color:var(--primary);" onclick="document.getElementById('pub-menu').scrollIntoView({behavior:'smooth'})">ORDER NOW</button>
                 </div>
 
-                <div id="pub-menu" class="p-2 container" style="padding-bottom:100px;">
-                    <!-- Menu Items -->
+                <!-- Video Gallery -->
+                ${ytGalleryHtml ? `<div class="p-2 container"><h3>Video Gallery</h3>${ytGalleryHtml}</div>` : ''}
+
+                <div id="pub-menu" class="p-2 container">
+                    <!-- Menu Items Injected Here -->
                 </div>
+                
+                <!-- Reviews Section -->
+                <div class="p-2 container mt-2" style="background:#fff; border-radius:20px; margin:15px;">
+                    <h3>Customer Reviews</h3>
+                    <div style="max-height:300px; overflow-y:auto; margin-bottom:15px;">
+                        ${reviews.length ? reviews.map(r => `<div style="border-bottom:1px solid #eee; padding:10px 0;"><b>${r.name}</b> <span class="text-yellow">${'★'.repeat(r.stars)}</span><p style="margin:5px 0; font-size:0.9rem;">${r.text}</p></div>`).join('') : '<p style="color:#888">No reviews yet.</p>'}
+                    </div>
+                    <h4>Write a Review</h4>
+                    <input id="rev-name" class="w-100 p-1 mb-1" style="border:1px solid #ddd; border-radius:8px;" placeholder="Your Name">
+                    <select id="rev-star" class="w-100 p-1 mb-1" style="border:1px solid #ddd; border-radius:8px;">
+                        <option value="5">★★★★★</option>
+                        <option value="4">★★★★</option>
+                        <option value="3">★★★</option>
+                    </select>
+                    <textarea id="rev-text" class="w-100 p-1 mb-1" style="border:1px solid #ddd; border-radius:8px;" placeholder="Message"></textarea>
+                    <button class="btn btn-primary" onclick="submitReview('${bizId}')">Submit Review</button>
+                </div>
+                
+                <footer class="text-center p-2 mt-2" style="background:var(--secondary); color:white;">
+                    <h4>${data.businessName}</h4>
+                    <p style="font-size:0.8rem; opacity:0.8;">${data.address}</p>
+                    <small style="display:block; opacity:0.5; margin-top:10px;">Powered by EatlyHub</small>
+                </footer>
 
                 <div class="floating-cart" onclick="showCartModal()">
                     🛒 <div class="cart-badge" id="cart-count">0</div>
@@ -979,46 +1120,7 @@
             </div>
         `;
 
-        const doc = await db.collection('users').doc(bizId).get();
-        if(!doc.exists) return app.innerHTML = "<h2 class='text-center p-2'>Business Not Found</h2>";
-        
-        const data = doc.data();
-        bizOwnerWa = data.whatsapp;
-
-        document.getElementById('pub-name').innerText = data.businessName;
-        document.getElementById('pub-logo').src = data.logo || 'https://via.placeholder.com/100';
-        document.getElementById('pub-address').innerText = data.address;
-        document.getElementById('pub-hero-text').innerText = data.heroText || "Welcome!";
-        document.getElementById('pub-hotline').href = `tel:${data.hotline}`;
-        document.getElementById('pub-wa').href = `https://wa.me/${data.whatsapp}`;
-        
-        if(data.verified) document.getElementById('pub-verified-badge').classList.remove('hidden');
-
-        // Schedule Logic
-        const today = new Date().toLocaleDateString('en-US', {weekday:'long'});
-        const sched = data.schedule?.[today];
-        const statusDiv = document.getElementById('public-status');
-        
-        let isOpenNow = false;
-        if(sched && sched.open) {
-            const now = new Date();
-            const curMins = now.getHours() * 60 + now.getMinutes();
-            const [sh, sm] = sched.start.split(':').map(Number);
-            const [eh, em] = sched.end.split(':').map(Number);
-            const startMins = sh * 60 + sm;
-            const endMins = eh * 60 + em;
-            if(curMins >= startMins && curMins <= endMins) isOpenNow = true;
-        }
-
-        if(isOpenNow) {
-            statusDiv.innerText = `OPEN NOW (${sched.start} - ${sched.end})`;
-            statusDiv.style.background = 'var(--green)';
-        } else {
-            statusDiv.innerText = "WE ARE CLOSED NOW";
-            statusDiv.style.background = 'var(--secondary)';
-        }
-
-        // Render Menu
+        // Render Menu with Beautiful Cards
         const menuDiv = document.getElementById('pub-menu');
         const cats = [...new Set((data.foods||[]).map(f => f.cat))];
         
@@ -1026,8 +1128,8 @@
             menuDiv.innerHTML += `<h3 class="mt-2 text-red" style="border-bottom:2px solid #eee; padding-bottom:5px;">${c||'Menu'}</h3>`;
             data.foods.filter(f => f.cat === c).forEach(f => {
                 menuDiv.innerHTML += `
-                    <div class="card flex justify-between center" style="padding:15px; margin-bottom:15px;">
-                        <img src="${f.img}" style="width:80px;height:80px;border-radius:12px;object-fit:cover;margin-right:15px;">
+                    <div class="card flex justify-between center" style="padding:15px; margin-bottom:15px; box-shadow:0 4px 15px rgba(0,0,0,0.05); border:none;">
+                        <img src="${f.img}" style="width:90px;height:90px;border-radius:12px;object-fit:cover;margin-right:15px;">
                         <div style="flex:1;">
                             <div class="bold" style="font-size:1.1rem;">${f.name}</div>
                             <div class="mt-1 flex" style="gap:5px; flex-wrap:wrap;">
@@ -1039,33 +1141,62 @@
                 `;
             });
         });
+        
+        // Status Bar Logic
+        const today = new Date().toLocaleDateString('en-US', {weekday:'long'});
+        const sched = data.schedule?.[today];
+        const statusDiv = document.getElementById('public-status');
+        let isOpenNow = false;
+        if(sched && sched.open) {
+            const now = new Date();
+            const curMins = now.getHours() * 60 + now.getMinutes();
+            const [sh, sm] = sched.start.split(':').map(Number);
+            const [eh, em] = sched.end.split(':').map(Number);
+            const startMins = sh * 60 + sm;
+            const endMins = eh * 60 + em;
+            if(curMins >= startMins && curMins <= endMins) isOpenNow = true;
+        }
+        if(isOpenNow) {
+            statusDiv.innerText = `OPEN NOW (${sched.start} - ${sched.end})`;
+            statusDiv.style.background = 'var(--green)';
+        } else {
+            statusDiv.innerText = "WE ARE CLOSED NOW";
+            statusDiv.style.background = 'var(--secondary)';
+        }
     }
 
     function addToCart(name, variant, price) {
         cart.push({name, variant, price});
         document.getElementById('cart-count').innerText = cart.length;
-        showToast(`Added ${name} (${variant})`, 'success');
+        // Auto Open Cart
+        showCartModal();
+    }
+    
+    function submitReview(bizId) {
+        const name = document.getElementById('rev-name').value;
+        const stars = document.getElementById('rev-star').value;
+        const text = document.getElementById('rev-text').value;
+        if(!name || !text) return showToast("Please fill all fields", "error");
+        
+        db.collection('users').doc(bizId).collection('reviews').add({
+            name, stars: Number(stars), text, status: 'pending', time: new Date().toISOString()
+        }).then(() => {
+            showToast("Review submitted for approval!");
+            document.getElementById('rev-text').value = '';
+        });
     }
 
     function showCartModal() {
         if(cart.length === 0) return showToast("Cart is empty", "error");
-        
         const total = cart.reduce((a,b)=>a+Number(b.price),0);
-        
         showModal(`
             <h2 class="text-center">Your Order</h2>
             <div style="background:#f8f9fa; padding:10px; border-radius:12px; max-height:250px; overflow-y:auto; margin-bottom:15px;">
                 ${cart.map(i => `<div class="flex justify-between" style="padding:8px 0; border-bottom:1px solid #eee;"><span>${i.name} (${i.variant})</span><b>${i.price}</b></div>`).join('')}
             </div>
             <h3 class="text-right text-red">Total: ${total}</h3>
-            
-            <div class="input-group">
-                <label>Your Name *</label><input id="c-name" placeholder="John Doe">
-            </div>
-            <div class="input-group">
-                <label>WhatsApp Number *</label><input id="c-wa" type="tel" placeholder="947...">
-            </div>
-            
+            <div class="input-group"><label>Your Name *</label><input id="c-name" placeholder="John Doe"></div>
+            <div class="input-group"><label>WhatsApp Number *</label><input id="c-wa" type="tel" placeholder="947..."></div>
             <button class="btn btn-green" onclick="placeOrder('${bizIdForCart}', ${total})">Confirm & Order via WhatsApp</button>
             <button class="btn btn-secondary" onclick="closeModal()">Close</button>
         `);
@@ -1077,18 +1208,14 @@
         if(!name || !wa) return showToast("Please fill name and number", "error");
 
         const orderNum = Math.floor(10000 + Math.random() * 90000).toString(); 
-        
         const orderData = {
             orderNum, custName: name, custWa: wa, items: cart, total, 
             time: new Date().toISOString(), status: 'new', seen: false
         };
 
-        // Save to DB
         db.collection('users').doc(bizId).collection('orders').add(orderData).then(() => {
-            // Send WA
             const msg = `🔔 *New Order!* \nName: ${name}\nOrder #: ${orderNum}\n\nItems:\n${cart.map(i=>`- ${i.name} (${i.variant})`).join('\n')}\n\n*Total: ${total}*`;
             window.open(`https://wa.me/${bizOwnerWa}?text=${encodeURIComponent(msg)}`);
-            
             cart = [];
             document.getElementById('cart-count').innerText = '0';
             closeModal();

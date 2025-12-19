@@ -1119,7 +1119,9 @@
 
     async function loadPublicPage(bizId) {
         bizIdForCart = bizId;
-        render('tpl-landing'); // Placeholder while loading
+        
+        // Show Loading State (Spinner) instead of Landing Page
+        app.innerHTML = `<div style="height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;"><div class="loader"></div></div>`;
         
         // Helper to extract YouTube ID
         const getYoutubeId = (url) => {
@@ -1128,134 +1130,140 @@
             return (match && match[2].length === 11) ? match[2] : null;
         };
 
-        const doc = await db.collection('users').doc(bizId).get();
-        if(!doc.exists) return app.innerHTML = "<h2 class='text-center p-2'>Business Not Found</h2>";
-        const data = doc.data();
-        bizOwnerWa = data.whatsapp;
+        try {
+            const doc = await db.collection('users').doc(bizId).get();
+            if(!doc.exists) return app.innerHTML = "<h2 class='text-center p-2'>Business Not Found</h2>";
+            const data = doc.data();
+            bizOwnerWa = data.whatsapp;
 
-        // Load Reviews
-        const reviewSnap = await db.collection('users').doc(bizId).collection('reviews').where('status', '==', 'published').limit(10).get();
-        const reviews = reviewSnap.docs.map(d => d.data());
+            // Load Reviews
+            const reviewSnap = await db.collection('users').doc(bizId).collection('reviews').where('status', '==', 'published').limit(10).get();
+            const reviews = reviewSnap.docs.map(d => d.data());
 
-        // Parse YouTube Links
-        const social = data.socialLinks || {};
-        let ytGalleryHtml = '';
-        if(social.yt) {
-            const urls = social.yt.split(',');
-            ytGalleryHtml = urls.map(u => {
-                const id = getYoutubeId(u.trim());
-                return id ? `<iframe src="https://www.youtube.com/embed/${id}" style="width:100%; height:200px; border-radius:12px; margin-bottom:10px; border:none;"></iframe>` : '';
-            }).join('');
-        }
+            // Parse YouTube Links
+            const social = data.socialLinks || {};
+            let ytGalleryHtml = '';
+            if(social.yt) {
+                const urls = social.yt.split(',');
+                ytGalleryHtml = urls.map(u => {
+                    const id = getYoutubeId(u.trim());
+                    // FIX: Added the missing src URL that caused iframe issues
+                    return id ? `<iframe src="https://www.youtube.com/embed/${id}" style="width:100%; height:200px; border-radius:12px; margin-bottom:10px; border:none;"></iframe>` : '';
+                }).join('');
+            }
 
-        // Generate HTML
-        app.innerHTML = `
-            <div id="public-view">
-                <div id="public-status" class="p-1 text-center bold text-white" style="position:sticky; top:0; z-index:900; font-size:0.9rem"></div>
-                
-                <div class="container p-2" style="background:white; border-radius:0 0 20px 20px; box-shadow:0 5px 15px rgba(0,0,0,0.05); text-align:center;">
-                    <div class="center flex-col">
-                        <img id="pub-logo" src="${data.logo || 'https://via.placeholder.com/100'}" style="width:110px; height:110px; border-radius:50%; object-fit:cover; border:5px solid var(--primary); margin-bottom:10px; margin-top:-10px;">
-                        <h2 id="pub-name" style="margin:0;">${data.businessName}</h2>
-                        ${data.verified ? `<div class="mt-1"><span class="status-badge st-new">✔ Verified Business</span></div>` : ''}
-                        <p style="color:#888; margin-top:5px; font-size:0.9rem;">${data.address}</p>
-                        
-                        <!-- Social Icons -->
-                        <div class="flex center mt-1" style="gap:15px;">
-                            ${social.fb ? `<a href="${social.fb}" target="_blank" style="font-size:1.5rem; text-decoration:none;">🔵</a>` : ''}
-                            ${social.ig ? `<a href="${social.ig}" target="_blank" style="font-size:1.5rem; text-decoration:none;">🟣</a>` : ''}
-                        </div>
+            // Generate HTML
+            app.innerHTML = `
+                <div id="public-view">
+                    <div id="public-status" class="p-1 text-center bold text-white" style="position:sticky; top:0; z-index:900; font-size:0.9rem"></div>
+                    
+                    <div class="container p-2" style="background:white; border-radius:0 0 20px 20px; box-shadow:0 5px 15px rgba(0,0,0,0.05); text-align:center;">
+                        <div class="center flex-col">
+                            <img id="pub-logo" src="${data.logo || 'https://via.placeholder.com/100'}" style="width:110px; height:110px; border-radius:50%; object-fit:cover; border:5px solid var(--primary); margin-bottom:10px; margin-top:-10px;">
+                            <h2 id="pub-name" style="margin:0;">${data.businessName}</h2>
+                            ${data.verified ? `<div class="mt-1"><span class="status-badge st-new">✔ Verified Business</span></div>` : ''}
+                            <p style="color:#888; margin-top:5px; font-size:0.9rem;">${data.address}</p>
+                            
+                            <!-- Social Icons -->
+                            <div class="flex center mt-1" style="gap:15px;">
+                                ${social.fb ? `<a href="${social.fb}" target="_blank" style="font-size:1.5rem; text-decoration:none;">🔵</a>` : ''}
+                                ${social.ig ? `<a href="${social.ig}" target="_blank" style="font-size:1.5rem; text-decoration:none;">🟣</a>` : ''}
+                            </div>
 
-                        <div class="flex center mt-1" style="gap:10px; width:100%;">
-                            <a href="tel:${data.hotline}" class="btn btn-green" style="flex:1;">📞 ${data.hotline}</a>
-                            <a href="https://wa.me/${data.whatsapp}" class="btn btn-green" style="flex:1;">💬 WhatsApp</a>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="hero mt-2" style="border-radius:20px; padding:30px 20px; margin: 15px;">
-                    <h2 style="font-size:1.5rem;">${data.heroText || "Welcome!"}</h2>
-                    <button class="btn btn-secondary mt-1" style="background:white; color:var(--primary);" onclick="document.getElementById('pub-menu').scrollIntoView({behavior:'smooth'})">ORDER NOW</button>
-                </div>
-
-                <!-- Video Gallery -->
-                ${ytGalleryHtml ? `<div class="p-2 container"><h3>Video Gallery</h3>${ytGalleryHtml}</div>` : ''}
-
-                <div id="pub-menu" class="p-2 container">
-                    <!-- Menu Items Injected Here -->
-                </div>
-                
-                <!-- Reviews Section -->
-                <div class="p-2 container mt-2" style="background:#fff; border-radius:20px; margin:15px;">
-                    <h3>Customer Reviews</h3>
-                    <div style="max-height:300px; overflow-y:auto; margin-bottom:15px;">
-                        ${reviews.length ? reviews.map(r => `<div style="border-bottom:1px solid #eee; padding:10px 0;"><b>${r.name}</b> <span class="text-yellow">${'★'.repeat(r.stars)}</span><p style="margin:5px 0; font-size:0.9rem;">${r.text}</p></div>`).join('') : '<p style="color:#888">No reviews yet.</p>'}
-                    </div>
-                    <h4>Write a Review</h4>
-                    <input id="rev-name" class="w-100 p-1 mb-1" style="border:1px solid #ddd; border-radius:8px;" placeholder="Your Name">
-                    <select id="rev-star" class="w-100 p-1 mb-1" style="border:1px solid #ddd; border-radius:8px;">
-                        <option value="5">★★★★★</option>
-                        <option value="4">★★★★</option>
-                        <option value="3">★★★</option>
-                    </select>
-                    <textarea id="rev-text" class="w-100 p-1 mb-1" style="border:1px solid #ddd; border-radius:8px;" placeholder="Message"></textarea>
-                    <button class="btn btn-primary" onclick="submitReview('${bizId}')">Submit Review</button>
-                </div>
-                
-                <footer class="text-center p-2 mt-2" style="background:var(--secondary); color:white;">
-                    <h4>${data.businessName}</h4>
-                    <p style="font-size:0.8rem; opacity:0.8;">${data.address}</p>
-                    <small style="display:block; opacity:0.5; margin-top:10px;">Powered by EatlyHub</small>
-                </footer>
-
-                <div class="floating-cart" onclick="showCartModal()">
-                    🛒 <div class="cart-badge" id="cart-count">0</div>
-                </div>
-            </div>
-        `;
-
-        // Render Menu with Beautiful Cards
-        const menuDiv = document.getElementById('pub-menu');
-        const cats = [...new Set((data.foods||[]).map(f => f.cat))];
-        
-        cats.forEach(c => {
-            menuDiv.innerHTML += `<h3 class="mt-2 text-red" style="border-bottom:2px solid #eee; padding-bottom:5px;">${c||'Menu'}</h3>`;
-            data.foods.filter(f => f.cat === c).forEach(f => {
-                menuDiv.innerHTML += `
-                    <div class="card flex justify-between center" style="padding:15px; margin-bottom:15px; box-shadow:0 4px 15px rgba(0,0,0,0.05); border:none;">
-                        <img src="${f.img}" style="width:90px;height:90px;border-radius:12px;object-fit:cover;margin-right:15px;">
-                        <div style="flex:1;">
-                            <div class="bold" style="font-size:1.1rem;">${f.name}</div>
-                            <div class="mt-1 flex" style="gap:5px; flex-wrap:wrap;">
-                                ${f.half ? `<button class="btn btn-outline" style="width:auto;padding:6px 12px;font-size:12px;margin:0" onclick="addToCart('${f.name}', 'Half', ${f.half})">Half: ${f.half}</button>` : ''}
-                                ${f.full ? `<button class="btn btn-outline" style="width:auto;padding:6px 12px;font-size:12px;margin:0" onclick="addToCart('${f.name}', 'Full', ${f.full})">Full: ${f.full}</button>` : ''}
+                            <div class="flex center mt-1" style="gap:10px; width:100%;">
+                                <a href="tel:${data.hotline}" class="btn btn-green" style="flex:1;">📞 ${data.hotline}</a>
+                                <a href="https://wa.me/${data.whatsapp}" class="btn btn-green" style="flex:1;">💬 WhatsApp</a>
                             </div>
                         </div>
                     </div>
-                `;
+
+                    <div class="hero mt-2" style="border-radius:20px; padding:30px 20px; margin: 15px;">
+                        <h2 style="font-size:1.5rem;">${data.heroText || "Welcome!"}</h2>
+                        <button class="btn btn-secondary mt-1" style="background:white; color:var(--primary);" onclick="document.getElementById('pub-menu').scrollIntoView({behavior:'smooth'})">ORDER NOW</button>
+                    </div>
+
+                    <!-- Video Gallery -->
+                    ${ytGalleryHtml ? `<div class="p-2 container"><h3>Video Gallery</h3>${ytGalleryHtml}</div>` : ''}
+
+                    <div id="pub-menu" class="p-2 container">
+                        <!-- Menu Items Injected Here -->
+                    </div>
+                    
+                    <!-- Reviews Section -->
+                    <div class="p-2 container mt-2" style="background:#fff; border-radius:20px; margin:15px;">
+                        <h3>Customer Reviews</h3>
+                        <div style="max-height:300px; overflow-y:auto; margin-bottom:15px;">
+                            ${reviews.length ? reviews.map(r => `<div style="border-bottom:1px solid #eee; padding:10px 0;"><b>${r.name}</b> <span class="text-yellow">${'★'.repeat(r.stars)}</span><p style="margin:5px 0; font-size:0.9rem;">${r.text}</p></div>`).join('') : '<p style="color:#888">No reviews yet.</p>'}
+                        </div>
+                        <h4>Write a Review</h4>
+                        <input id="rev-name" class="w-100 p-1 mb-1" style="border:1px solid #ddd; border-radius:8px;" placeholder="Your Name">
+                        <select id="rev-star" class="w-100 p-1 mb-1" style="border:1px solid #ddd; border-radius:8px;">
+                            <option value="5">★★★★★</option>
+                            <option value="4">★★★★</option>
+                            <option value="3">★★★</option>
+                        </select>
+                        <textarea id="rev-text" class="w-100 p-1 mb-1" style="border:1px solid #ddd; border-radius:8px;" placeholder="Message"></textarea>
+                        <button class="btn btn-primary" onclick="submitReview('${bizId}')">Submit Review</button>
+                    </div>
+                    
+                    <footer class="text-center p-2 mt-2" style="background:var(--secondary); color:white;">
+                        <h4>${data.businessName}</h4>
+                        <p style="font-size:0.8rem; opacity:0.8;">${data.address}</p>
+                        <small style="display:block; opacity:0.5; margin-top:10px;">Powered by EatlyHub</small>
+                    </footer>
+
+                    <div class="floating-cart" onclick="showCartModal()">
+                        🛒 <div class="cart-badge" id="cart-count">0</div>
+                    </div>
+                </div>
+            `;
+
+            // Render Menu with Beautiful Cards
+            const menuDiv = document.getElementById('pub-menu');
+            const cats = [...new Set((data.foods||[]).map(f => f.cat))];
+            
+            cats.forEach(c => {
+                menuDiv.innerHTML += `<h3 class="mt-2 text-red" style="border-bottom:2px solid #eee; padding-bottom:5px;">${c||'Menu'}</h3>`;
+                data.foods.filter(f => f.cat === c).forEach(f => {
+                    menuDiv.innerHTML += `
+                        <div class="card flex justify-between center" style="padding:15px; margin-bottom:15px; box-shadow:0 4px 15px rgba(0,0,0,0.05); border:none;">
+                            <img src="${f.img}" style="width:90px;height:90px;border-radius:12px;object-fit:cover;margin-right:15px;">
+                            <div style="flex:1;">
+                                <div class="bold" style="font-size:1.1rem;">${f.name}</div>
+                                <div class="mt-1 flex" style="gap:5px; flex-wrap:wrap;">
+                                    ${f.half ? `<button class="btn btn-outline" style="width:auto;padding:6px 12px;font-size:12px;margin:0" onclick="addToCart('${f.name}', 'Half', ${f.half})">Half: ${f.half}</button>` : ''}
+                                    ${f.full ? `<button class="btn btn-outline" style="width:auto;padding:6px 12px;font-size:12px;margin:0" onclick="addToCart('${f.name}', 'Full', ${f.full})">Full: ${f.full}</button>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
             });
-        });
-        
-        // Status Bar Logic
-        const today = new Date().toLocaleDateString('en-US', {weekday:'long'});
-        const sched = data.schedule?.[today];
-        const statusDiv = document.getElementById('public-status');
-        let isOpenNow = false;
-        if(sched && sched.open) {
-            const now = new Date();
-            const curMins = now.getHours() * 60 + now.getMinutes();
-            const [sh, sm] = sched.start.split(':').map(Number);
-            const [eh, em] = sched.end.split(':').map(Number);
-            const startMins = sh * 60 + sm;
-            const endMins = eh * 60 + em;
-            if(curMins >= startMins && curMins <= endMins) isOpenNow = true;
-        }
-        if(isOpenNow) {
-            statusDiv.innerText = `OPEN NOW (${sched.start} - ${sched.end})`;
-            statusDiv.style.background = 'var(--green)';
-        } else {
-            statusDiv.innerText = "WE ARE CLOSED NOW";
-            statusDiv.style.background = 'var(--secondary)';
+            
+            // Status Bar Logic
+            const today = new Date().toLocaleDateString('en-US', {weekday:'long'});
+            const sched = data.schedule?.[today];
+            const statusDiv = document.getElementById('public-status');
+            let isOpenNow = false;
+            if(sched && sched.open) {
+                const now = new Date();
+                const curMins = now.getHours() * 60 + now.getMinutes();
+                const [sh, sm] = sched.start.split(':').map(Number);
+                const [eh, em] = sched.end.split(':').map(Number);
+                const startMins = sh * 60 + sm;
+                const endMins = eh * 60 + em;
+                if(curMins >= startMins && curMins <= endMins) isOpenNow = true;
+            }
+            if(isOpenNow) {
+                statusDiv.innerText = `OPEN NOW (${sched.start} - ${sched.end})`;
+                statusDiv.style.background = 'var(--green)';
+            } else {
+                statusDiv.innerText = "WE ARE CLOSED NOW";
+                statusDiv.style.background = 'var(--secondary)';
+            }
+        } catch (e) {
+            console.error(e);
+            app.innerHTML = "<h2 class='text-center p-2'>Error Loading Page</h2>";
         }
     }
 

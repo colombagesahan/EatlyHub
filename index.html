@@ -123,7 +123,7 @@
         .tabs-wrapper { 
             background: var(--surface); border-bottom: 1px solid #eee; position: sticky; top: 62px; z-index: 90; 
             box-shadow: 0 2px 5px rgba(0,0,0,0.02);
-            width: 100%; overflow: hidden; /* Prevent vertical overflow */
+            width: 100%; overflow: hidden; 
         }
         .tabs-container { 
             display: flex; flex-wrap: nowrap; overflow-x: auto; padding: 10px 15px; 
@@ -252,12 +252,12 @@
     <div class="text-center p-2 text-red" style="font-size:0.8rem">Powered by EatlyHub</div>
 </template>
 
-<!-- 2. DASHBOARD SHELL -->
+<!-- 2. DASHBOARD SHELL (User & Admin) -->
 <template id="tpl-dashboard">
     <nav>
         <div class="nav-brand">
             <svg class="nav-logo-svg" viewBox="0 0 24 24"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/></svg>
-            EatlyHub
+            EatlyHub <span id="admin-tag" class="hidden" style="font-size:0.7rem; background:black; color:white; padding:2px 5px; border-radius:5px; margin-left:5px;">ADMIN</span>
         </div>
         <button class="btn btn-secondary" style="width:auto; padding:8px 14px; font-size:0.85rem; margin:0; border-radius:20px;" onclick="authLogout()">Logout</button>
     </nav>
@@ -276,6 +276,11 @@
 <!-- ================= JAVASCRIPT LOGIC ================= -->
 
 <script>
+    // ============================================
+    // IMPORTANT: REPLACE WITH YOUR ADMIN EMAIL
+    // ============================================
+    const ADMIN_EMAIL = "admin@eatlyhub.com"; 
+
     // --- 1. CONFIGURATION ---
     const firebaseConfig = {
       apiKey: "AIzaSyA4mlpgLA8l1N8VHqwpVLbPXvDvPxGPcSI",
@@ -292,7 +297,6 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     } catch(e) { 
         console.error("Firebase Init Error", e); 
-        alert("System Error: Firebase Config missing.");
     }
     const auth = firebase.auth();
     const db = firebase.firestore();
@@ -303,14 +307,18 @@
     let bizProfile = {};
     let bizOrders = [];
     let bizReviews = [];
+    let adminRequests = []; // For Admin
     let currentTab = 'Dashboard';
 
-    // Tabs List (Updated with Reviews)
+    // Tabs List (User)
     const TABS = [
         'Dashboard', 'Profile', 'Open/Close', 'Add Foods', 'My Webpage', 'Reviews',
         'New Orders', 'Confirmed Orders', 'Active Orders', 'Ready Orders', 
         'Completed Orders', 'Unpaid Bills', 'Reports', 'Admin Messages'
     ];
+
+    // Tabs List (Admin)
+    const ADMIN_TABS = ['Verification Requests', 'Admin Messages'];
 
     // --- 4. IMAGE COMPRESSION UTILITY ---
     function compressImage(file) {
@@ -350,7 +358,12 @@
             auth.onAuthStateChanged(user => {
                 if (user) {
                     currentUser = user;
-                    loadDashboard();
+                    // Check if Admin
+                    if(user.email === ADMIN_EMAIL) {
+                        loadAdminDashboard();
+                    } else {
+                        loadDashboard();
+                    }
                 } else {
                     render('tpl-landing');
                 }
@@ -374,7 +387,88 @@
         auth.signOut().then(() => window.location.reload()); 
     }
 
-    // --- 7. DASHBOARD LOGIC ---
+    // --- 7. ADMIN DASHBOARD LOGIC ---
+    function loadAdminDashboard() {
+        render('tpl-dashboard');
+        document.getElementById('admin-tag').classList.remove('hidden');
+        
+        // Setup Admin Tabs
+        const tabsContainer = document.getElementById('dash-tabs');
+        tabsContainer.innerHTML = ADMIN_TABS.map(t => 
+            `<div class="tab-btn" onclick="switchAdminTab('${t}')">${t}</div>`
+        ).join('');
+
+        // Listen for Verification Requests
+        db.collection('admin_requests').onSnapshot(snap => {
+            adminRequests = snap.docs.map(d => ({id: d.id, ...d.data()}));
+            refreshAdminContent();
+        });
+
+        switchAdminTab('Verification Requests');
+    }
+
+    function switchAdminTab(name) {
+        currentTab = name;
+        document.querySelectorAll('.tab-btn').forEach(b => {
+            b.classList.toggle('active', b.innerText === name);
+        });
+        refreshAdminContent();
+    }
+
+    function refreshAdminContent() {
+        const container = document.getElementById('dash-content');
+        container.innerHTML = '';
+
+        if(currentTab === 'Verification Requests') {
+            if(adminRequests.length === 0) {
+                container.innerHTML = '<div class="card text-center text-gray"><h3>No Pending Requests</h3></div>';
+                return;
+            }
+            container.innerHTML = adminRequests.map(r => `
+                <div class="card">
+                    <h4>${r.name}</h4>
+                    <p>Request ID: ${r.id}</p>
+                    <div class="flex flex-col mt-1" style="gap:10px;">
+                        <div>
+                            <small>Grama Niladhari Letter</small>
+                            <img src="${r.letter}" style="width:100%; max-height:200px; object-fit:contain; border:1px solid #eee;">
+                        </div>
+                        <div>
+                            <small>Payment Slip</small>
+                            <img src="${r.slip}" style="width:100%; max-height:200px; object-fit:contain; border:1px solid #eee;">
+                        </div>
+                    </div>
+                    <div class="flex mt-2" style="gap:10px;">
+                        <button class="btn btn-green" onclick="approveUser('${r.uid}', '${r.id}')">Approve & Verify</button>
+                        <button class="btn btn-outline" style="border-color:red; color:red;" onclick="rejectRequest('${r.id}')">Reject</button>
+                    </div>
+                </div>
+            `).join('');
+        } else if (currentTab === 'Admin Messages') {
+            container.innerHTML = '<div class="card text-center"><h3>Inbox</h3><p>Chat feature coming soon.</p></div>';
+        }
+    }
+
+    function approveUser(uid, reqId) {
+        if(confirm("Confirm Verification for this user?")) {
+            // Update User Profile
+            db.collection('users').doc(uid).update({verified: true}).then(() => {
+                // Delete Request
+                db.collection('admin_requests').doc(reqId).delete();
+                showToast("User Verified Successfully!");
+            });
+        }
+    }
+
+    function rejectRequest(reqId) {
+        if(confirm("Reject this request?")) {
+            db.collection('admin_requests').doc(reqId).delete();
+            showToast("Request Rejected");
+        }
+    }
+
+
+    // --- 8. USER DASHBOARD LOGIC ---
     async function loadDashboard() {
         render('tpl-dashboard');
         
@@ -984,7 +1078,7 @@
         `;
     }
 
-    // H) ADMIN CHAT
+    // H) ADMIN CHAT (User Side)
     function renderAdminChat(target) {
         target.innerHTML = `
             <div class="card" style="height:60vh; display:flex; flex-direction:column;">
@@ -1025,7 +1119,7 @@
 
     async function loadPublicPage(bizId) {
         bizIdForCart = bizId;
-        render('tpl-public');
+        render('tpl-landing'); // Placeholder while loading
         
         // Helper to extract YouTube ID
         const getYoutubeId = (url) => {

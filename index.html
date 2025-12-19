@@ -7,7 +7,6 @@
     
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#ff4757">
-    <!-- FIX: Added standard mobile-web-app-capable tag -->
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -17,6 +16,8 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <!-- ADDED: Firebase Storage SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script>
 
     <style>
         :root {
@@ -306,6 +307,7 @@
     }
     const auth = firebase.auth();
     const db = firebase.firestore();
+    const storage = firebase.storage(); // Init Storage
 
     // --- 3. STATE MANAGEMENT ---
     const app = document.getElementById('app');
@@ -326,7 +328,9 @@
     // Tabs List (Admin)
     const ADMIN_TABS = ['Verification Requests', 'Admin Messages'];
 
-    // --- 4. IMAGE COMPRESSION UTILITY ---
+    // --- 4. IMAGE UTILITIES (COMPRESSION & UPLOAD) ---
+    
+    // Compress image to Base64 (used as intermediate step)
     function compressImage(file) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -342,11 +346,31 @@
                     canvas.height = img.height * scaleSize;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    // Return Base64
                     resolve(canvas.toDataURL('image/jpeg', 0.7)); 
                 };
                 img.onerror = (err) => reject(err);
             };
             reader.onerror = (err) => reject(err);
+        });
+    }
+
+    // NEW: Upload Base64 Data URL to Firebase Storage
+    function uploadImageToStorage(base64DataUrl, path) {
+        return new Promise((resolve, reject) => {
+            const ref = storage.ref(path);
+            const task = ref.putString(base64DataUrl, 'data_url');
+            
+            task.on('state_changed', 
+                (snapshot) => {
+                    // Optional: You could update a progress bar here
+                    // const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                }, 
+                (error) => reject(error), 
+                () => {
+                    task.snapshot.ref.getDownloadURL().then(resolve);
+                }
+            );
         });
     }
 
@@ -689,20 +713,28 @@
 
     async function handleImageUpload(input, type) {
         if (input.files && input.files[0]) {
-            showToast("Compressing Image...", "info");
+            showToast("Compressing & Uploading...", "info");
             try {
+                // 1. Compress
                 const base64 = await compressImage(input.files[0]);
+                
+                // 2. Upload to Storage
+                const timestamp = Date.now();
+                const path = `images/${currentUser.uid}/${type}_${timestamp}.jpg`;
+                const downloadUrl = await uploadImageToStorage(base64, path);
+
+                // 3. Save URL to local state (not DB yet, except via saving profile)
                 if(type === 'logo') {
-                    // Update locally first for preview
-                    bizProfile.tempLogo = base64;
+                    bizProfile.tempLogo = downloadUrl;
                     renderProfile(document.getElementById('dash-content')); 
                 } else {
-                    bizProfile['temp_' + type] = base64;
+                    bizProfile['temp_' + type] = downloadUrl;
                     document.getElementById('stat-' + type).classList.remove('hidden');
                 }
-                showToast("Image Ready", "success");
+                showToast("Image Uploaded Successfully", "success");
             } catch (e) {
-                showToast("Image Error: " + e.message, "error");
+                console.error(e);
+                showToast("Upload Error: " + e.message, "error");
             }
         }
     }
@@ -861,13 +893,29 @@
     let tempFoodImg = null;
     async function handleFoodImg(input) {
         if(input.files[0]) {
-            showToast("Compressing Food Image...", "info");
-            tempFoodImg = await compressImage(input.files[0]);
-            const img = document.getElementById('f-prev');
-            img.src = tempFoodImg;
-            img.classList.remove('hidden');
-            document.getElementById('f-file-txt').innerText = "Image Selected (Ready to add)";
-            showToast("Food Image Ready", "success");
+            showToast("Compressing & Uploading Food Image...", "info");
+            try {
+                // 1. Compress
+                const base64 = await compressImage(input.files[0]);
+                
+                // 2. Upload to Storage
+                const timestamp = Date.now();
+                const path = `food_images/${currentUser.uid}/${timestamp}.jpg`;
+                const downloadUrl = await uploadImageToStorage(base64, path);
+
+                // 3. Update State
+                tempFoodImg = downloadUrl;
+                
+                const img = document.getElementById('f-prev');
+                img.src = tempFoodImg;
+                img.classList.remove('hidden');
+                document.getElementById('f-file-txt').innerText = "Image Selected (Ready to add)";
+                showToast("Food Image Ready", "success");
+
+            } catch (e) {
+                console.error(e);
+                showToast("Upload Failed: " + e.message, "error");
+            }
         }
     }
 

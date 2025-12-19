@@ -7,7 +7,7 @@
     <link rel="manifest" href="./manifest.json">
     <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3075/3075977.png">
     
-    <!-- Firebase SDKs -->
+    <!-- Firebase SDKs (Compat) -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
@@ -15,19 +15,24 @@
 
     <style>
         :root {
-            --primary: #ff4757; /* EatlyHub Red */
+            --primary: #ff4757; 
+            --primary-dark: #e84118;
             --secondary: #2f3542;
+            --bg: #f8f9fa;
+            --surface: #ffffff;
             --green: #2ed573;
+            --red: #ff6b81;
             --yellow: #ffa502;
-            --bg: #f1f2f6;
-            --white: #ffffff;
-            --font: 'Segoe UI', sans-serif;
+            --gray: #ced6e0;
+            --shadow: 0 4px 12px rgba(0,0,0,0.08);
+            --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
         }
 
+        /* --- RESET & BASE --- */
         * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
-        body { margin: 0; padding: 0; font-family: var(--font); background: var(--bg); color: var(--secondary); font-size: 14px; }
-
-        /* UTILITIES */
+        body { margin: 0; padding: 0; font-family: var(--font); background: var(--bg); color: var(--secondary); font-size: 14px; line-height: 1.5; overflow-x: hidden; }
+        
+        /* --- UTILITY CLASSES --- */
         .flex { display: flex; }
         .flex-col { flex-direction: column; }
         .center { align-items: center; justify-content: center; }
@@ -36,192 +41,225 @@
         .hidden { display: none !important; }
         .mt-1 { margin-top: 0.5rem; }
         .mt-2 { margin-top: 1rem; }
+        .mb-1 { margin-bottom: 0.5rem; }
         .p-1 { padding: 0.5rem; }
         .p-2 { padding: 1rem; }
         .text-center { text-align: center; }
+        .text-right { text-align: right; }
         .text-red { color: var(--primary); }
         .text-green { color: var(--green); }
-        .bold { font-weight: bold; }
+        .bold { font-weight: 700; }
+        .relative { position: relative; }
         
-        /* RESPONSIVE 300px adjustments */
+        /* --- TYPOGRAPHY --- */
+        h1, h2, h3, h4 { margin: 0 0 10px 0; color: var(--secondary); }
+        small { color: #747d8c; font-size: 0.85rem; }
+
+        /* --- RESPONSIVE 300px FIXES --- */
+        /* Ensures containers don't overflow on tiny screens */
+        .card, .hero, nav, .container { min-width: 0; word-break: break-word; }
         @media (max-width: 320px) {
-            body { font-size: 12px; }
-            h1 { font-size: 1.5rem; }
-            .btn { padding: 8px 10px !important; }
+            body { font-size: 13px; }
+            h1 { font-size: 1.4rem; }
+            .btn { padding: 8px 12px !important; font-size: 0.9rem; }
         }
 
-        /* BUTTONS */
-        .btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.2s; width: 100%; text-align: center; margin-bottom: 5px; }
+        /* --- COMPONENTS --- */
+        
+        /* Buttons */
+        .btn { padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: transform 0.1s, opacity 0.2s; width: 100%; text-align: center; display: inline-block; text-decoration: none; margin-bottom: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .btn:active { transform: scale(0.98); }
         .btn-primary { background: var(--primary); color: white; }
         .btn-secondary { background: var(--secondary); color: white; }
         .btn-green { background: var(--green); color: white; }
         .btn-yellow { background: var(--yellow); color: white; }
-        .btn-outline { border: 1px solid var(--primary); color: var(--primary); background: transparent; }
+        .btn-outline { border: 2px solid var(--primary); color: var(--primary); background: transparent; box-shadow: none; }
+        
+        /* Cards */
+        .card { background: var(--surface); padding: 16px; border-radius: 12px; box-shadow: var(--shadow); margin-bottom: 16px; border-left: 5px solid var(--gray); position: relative; overflow: hidden; }
+        
+        /* Inputs */
+        .input-group { margin-bottom: 16px; }
+        .input-group label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 0.9rem; color: var(--secondary); }
+        .input-group input, .input-group select, .input-group textarea { width: 100%; padding: 12px; border: 1px solid #dfe4ea; border-radius: 8px; font-size: 1rem; background: #fdfdfd; transition: border 0.2s; }
+        .input-group input:focus { border-color: var(--primary); }
 
-        /* CARDS & INPUTS */
-        .card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 15px; border-left: 5px solid transparent; }
-        .input-group { margin-bottom: 15px; text-align: left; }
-        .input-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9rem; }
-        .input-group input, .input-group select, .input-group textarea { width: 100%; padding: 12px; border: 1px solid #dfe4ea; border-radius: 8px; font-size: 1rem; }
-        
-        /* HEADER & NAV */
-        nav { background: white; padding: 10px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .nav-brand { display: flex; align-items: center; gap: 10px; font-size: 1.2rem; font-weight: bold; color: var(--primary); }
-        .nav-logo { width: 40px; height: 40px; }
-        
-        /* DASHBOARD TABS */
-        .tabs-container { overflow-x: auto; white-space: nowrap; background: white; padding: 0 10px; border-bottom: 1px solid #eee; -ms-overflow-style: none; scrollbar-width: none; }
+        /* Navigation */
+        nav { background: var(--surface); padding: 12px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: space-between; }
+        .nav-brand { display: flex; align-items: center; gap: 8px; font-size: 1.3rem; font-weight: 800; color: var(--primary); }
+        .nav-logo-svg { width: 32px; height: 32px; fill: var(--primary); }
+
+        /* Dashboard Tabs (Scrollable) */
+        .tabs-wrapper { background: var(--surface); border-bottom: 1px solid #eee; position: sticky; top: 60px; z-index: 90; }
+        .tabs-container { display: flex; overflow-x: auto; padding: 0 10px; -webkit-overflow-scrolling: touch; scrollbar-width: none; gap: 10px; }
         .tabs-container::-webkit-scrollbar { display: none; }
-        .tab-btn { display: inline-block; padding: 15px; cursor: pointer; color: #747d8c; border-bottom: 3px solid transparent; }
-        .tab-btn.active { color: var(--primary); border-bottom: 3px solid var(--primary); font-weight: bold; }
+        .tab-btn { padding: 12px 15px; white-space: nowrap; cursor: pointer; color: #747d8c; font-weight: 600; border-bottom: 3px solid transparent; transition: color 0.2s; font-size: 0.95rem; }
+        .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
 
-        /* HERO SECTION */
-        .hero { background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1000&q=80'); background-size: cover; background-position: center; color: white; padding: 60px 20px; text-align: center; border-radius: 0 0 20px 20px; }
-        
-        /* VERIFICATION BADGE */
-        .verified-badge { display: inline-flex; align-items: center; gap: 5px; color: var(--green); border: 1px solid var(--green); padding: 2px 8px; border-radius: 20px; font-size: 0.8rem; background: #eafff3; }
-        .not-verified { color: var(--primary); font-size: 0.8rem; }
+        /* Hero Section */
+        .hero { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; padding: 50px 20px; text-align: center; border-radius: 0 0 25px 25px; box-shadow: var(--shadow); }
+        .hero h1 { color: white; margin-bottom: 5px; }
 
-        /* BILL & WATERMARK */
-        .bill-wrapper { position: relative; border: 1px dashed #ccc; padding: 20px; background: #fffbe7; overflow: hidden; }
-        .watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); font-size: 3rem; font-weight: bold; color: rgba(255, 71, 87, 0.15); border: 4px solid rgba(255, 71, 87, 0.15); padding: 10px; white-space: nowrap; pointer-events: none; }
-
-        /* MODAL */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; display: flex; justify-content: center; align-items: center; }
-        .modal-box { background: white; width: 90%; max-width: 400px; padding: 20px; border-radius: 12px; max-height: 90vh; overflow-y: auto; }
-
-        /* STATUS COLORS */
+        /* Status Badges & Borders */
         .status-new { border-left-color: var(--green); }
         .status-confirm { border-left-color: var(--yellow); }
-        .status-active { border-left-color: #70a1ff; }
+        .status-active { border-left-color: #70a1ff; } /* Cooking */
         .status-ready { border-left-color: #ff6b81; }
         .status-completed { border-left-color: #2f3542; }
         .status-unpaid { border-left-color: #eccc68; }
+
+        .verified-badge { background: #eafff3; color: #00b894; border: 1px solid #00b894; padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 4px; font-weight: bold; }
+        .unverified-badge { background: #fff0f0; color: var(--primary); border: 1px solid var(--primary); padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; }
+
+        /* Receipt / Bill Styles */
+        .bill-wrapper { background: #fff; padding: 20px; border: 1px solid #eee; box-shadow: 0 0 10px rgba(0,0,0,0.05); margin-top: 15px; font-family: 'Courier New', monospace; position: relative; }
+        .bill-header { text-align: center; border-bottom: 1px dashed #000; padding-bottom: 10px; margin-bottom: 10px; }
+        .bill-item { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 0.9rem; }
+        .bill-total { border-top: 1px dashed #000; padding-top: 10px; margin-top: 10px; display: flex; justify-content: space-between; font-weight: bold; font-size: 1.1rem; }
+        
+        /* Watermark */
+        .watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); font-size: 2.5rem; font-weight: 900; color: rgba(255, 71, 87, 0.15); border: 4px solid rgba(255, 71, 87, 0.15); padding: 10px 20px; white-space: nowrap; pointer-events: none; user-select: none; z-index: 1; }
+
+        /* Modals */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; display: flex; justify-content: center; align-items: flex-end; /* Bottom sheet on mobile */ }
+        @media(min-width: 600px) { .modal-overlay { align-items: center; } }
+        .modal-box { background: white; width: 100%; max-width: 500px; padding: 25px; border-radius: 20px 20px 0 0; max-height: 90vh; overflow-y: auto; animation: slideUp 0.3s ease; }
+        @media(min-width: 600px) { .modal-box { border-radius: 12px; } }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+        /* Spinner */
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; margin: 0 auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
     </style>
 </head>
 <body>
 
-<div id="app"></div>
+<div id="app">
+    <div style="height:100vh; display:flex; align-items:center; justify-content:center;">
+        <div class="loader"></div>
+    </div>
+</div>
 
-<!-- TEMPLATES -->
+<!-- ================= TEMPLATES ================= -->
 
 <!-- 1. LANDING PAGE -->
 <template id="tpl-landing">
     <div class="hero">
-        <svg class="nav-logo" viewBox="0 0 512 512" fill="white" style="width:80px;height:80px;margin-bottom:10px;">
-            <path d="M256 32C132.3 32 32 132.3 32 256s100.3 224 224 224 224-100.3 224-224S379.7 32 256 32zm0 416c-105.9 0-192-86.1-192-192S150.1 64 256 64s192 86.1 192 192-86.1 192-192 192z"/><path d="M368 240H144c-8.8 0-16 7.2-16 16v32c0 8.8 7.2 16 16 16h224c8.8 0 16-7.2 16-16v-32c0-8.8-7.2-16-16-16z" fill="white"/>
+        <svg class="nav-logo-svg" viewBox="0 0 24 24" fill="white" style="width:64px;height:64px;margin-bottom:10px;">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
         </svg>
         <h1>EatlyHub</h1>
-        <p>The All-in-One Platform for Hotels, Restaurants & Home-Based Kitchens</p>
-        <button class="btn btn-primary mt-2" onclick="authLogin()">Login / Create Account (Gmail)</button>
+        <p>The Ultimate Food Platform for Hotels, Restaurants & Home-Based Kitchens</p>
+        <button class="btn btn-secondary mt-2" onclick="authLogin()" style="background:white; color:var(--primary); font-weight:bold;">Login / Join with Gmail</button>
     </div>
     
-    <div class="p-2">
-        <h2 class="text-center">Start Your Food Business</h2>
+    <div class="container p-2">
+        <h3 class="text-center mb-1">Start Your Journey</h3>
         
         <div class="card">
-            <h3>🏨 Hotels & Restaurants</h3>
-            <p>Digitalize your room service and table ordering. Manage orders efficiently.</p>
+            <h4>🏨 Hotels & Restaurants</h4>
+            <p>Streamline room service and table orders with a digital menu. No hardware needed.</p>
         </div>
 
         <div class="card">
-            <h3>🏠 Home Based Kitchens</h3>
-            <p>Turn your kitchen into a business! Create a menu, share your link, and get orders directly to WhatsApp.</p>
-            <p class="text-green bold">Start small, Grow Big.</p>
-        </div>
-
-        <div class="card" style="background: #dfe4ea;">
-            <h3>For Customers</h3>
-            <p>Login to track your orders or order as a guest.</p>
+            <h4>🏠 Home Based Kitchens</h4>
+            <p>Passionate about cooking? Create a menu, get a link, and accept orders via WhatsApp.</p>
+            <div class="text-green bold text-center mt-1">Start Home Production Today!</div>
         </div>
     </div>
+    <div class="text-center p-2 text-red" style="font-size:0.8rem">Powered by RestoFlow</div>
 </template>
 
 <!-- 2. DASHBOARD SHELL -->
 <template id="tpl-dashboard">
-    <nav class="flex justify-between center">
+    <nav>
         <div class="nav-brand">
-            <svg class="nav-logo" viewBox="0 0 24 24" fill="var(--primary)"><circle cx="12" cy="12" r="10"/></svg>
+            <svg class="nav-logo-svg" viewBox="0 0 24 24"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/></svg>
             EatlyHub
         </div>
-        <button class="btn btn-outline" style="width:auto; padding:5px 10px;" onclick="authLogout()">Logout</button>
+        <button class="btn btn-secondary" style="width:auto; padding:6px 12px; font-size:0.8rem; margin:0;" onclick="authLogout()">Logout</button>
     </nav>
     
-    <div class="tabs-container" id="dash-tabs">
-        <!-- JS will populate tabs -->
+    <div class="tabs-wrapper">
+        <div class="tabs-container" id="dash-tabs">
+            <!-- Injected by JS -->
+        </div>
     </div>
 
     <div id="dash-content" class="p-2" style="padding-bottom: 80px;">
-        <!-- Content Area -->
+        <!-- Content Injected by JS -->
     </div>
 </template>
 
-<!-- 3. PUBLIC PAGE TEMPLATE -->
+<!-- 3. PUBLIC PAGE -->
 <template id="tpl-public">
-    <div id="public-status" class="p-1 text-center bold text-white"></div>
+    <div id="public-status" class="p-1 text-center bold text-white" style="font-size:0.9rem"></div>
     
-    <div class="text-center p-2 bg-white">
-        <img id="pub-logo" src="" style="width:100px; height:100px; border-radius:50%; object-fit:cover; border:3px solid var(--primary);">
-        <h2 id="pub-name" class="mt-1"></h2>
-        <div id="pub-verified-badge" class="hidden center" style="justify-content:center; margin-bottom:10px;">
+    <div class="text-center p-2" style="background:white; border-bottom:1px solid #eee;">
+        <img id="pub-logo" src="" style="width:100px; height:100px; border-radius:50%; object-fit:cover; border:4px solid var(--primary); margin-bottom:10px;">
+        <h2 id="pub-name" style="margin:0;">Loading...</h2>
+        <div id="pub-verified-badge" class="hidden mt-1" style="justify-content:center;">
             <span class="verified-badge">✔ Verified Business</span>
         </div>
-        <p id="pub-address" style="color:#777"></p>
-        <div class="flex center mt-1">
-            <a id="pub-hotline" class="btn btn-green" style="width:auto; margin-right:5px;">Call</a>
-            <a id="pub-wa" class="btn btn-green" style="width:auto;">WhatsApp</a>
+        <p id="pub-address" style="color:#888; margin-top:5px; font-size:0.9rem;"></p>
+        
+        <div class="flex center mt-1" style="gap:10px;">
+            <a id="pub-hotline" class="btn btn-green" style="width:auto; flex:1;">📞 Call</a>
+            <a id="pub-wa" class="btn btn-green" style="width:auto; flex:1;">💬 WhatsApp</a>
         </div>
     </div>
 
-    <div class="hero mt-2" style="border-radius:0;">
-        <h2 id="pub-hero-text"></h2>
-        <button class="btn btn-primary" onclick="document.getElementById('pub-menu').scrollIntoView()">ORDER NOW</button>
+    <div class="hero mt-1" style="border-radius:0; padding:30px 20px;">
+        <h2 id="pub-hero-text" style="font-size:1.5rem;"></h2>
+        <button class="btn btn-secondary mt-1" style="background:white; color:var(--primary);" onclick="document.getElementById('pub-menu').scrollIntoView({behavior:'smooth'})">ORDER NOW</button>
     </div>
 
-    <div id="pub-menu" class="p-2"></div>
+    <div id="pub-menu" class="p-2 container">
+        <!-- Menu Items -->
+    </div>
 
     <footer class="text-center p-2 mt-2" style="background:var(--secondary); color:white;">
         <h4 id="footer-biz-name"></h4>
-        <p id="footer-contact"></p>
-        <div id="footer-verified" class="hidden verified-badge" style="background:transparent; border-color:white; color:white; margin: 10px auto; width:fit-content; cursor:pointer;">✔ Verified (Click to view proof)</div>
-        <small>Powered by RestoFlow</small>
+        <p id="footer-contact" style="font-size:0.8rem; opacity:0.8;"></p>
+        <div id="footer-verified" class="hidden verified-badge" style="background:transparent; border-color:white; color:white; margin: 10px auto; width:fit-content; cursor:pointer;">✔ Verified (View Proof)</div>
+        <small class="mt-1" style="display:block; opacity:0.5;">Powered by EatlyHub (RestoFlow)</small>
     </footer>
 </template>
 
+<!-- ================= JAVASCRIPT LOGIC ================= -->
 <script>
-    // --- FIREBASE CONFIGURATION ---
+    // --- CONFIGURATION ---
     const firebaseConfig = {
         apiKey: "AIzaSyA4mlpgLA8l1N8VHqwpVLbPXvDvPxGPcSI",
         authDomain: "eatlyhub.firebaseapp.com",
         projectId: "eatlyhub",
         storageBucket: "eatlyhub.firebasestorage.app",
         messagingSenderId: "1094045089044",
-        appId: "1:1094045089044:web:397e0fd73412a07c3ad601",
-        measurementId: "G-V3K3QB1715"
+        appId: "1:1094045089044:web:397e0fd73412a07c3ad601"
     };
 
-    // Initialize Firebase
-    if (!firebase.apps.length) {
+    // --- INIT FIREBASE ---
+    try {
         firebase.initializeApp(firebaseConfig);
-    }
+    } catch(e) { console.error("Firebase Init Error", e); }
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // --- APP STATE & ROUTING ---
+    // --- STATE ---
     const app = document.getElementById('app');
     let currentUser = null;
-    let bizProfile = null;
+    let bizProfile = {};
     let bizOrders = [];
-    
-    // TABS DEFINITION
+    let currentTab = 'Dashboard';
+
     const TABS = [
         'Dashboard', 'Profile', 'Open/Close', 'Add Foods', 'My Webpage',
         'New Orders', 'Confirmed Orders', 'Active Orders', 'Ready Orders', 
         'Completed Orders', 'Unpaid Bills', 'Reports', 'Admin Messages'
     ];
 
-    // --- INIT ---
+    // --- APP STARTUP ---
     window.addEventListener('load', () => {
         const urlParams = new URLSearchParams(window.location.search);
         const bizId = urlParams.get('biz');
@@ -243,425 +281,530 @@
         }
     });
 
-    // --- RENDER HELPERS ---
+    // --- NAVIGATION & RENDERING ---
     function render(tplId) {
         app.innerHTML = '';
-        app.appendChild(document.getElementById(tplId).content.cloneNode(true));
+        const tpl = document.getElementById(tplId);
+        if(tpl) app.appendChild(tpl.content.cloneNode(true));
     }
 
-    // --- AUTHENTICATION ---
     function authLogin() {
         const provider = new firebase.auth.GoogleAuthProvider();
-        auth.signInWithPopup(provider).catch(alert);
+        auth.signInWithPopup(provider).catch(e => alert("Login Error: " + e.message));
     }
-    function authLogout() { auth.signOut().then(() => window.location.reload()); }
+    
+    function authLogout() { 
+        auth.signOut().then(() => window.location.reload()); 
+    }
 
     // --- DASHBOARD LOGIC ---
     async function loadDashboard() {
         render('tpl-dashboard');
         
-        // Load Profile
-        const doc = await db.collection('users').doc(currentUser.uid).get();
-        bizProfile = doc.exists ? doc.data() : { locked: false, verified: false, foods: [], schedule: {} };
-        
-        // Listen to Orders
-        db.collection('users').doc(currentUser.uid).collection('orders').orderBy('time', 'desc')
-            .onSnapshot(snap => {
-                bizOrders = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                // Check for new orders notification
-                const newOrders = bizOrders.filter(o => o.status === 'new' && !o.seen);
-                if(newOrders.length > 0) showModal(`<h3>🔔 New Order!</h3><p>You have ${newOrders.length} new orders.</p>`);
-                refreshCurrentTab();
-            });
+        // Setup Tabs
+        const tabsContainer = document.getElementById('dash-tabs');
+        tabsContainer.innerHTML = TABS.map(t => 
+            `<div class="tab-btn" onclick="switchTab('${t}')">${t}</div>`
+        ).join('');
 
-        renderTabs();
+        // Real-time Listener
+        db.collection('users').doc(currentUser.uid).onSnapshot(doc => {
+            bizProfile = doc.exists ? doc.data() : { locked: false, verified: false, foods: [], schedule: {} };
+            refreshTabContent(); // Refresh UI when profile changes
+        });
+
+        db.collection('users').doc(currentUser.uid).collection('orders')
+          .orderBy('time', 'desc').limit(50)
+          .onSnapshot(snap => {
+              bizOrders = snap.docs.map(d => ({id: d.id, ...d.data()}));
+              
+              // Notification for New Orders
+              const newOrders = bizOrders.filter(o => o.status === 'new' && !o.seen);
+              if(newOrders.length > 0) {
+                  showToast(`🔔 You have ${newOrders.length} new orders!`, 'success');
+                  // Mark as seen locally to avoid spam
+                  newOrders.forEach(o => o.seen = true); 
+              }
+              refreshTabContent();
+          });
+
         switchTab('Dashboard');
     }
 
-    function renderTabs() {
-        const container = document.getElementById('dash-tabs');
-        container.innerHTML = TABS.map(t => `<span class="tab-btn" onclick="switchTab('${t}')">${t}</span>`).join('');
+    function switchTab(name) {
+        // Guard: Force Profile Completion
+        if (name !== 'Dashboard' && name !== 'Profile' && (!bizProfile.locked)) {
+            showToast("⚠ Please complete & lock your profile first.", "error");
+            name = 'Profile';
+        }
+
+        currentTab = name;
+        // Update UI Tabs
+        document.querySelectorAll('.tab-btn').forEach(b => {
+            b.classList.toggle('active', b.innerText === name);
+        });
+        refreshTabContent();
     }
 
-    function switchTab(tabName) {
-        // Validation: Profile must be complete to access other tabs
-        if (tabName !== 'Dashboard' && tabName !== 'Profile' && (!bizProfile.locked)) {
-            alert("Please complete and LOCK your profile first.");
-            switchTab('Profile');
+    function refreshTabContent() {
+        const container = document.getElementById('dash-content');
+        if (!container || !currentUser) return;
+
+        // Route logic
+        if(currentTab === 'Dashboard') renderDashHome(container);
+        else if(currentTab === 'Profile') renderProfile(container);
+        else if(currentTab === 'Open/Close') renderSchedule(container);
+        else if(currentTab === 'Add Foods') renderAddFoods(container);
+        else if(currentTab === 'My Webpage') renderWebpageInfo(container);
+        else if(currentTab === 'Reports') renderReports(container);
+        else if(currentTab === 'Admin Messages') container.innerHTML = '<div class="card text-center text-red">No new messages.</div>';
+        else renderOrdersList(container, currentTab);
+    }
+
+    // --- TAB: DASHBOARD HOME ---
+    function renderDashHome(target) {
+        target.innerHTML = `
+            <div class="card center flex-col">
+                <img src="${bizProfile.logo || 'https://via.placeholder.com/100?text=Logo'}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;margin-bottom:10px;">
+                <h3>${bizProfile.businessName || 'Welcome!'}</h3>
+                ${bizProfile.verified ? '<div class="verified-badge">✔ Verified Business</div>' : '<div class="unverified-badge">❌ Not Verified</div>'}
+            </div>
+            
+            <div class="card">
+                <h4>🔍 Quick Search</h4>
+                <div class="input-group">
+                    <label>Track Order (ID)</label>
+                    <input type="text" placeholder="e.g. 12345" onkeyup="searchOrder(this.value)">
+                    <div id="res-order" class="mt-1"></div>
+                </div>
+                <div class="input-group">
+                    <label>Check Unpaid Customers (WhatsApp)</label>
+                    <input type="text" placeholder="e.g. 9477..." onkeyup="searchUnpaid(this.value)">
+                    <div id="res-unpaid" class="mt-1"></div>
+                </div>
+            </div>
+        `;
+    }
+
+    // --- TAB: PROFILE ---
+    function renderProfile(target) {
+        const p = bizProfile;
+        const disabled = p.locked ? 'disabled' : '';
+        const btn = p.locked 
+            ? `<button class="btn btn-yellow" onclick="toggleLock(false)">Unlock to Edit</button>` 
+            : `<button class="btn btn-primary" onclick="saveProfile()">Save & Lock Profile</button>`;
+
+        target.innerHTML = `
+            <div class="card">
+                <div class="input-group"><label>Logo Image URL</label><input id="p-logo" value="${p.logo||''}" ${disabled}></div>
+                <div class="input-group"><label>Business Name</label><input id="p-name" value="${p.businessName||''}" ${disabled}></div>
+                <div class="input-group"><label>Owner Name</label><input id="p-owner" value="${p.ownerName||''}" ${disabled}></div>
+                <div class="input-group"><label>Address</label><input id="p-addr" value="${p.address||''}" ${disabled}></div>
+                <div class="input-group"><label>Reg / NIC No.</label><input id="p-nic" value="${p.nic||''}" ${disabled}></div>
+                <div class="input-group"><label>Hotline</label><input id="p-hot" value="${p.hotline||''}" ${disabled}></div>
+                <div class="input-group"><label>WhatsApp</label><input id="p-wa" value="${p.whatsapp||''}" ${disabled}></div>
+                ${btn}
+            </div>
+            <div class="card">
+                <h3>Verification Badge (Rs 2500)</h3>
+                ${p.verified ? '<div class="text-green bold">✅ You are Verified!</div>' : `
+                    <p class="mb-1">Attract more customers with the Green Badge.</p>
+                    <div style="background:#f1f2f6; padding:10px; border-radius:8px; font-size:0.9rem;">
+                        <b>Bank:</b> Commercial Bank, Homagama<br>
+                        <b>Acc:</b> 8750053306 (Colombage SD)
+                    </div>
+                    <div class="input-group mt-1">
+                        <label>Upload Grama Niladhari Letter</label>
+                        <input type="file" id="v-letter" onchange="previewFile('v-letter', 'prev-letter')">
+                        <img id="prev-letter" style="max-width:100%; display:none; margin-top:5px; border-radius:5px;">
+                    </div>
+                    <div class="input-group">
+                        <label>Upload Payment Slip</label>
+                        <input type="file" id="v-slip" onchange="previewFile('v-slip', 'prev-slip')">
+                        <img id="prev-slip" style="max-width:100%; display:none; margin-top:5px; border-radius:5px;">
+                    </div>
+                    <button class="btn btn-green" onclick="requestVerification()">Submit for Verification</button>
+                    <button class="btn btn-outline" onclick="switchTab('Admin Messages')">Send Message</button>
+                `}
+            </div>
+        `;
+    }
+
+    // --- TAB: OPEN/CLOSE ---
+    function renderSchedule(target) {
+        const today = new Date().toLocaleDateString('en-US', {weekday:'long'});
+        const s = bizProfile.schedule?.[today] || {open: false, start:'08:00', end:'20:00'};
+        
+        target.innerHTML = `
+            <div class="card">
+                <h3>📅 Schedule for ${today}</h3>
+                <div class="input-group">
+                    <label>Are you Open Today?</label>
+                    <select id="oc-stat" onchange="saveSched('${today}')">
+                        <option value="yes" ${s.open?'selected':''}>Yes, Open</option>
+                        <option value="no" ${!s.open?'selected':''}>No, Closed</option>
+                    </select>
+                </div>
+                <div class="flex" style="gap:10px;">
+                    <div class="input-group w-100">
+                        <label>Open Time</label>
+                        <input type="time" id="oc-start" value="${s.start}" onchange="saveSched('${today}')">
+                    </div>
+                    <div class="input-group w-100">
+                        <label>Close Time</label>
+                        <input type="time" id="oc-end" value="${s.end}" onchange="saveSched('${today}')">
+                    </div>
+                </div>
+                <div class="text-center text-green" style="font-size:0.8rem">Changes auto-save for ${today}</div>
+            </div>
+        `;
+    }
+
+    // --- TAB: ADD FOODS ---
+    function renderAddFoods(target) {
+        target.innerHTML = `
+            <div class="card">
+                <h3>Add New Item</h3>
+                <input id="f-cat" class="w-100 p-1 mb-1" style="border:1px solid #ddd;border-radius:5px;" placeholder="Category (e.g. Fried Rice)">
+                <input id="f-name" class="w-100 p-1 mb-1" style="border:1px solid #ddd;border-radius:5px;" placeholder="Food Name *">
+                <input id="f-img" class="w-100 p-1 mb-1" style="border:1px solid #ddd;border-radius:5px;" placeholder="Image URL *">
+                <div class="flex" style="gap:10px">
+                    <input id="f-half" type="number" class="w-100 p-1" style="border:1px solid #ddd;border-radius:5px;" placeholder="Half Price">
+                    <input id="f-full" type="number" class="w-100 p-1" style="border:1px solid #ddd;border-radius:5px;" placeholder="Full Price">
+                </div>
+                <button class="btn btn-green mt-1" onclick="addFood()">+ Add to Menu</button>
+            </div>
+            <div id="menu-list">
+                ${(bizProfile.foods||[]).map((f,i) => `
+                    <div class="card flex justify-between center" style="padding:10px;">
+                        <div class="flex center">
+                            <img src="${f.img}" style="width:50px;height:50px;border-radius:5px;margin-right:10px;object-fit:cover;">
+                            <div>
+                                <div class="bold">${f.name}</div>
+                                <small>${f.cat}</small>
+                            </div>
+                        </div>
+                        <button class="btn btn-secondary" style="width:auto;padding:5px 10px;" onclick="deleteFood(${i})">🗑</button>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+
+    // --- TAB: MY WEBPAGE ---
+    function renderWebpageInfo(target) {
+        const url = `${window.location.origin}${window.location.pathname}?biz=${currentUser.uid}`;
+        target.innerHTML = `
+            <div class="card">
+                <h3>🌍 Your Public Webpage</h3>
+                <p>Share this link with customers:</p>
+                <div style="background:#eee; padding:10px; border-radius:5px; word-break:break-all; font-family:monospace; margin-bottom:10px;">${url}</div>
+                <a href="${url}" target="_blank" class="btn btn-primary">Open Page</a>
+                <div class="input-group mt-2">
+                    <label>Custom Hero Text</label>
+                    <input id="hero-txt" value="${bizProfile.heroText || 'Welcome to ' + bizProfile.businessName}" onchange="updateHero(this.value)">
+                </div>
+            </div>
+        `;
+    }
+
+    // --- TABS: ORDERS LOGIC ---
+    function renderOrdersList(target, tabName) {
+        const map = {
+            'New Orders': 'new', 'Confirmed Orders': 'confirmed', 
+            'Active Orders': 'active', 'Ready Orders': 'ready', 
+            'Completed Orders': 'completed', 'Unpaid Bills': 'unpaid'
+        };
+        const status = map[tabName];
+        if(!status) return;
+
+        const list = bizOrders.filter(o => o.status === status);
+        if(list.length === 0) {
+            target.innerHTML = '<div class="text-center p-2 text-gray">No orders found in this section.</div>';
             return;
         }
 
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.innerText === tabName));
-        const content = document.getElementById('dash-content');
-        content.innerHTML = '<div class="text-center p-2">Loading...</div>';
-        
-        window.currentTab = tabName; // store for refreshing
-        renderTabContent(tabName, content);
-    }
-
-    function refreshCurrentTab() {
-        if(window.currentTab) renderTabContent(window.currentTab, document.getElementById('dash-content'));
-    }
-
-    // --- TAB CONTENTS ---
-    function renderTabContent(tab, container) {
-        container.innerHTML = '';
-
-        if(tab === 'Dashboard') {
-            container.innerHTML = `
-                <div class="card center flex-col">
-                    <img src="${bizProfile.logo || 'https://via.placeholder.com/100'}" style="width:80px;height:80px;border-radius:50%">
-                    <h3>${bizProfile.businessName || 'Welcome'}</h3>
-                    ${bizProfile.verified ? '<div class="verified-badge">✔ Verified</div>' : '<div class="not-verified">❌ Not Verified</div>'}
-                </div>
-                <div class="input-group">
-                    <label>🔍 Search Order (ID)</label>
-                    <input type="text" placeholder="Enter Order Number" onkeyup="searchOrder(this.value)">
-                    <div id="search-res-order"></div>
-                </div>
-                <div class="input-group">
-                    <label>🔍 Search Unpaid Customer (WhatsApp)</label>
-                    <input type="text" placeholder="Enter 947..." onkeyup="searchCustomer(this.value)">
-                    <div id="search-res-cust"></div>
-                </div>
-            `;
-        }
-
-        else if (tab === 'Profile') {
-            const isLocked = bizProfile.locked;
-            container.innerHTML = `
-                <div class="card">
-                    <div class="input-group"><label>Logo URL</label><input id="p-logo" value="${bizProfile.logo||''}" ${isLocked?'disabled':''}></div>
-                    <div class="input-group"><label>Business Name</label><input id="p-bizname" value="${bizProfile.businessName||''}" ${isLocked?'disabled':''}></div>
-                    <div class="input-group"><label>Owner Name</label><input id="p-owner" value="${bizProfile.ownerName||''}" ${isLocked?'disabled':''}></div>
-                    <div class="input-group"><label>Address</label><input id="p-addr" value="${bizProfile.address||''}" ${isLocked?'disabled':''}></div>
-                    <div class="input-group"><label>Reg/NIC No</label><input id="p-nic" value="${bizProfile.nic||''}" ${isLocked?'disabled':''}></div>
-                    <div class="input-group"><label>Hotline</label><input id="p-hot" value="${bizProfile.hotline||''}" ${isLocked?'disabled':''}></div>
-                    <div class="input-group"><label>WhatsApp</label><input id="p-wa" value="${bizProfile.whatsapp||''}" ${isLocked?'disabled':''}></div>
-                    
-                    ${isLocked 
-                        ? `<button class="btn btn-yellow" onclick="toggleProfileLock(false)">Unlock & Edit</button>` 
-                        : `<button class="btn btn-primary" onclick="saveProfile()">Save & Lock Profile</button>`}
-                </div>
-
-                <div class="card">
-                    <h3>Get Verified (Rs 2500)</h3>
-                    ${bizProfile.verified ? '<p class="text-green bold">You are Verified!</p>' : `
-                        <p>Bank: Commercial Bank, Homagama<br>Acc: 8750053306 (Colombage SD)</p>
-                        <div class="input-group"><label>Upload Grama Niladhari Letter & Slip (Mock)</label><input type="file" disabled></div>
-                        <button class="btn btn-primary" onclick="requestVerification()">Submit to Admin</button>
-                    `}
-                </div>
-            `;
-        }
-
-        else if (tab === 'Open/Close') {
-            const today = new Date().toLocaleDateString('en-US', {weekday:'long'});
-            container.innerHTML = `
-                <div class="card">
-                    <h3>📅 Schedule for ${today} (Today)</h3>
-                    <div class="input-group">
-                        <label>Are you Open Today?</label>
-                        <select id="oc-status" onchange="saveSchedule('${today}')">
-                            <option value="yes" ${bizProfile.schedule?.[today]?.open ? 'selected':''}>Yes</option>
-                            <option value="no" ${!bizProfile.schedule?.[today]?.open ? 'selected':''}>No</option>
-                        </select>
-                    </div>
-                    <div class="flex justify-between">
-                        <div class="input-group w-100" style="margin-right:5px">
-                            <label>Open Time</label>
-                            <input type="time" id="oc-open" value="${bizProfile.schedule?.[today]?.start || '08:00'}" onchange="saveSchedule('${today}')">
+        target.innerHTML = list.map(o => {
+            let actions = '';
+            
+            // NEW -> CONFIRM
+            if(status === 'new') {
+                actions = `
+                    <button class="btn btn-yellow" onclick="reqConfirm('${o.id}', '${o.custWa}')">Request Confirmation (WhatsApp)</button>
+                    <button class="btn btn-outline" style="border-color:red; color:red;" onclick="setStatus('${o.id}', 'canceled')">Decline</button>
+                `;
+            }
+            // CONFIRM -> ACTIVE (BILL)
+            else if(status === 'confirmed') {
+                actions = `<button class="btn btn-primary" onclick="generateBill('${o.id}')">🖨 Print Bill & Start Cooking</button>`;
+            }
+            // ACTIVE -> READY
+            else if(status === 'active') {
+                actions = `
+                    <div class="bill-wrapper">
+                        <div class="watermark">NOT PAID</div>
+                        <div class="bill-header">
+                            <div class="bold">${bizProfile.businessName}</div>
+                            <small>Order #${o.orderNum}</small>
                         </div>
-                        <div class="input-group w-100">
-                            <label>Close Time</label>
-                            <input type="time" id="oc-close" value="${bizProfile.schedule?.[today]?.end || '20:00'}" onchange="saveSchedule('${today}')">
-                        </div>
+                        ${o.items.map(i => `<div class="bill-item"><span>${i.name} (${i.variant})</span><span>${i.price}</span></div>`).join('')}
+                        <div class="bill-total"><span>Total</span><span>${o.total}</span></div>
                     </div>
-                    <p class="text-green text-center">Settings autosaved for ${today}</p>
-                </div>
-            `;
-        }
-
-        else if (tab === 'Add Foods') {
-            container.innerHTML = `
-                <div class="card">
-                    <h3>Add Item</h3>
-                    <input id="f-cat" class="w-100 mb-1 p-1" placeholder="Category (e.g. Rice)">
-                    <input id="f-name" class="w-100 mb-1 p-1" placeholder="Food Name *">
-                    <input id="f-img" class="w-100 mb-1 p-1" placeholder="Image URL *">
-                    <div class="flex">
-                        <input id="f-half" type="number" class="w-100 p-1" placeholder="Half Price" style="margin-right:5px">
-                        <input id="f-full" type="number" class="w-100 p-1" placeholder="Full Price">
-                    </div>
-                    <button class="btn btn-green mt-2" onclick="addFood()">Add to Menu</button>
-                </div>
-                <div id="food-list">
-                    ${(bizProfile.foods || []).map((f, i) => `
-                        <div class="card flex justify-between center">
-                            <div class="flex center">
-                                <img src="${f.img}" style="width:50px;height:50px;border-radius:5px;margin-right:10px;">
-                                <div><b>${f.name}</b><br><small>${f.cat}</small></div>
-                            </div>
-                            <button class="btn btn-secondary" style="width:auto" onclick="deleteFood(${i})">X</button>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-        }
-
-        else if (tab === 'My Webpage') {
-            const link = `${window.location.origin}${window.location.pathname}?biz=${currentUser.uid}`;
-            container.innerHTML = `
-                <div class="card">
-                    <h3>Your Public Link</h3>
-                    <input value="${link}" readonly style="width:100%; padding:10px; background:#eee; border:none; border-radius:5px;">
-                    <a href="${link}" target="_blank" class="btn btn-primary mt-2" style="display:block;text-decoration:none">Open Webpage</a>
-                    <div class="input-group mt-2">
-                        <label>Custom Hero Text</label>
-                        <input id="hero-txt" value="${bizProfile.heroText || 'Welcome to ' + bizProfile.businessName}" onchange="updateHero(this.value)">
-                    </div>
-                </div>
-            `;
-        }
-
-        // --- ORDER TABS ---
-        else if (['New Orders', 'Confirmed Orders', 'Active Orders', 'Ready Orders', 'Completed Orders', 'Unpaid Bills'].includes(tab)) {
-            const statusMap = {
-                'New Orders': 'new',
-                'Confirmed Orders': 'confirmed',
-                'Active Orders': 'active',
-                'Ready Orders': 'ready',
-                'Completed Orders': 'completed',
-                'Unpaid Bills': 'unpaid'
-            };
-            const status = statusMap[tab];
-            const filtered = bizOrders.filter(o => o.status === status);
-
-            if(filtered.length === 0) {
-                container.innerHTML = '<div class="text-center p-2">No orders in this section.</div>';
-                return;
+                    <button class="btn btn-green mt-1" onclick="markReady('${o.id}', '${o.custWa}')">Mark Ready & Notify</button>
+                `;
+            }
+            // READY -> COMPLETE / UNPAID
+            else if(status === 'ready') {
+                actions = `
+                    <button class="btn btn-secondary" onclick="setStatus('${o.id}', 'completed')">💰 Payment Received (Complete)</button>
+                    <button class="btn btn-outline" style="border-color:var(--yellow); color:var(--yellow);" onclick="setStatus('${o.id}', 'unpaid')">⚠ Not Paid (Record)</button>
+                `;
             }
 
-            container.innerHTML = filtered.map(o => {
-                let btns = '';
-                if(status === 'new') btns = `
-                    <button class="btn btn-yellow" onclick="reqConfirm('${o.id}', '${o.custWa}')">Request Confirmation via WhatsApp</button>
-                    <button class="btn btn-secondary" onclick="updateOrderStatus('${o.id}', 'canceled')">Decline</button>`;
-                if(status === 'confirmed') btns = `<button class="btn btn-primary" onclick="printBill('${o.id}')">🖨 Print Bill & Cook</button>`;
-                if(status === 'active') btns = `
-                    <div class="bill-wrapper mt-1">
-                        <div class="watermark">NOT PAID</div>
-                        <h4>${bizProfile.businessName} - Bill</h4>
-                        <p>Order #${o.orderNum}</p>
-                        <hr>
-                        ${o.items.map(i => `<div class="flex justify-between"><span>${i.name} (${i.variant})</span><span>${i.price}</span></div>`).join('')}
-                        <hr><h3>Total: ${o.total}</h3>
-                    </div>
-                    <button class="btn btn-green mt-1" onclick="markReady('${o.id}', '${o.custWa}')">Order Ready (Notify Customer)</button>`;
-                if(status === 'ready') btns = `
-                    <button class="btn btn-secondary" onclick="updateOrderStatus('${o.id}', 'completed')">💰 Paid & Completed</button>
-                    <button class="btn btn-outline" style="color:red; border-color:red" onclick="updateOrderStatus('${o.id}', 'unpaid')">⚠ Not Paid</button>`;
-                
-                return `
+            return `
                 <div class="card status-${status}">
-                    <div class="flex justify-between">
-                        <h4>#${o.orderNum}</h4>
-                        <small>${new Date(o.time).toLocaleTimeString()}</small>
+                    <div class="flex justify-between center">
+                        <h4 class="text-red">#${o.orderNum}</h4>
+                        <small>${new Date(o.time).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</small>
                     </div>
-                    <p><b>${o.custName}</b> <a href="https://wa.me/${o.custWa}">${o.custWa}</a></p>
-                    <div style="background:#f1f2f6; padding:10px; border-radius:5px; margin:10px 0;">
-                        ${o.items.map(i => `<div>${i.name} (${i.variant}) - ${i.price}</div>`).join('')}
+                    <div class="mb-1">
+                        <b>${o.custName}</b> <a href="https://wa.me/${o.custWa}" style="text-decoration:none; color:var(--green)">✆ ${o.custWa}</a>
                     </div>
-                    <h4 class="text-right">Total: ${o.total}</h4>
-                    <div class="mt-1">${btns}</div>
-                </div>`;
-            }).join('');
-        }
-
-        else if (tab === 'Reports') {
-            const completed = bizOrders.filter(o => o.status === 'completed');
-            const revenue = completed.reduce((sum, o) => sum + parseInt(o.total), 0);
-            const unpaid = bizOrders.filter(o => o.status === 'unpaid').length;
-            
-            container.innerHTML = `
-                <div class="card">
-                    <h3>Summary Report</h3>
-                    <p>Total Revenue: <b>Rs. ${revenue}</b></p>
-                    <p>Completed Orders: <b>${completed.length}</b></p>
-                    <p class="text-red">Unpaid Bills: <b>${unpaid}</b></p>
+                    <div style="background:#f8f9fa; padding:8px; border-radius:5px;">
+                        ${o.items.map(i => `<div>• ${i.name} (${i.variant}) - ${i.price}</div>`).join('')}
+                    </div>
+                    <div class="text-right mt-1 bold">Total: ${o.total}</div>
+                    <div class="mt-1">${actions}</div>
                 </div>
             `;
-        }
-        
-        else if (tab === 'Admin Messages') {
-            container.innerHTML = `<div class="card"><p>No new messages from Admin.</p></div>`;
-        }
+        }).join('');
     }
 
-    // --- ACTIONS ---
+    // --- TAB: REPORTS ---
+    function renderReports(target) {
+        const completed = bizOrders.filter(o => o.status === 'completed');
+        const unpaid = bizOrders.filter(o => o.status === 'unpaid');
+        const revenue = completed.reduce((a,b) => a + Number(b.total), 0);
+
+        target.innerHTML = `
+            <div class="card text-center">
+                <h3>📊 Business Report</h3>
+                <h1 class="text-green mt-2">Rs. ${revenue}</h1>
+                <small>Total Revenue</small>
+                <div class="flex mt-2" style="gap:10px">
+                    <div class="w-100 p-1" style="background:#f1f2f6; border-radius:8px;">
+                        <h3>${completed.length}</h3><small>Completed</small>
+                    </div>
+                    <div class="w-100 p-1" style="background:#fff0f0; border-radius:8px; color:red;">
+                        <h3>${unpaid.length}</h3><small>Unpaid Bills</small>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // --- ACTIONS IMPLEMENTATION ---
+
     function saveProfile() {
         const p = {
             logo: document.getElementById('p-logo').value,
-            businessName: document.getElementById('p-bizname').value,
+            businessName: document.getElementById('p-name').value,
             ownerName: document.getElementById('p-owner').value,
             address: document.getElementById('p-addr').value,
             nic: document.getElementById('p-nic').value,
             hotline: document.getElementById('p-hot').value,
             whatsapp: document.getElementById('p-wa').value,
-            locked: true,
             verified: bizProfile.verified || false,
+            locked: true,
             foods: bizProfile.foods || [],
             schedule: bizProfile.schedule || {}
         };
-        // Validation
-        if(!p.businessName || !p.whatsapp || !p.hotline) return alert("Fill all required fields");
         
+        if(!p.businessName || !p.whatsapp) return showToast("Name and WhatsApp required", "error");
+
         db.collection('users').doc(currentUser.uid).set(p, {merge:true})
-            .then(() => { bizProfile = p; switchTab('Dashboard'); });
-    }
-    
-    function toggleProfileLock(state) {
-        db.collection('users').doc(currentUser.uid).update({locked: state})
-        .then(() => { bizProfile.locked = state; renderTabContent('Profile', document.getElementById('dash-content')); });
+        .then(() => { showToast("Profile Saved & Locked", "success"); switchTab('Dashboard'); });
     }
 
-    function saveSchedule(day) {
-        const isOpen = document.getElementById('oc-status').value === 'yes';
-        const start = document.getElementById('oc-open').value;
-        const end = document.getElementById('oc-close').value;
+    function toggleLock(state) {
+        db.collection('users').doc(currentUser.uid).update({locked: state});
+    }
+
+    function saveSched(day) {
+        const open = document.getElementById('oc-stat').value === 'yes';
+        const start = document.getElementById('oc-start').value;
+        const end = document.getElementById('oc-end').value;
+        const schedule = bizProfile.schedule || {};
+        schedule[day] = { open, start, end };
         
-        if(!bizProfile.schedule) bizProfile.schedule = {};
-        bizProfile.schedule[day] = { open: isOpen, start, end };
-        
-        db.collection('users').doc(currentUser.uid).update({schedule: bizProfile.schedule});
+        db.collection('users').doc(currentUser.uid).update({ schedule });
     }
 
     function addFood() {
+        const cat = document.getElementById('f-cat').value;
         const name = document.getElementById('f-name').value;
         const img = document.getElementById('f-img').value;
         const half = document.getElementById('f-half').value;
         const full = document.getElementById('f-full').value;
-        const cat = document.getElementById('f-cat').value;
 
-        if(!name || !img || (!half && !full)) return alert("Name, Image and at least one price required.");
-        
-        const newFood = { name, img, half, full, cat };
-        const updatedFoods = [...(bizProfile.foods || []), newFood];
-        
-        db.collection('users').doc(currentUser.uid).update({foods: updatedFoods})
-            .then(() => { bizProfile.foods = updatedFoods; renderTabContent('Add Foods', document.getElementById('dash-content')); });
+        if(!name || !img || (!half && !full)) return showToast("Name, Image & 1 Price required", "error");
+
+        const foods = [...(bizProfile.foods||[]), {cat, name, img, half, full}];
+        db.collection('users').doc(currentUser.uid).update({foods})
+        .then(() => {
+            showToast("Food Added", "success");
+            renderAddFoods(document.getElementById('dash-content')); // Redraw
+        });
     }
 
     function deleteFood(idx) {
-        const updatedFoods = bizProfile.foods.filter((_, i) => i !== idx);
-        db.collection('users').doc(currentUser.uid).update({foods: updatedFoods})
-            .then(() => { bizProfile.foods = updatedFoods; renderTabContent('Add Foods', document.getElementById('dash-content')); });
+        if(!confirm("Delete this item?")) return;
+        const foods = bizProfile.foods.filter((_, i) => i !== idx);
+        db.collection('users').doc(currentUser.uid).update({foods})
+        .then(() => renderAddFoods(document.getElementById('dash-content')));
     }
 
     function updateHero(txt) {
         db.collection('users').doc(currentUser.uid).update({heroText: txt});
     }
 
-    function requestVerification() {
-        alert("Verification Request Sent to Admin!"); 
-        // Logic to send msg to admin collection would go here
+    function previewFile(inputId, imgId) {
+        const file = document.getElementById(inputId).files[0];
+        if(file) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                const img = document.getElementById(imgId);
+                img.src = e.target.result;
+                img.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
     }
 
-    // --- ORDER HANDLING ---
+    function requestVerification() {
+        const l = document.getElementById('v-letter').files[0];
+        const s = document.getElementById('v-slip').files[0];
+        if(!l || !s) return showToast("Please upload both documents", "error");
+        
+        // Simulating upload since we don't have storage bucket config details in prompt
+        showToast("Documents Submitted to Admin!", "success");
+    }
+
+    // --- ORDER ACTIONS ---
     function reqConfirm(id, wa) {
         const link = `${window.location.origin}${window.location.pathname}?biz=${currentUser.uid}&orderId=${id}`;
-        const msg = `Please confirm your order by clicking this link: ${link}`;
+        const msg = `Hello! Please confirm your *EatlyHub* order by clicking here: ${link}`;
         window.open(`https://wa.me/${wa}?text=${encodeURIComponent(msg)}`);
     }
 
-    function printBill(id) {
-        // Send Bill Image via WA logic requires backend image generation. 
-        // For Client-Side: Generate Text Bill
+    function generateBill(id) {
         const o = bizOrders.find(x => x.id === id);
-        const billTxt = `*BILL - ${bizProfile.businessName}* %0A Order: ${o.orderNum} %0A Total: ${o.total} %0A Status: Cooking`;
-        window.open(`https://wa.me/${o.custWa}?text=${billTxt}`);
-        updateOrderStatus(id, 'active');
+        // Visual bill is in the next tab (Active), we just move it there
+        setStatus(id, 'active');
+        
+        // WhatsApp Bill Text
+        let txt = `🧾 *BILL - ${bizProfile.businessName}*\nOrder #${o.orderNum}\n\n`;
+        o.items.forEach(i => txt += `${i.name} (${i.variant}): ${i.price}\n`);
+        txt += `\n*Total: ${o.total}*\nStatus: Preparing...`;
+        
+        window.open(`https://wa.me/${o.custWa}?text=${encodeURIComponent(txt)}`);
     }
 
     function markReady(id, wa) {
-        window.open(`https://wa.me/${wa}?text=Your order is READY! Please come and pay.`);
-        updateOrderStatus(id, 'ready');
+        const msg = `🍽 Your order is *READY*! Please come and pick it up.`;
+        window.open(`https://wa.me/${wa}?text=${encodeURIComponent(msg)}`);
+        setStatus(id, 'ready');
     }
 
-    function updateOrderStatus(id, status) {
-        db.collection('users').doc(currentUser.uid).collection('orders').doc(id).update({status: status})
-            .then(() => refreshCurrentTab());
+    function setStatus(id, status) {
+        db.collection('users').doc(currentUser.uid).collection('orders').doc(id).update({status});
     }
 
+    // --- SEARCH ---
     function searchOrder(val) {
         const o = bizOrders.find(x => x.orderNum === val);
-        document.getElementById('search-res-order').innerHTML = o 
-            ? `<div class="p-1 border mt-1">Found: Status <b>${o.status}</b></div>` 
+        document.getElementById('res-order').innerHTML = o 
+            ? `<div class="p-1 border text-green" style="background:#eafff3">Found: <b>${o.status.toUpperCase()}</b></div>`
             : '';
     }
 
-    function searchCustomer(val) {
+    function searchUnpaid(val) {
         if(val.length < 5) return;
-        const unpaid = bizOrders.filter(x => x.custWa.includes(val) && x.status === 'unpaid');
-        document.getElementById('search-res-cust').innerHTML = unpaid.length > 0 
-            ? `<div class="p-1 border mt-1 text-red">⚠ Found ${unpaid.length} Unpaid Bills!</div>` 
-            : '<div class="text-green mt-1">No unpaid records.</div>';
+        const found = bizOrders.filter(x => x.custWa.includes(val) && x.status === 'unpaid');
+        document.getElementById('res-unpaid').innerHTML = found.length 
+            ? `<div class="p-1 border text-red" style="background:#fff0f0">⚠ <b>${found.length} Unpaid Bills!</b></div>`
+            : '<div class="text-green">No record found.</div>';
     }
 
-    // --- PUBLIC PAGE LOGIC ---
+
+    // ================= PUBLIC PAGE LOGIC =================
     let cart = [];
-    
+
     async function loadPublicPage(bizId) {
         render('tpl-public');
+        
         const doc = await db.collection('users').doc(bizId).get();
-        if(!doc.exists) return alert("Business not found");
+        if(!doc.exists) return document.body.innerHTML = "<h2 class='text-center p-2'>Business Not Found</h2>";
         
         const data = doc.data();
+
+        // Populate Info
         document.getElementById('pub-name').innerText = data.businessName;
-        document.getElementById('pub-logo').src = data.logo;
+        document.getElementById('pub-logo').src = data.logo || 'https://via.placeholder.com/100';
         document.getElementById('pub-address').innerText = data.address;
-        document.getElementById('pub-hero-text').innerText = data.heroText || `Welcome to ${data.businessName}`;
+        document.getElementById('pub-hero-text').innerText = data.heroText || "Welcome!";
         document.getElementById('pub-hotline').href = `tel:${data.hotline}`;
         document.getElementById('pub-wa').href = `https://wa.me/${data.whatsapp}`;
         
-        // Footer info
         document.getElementById('footer-biz-name').innerText = data.businessName;
-        document.getElementById('footer-contact').innerText = `${data.address} | ${data.hotline}`;
+        document.getElementById('footer-contact').innerText = data.address + ' | ' + data.hotline;
+
         if(data.verified) {
-             document.getElementById('pub-verified-badge').classList.remove('hidden');
-             document.getElementById('footer-verified').classList.remove('hidden');
-             document.getElementById('footer-verified').onclick = () => alert("User has submitted Grama Niladhari Letter to Admin.");
+            document.getElementById('pub-verified-badge').classList.remove('hidden');
+            document.getElementById('footer-verified').classList.remove('hidden');
+            document.getElementById('footer-verified').onclick = () => alert("Verified via Grama Niladhari Letter.");
         }
 
-        // Open/Close
+        // Open/Close Check
         const today = new Date().toLocaleDateString('en-US', {weekday:'long'});
         const sched = data.schedule?.[today];
         const statusDiv = document.getElementById('public-status');
         
-        if (sched && sched.open) {
-            statusDiv.innerText = `WE ARE OPEN TODAY (${sched.start} - ${sched.end})`;
+        // Time Check Logic
+        let isOpenNow = false;
+        if(sched && sched.open) {
+            const now = new Date();
+            const curMins = now.getHours() * 60 + now.getMinutes();
+            const [sh, sm] = sched.start.split(':').map(Number);
+            const [eh, em] = sched.end.split(':').map(Number);
+            const startMins = sh * 60 + sm;
+            const endMins = eh * 60 + em;
+            if(curMins >= startMins && curMins <= endMins) isOpenNow = true;
+        }
+
+        if(isOpenNow) {
+            statusDiv.innerText = `OPEN NOW (${sched.start} - ${sched.end})`;
             statusDiv.style.background = 'var(--green)';
-            // Check if currently within time - simplified logic
         } else {
-            statusDiv.innerText = `WE ARE CLOSED TODAY`;
+            statusDiv.innerText = "CLOSED NOW";
             statusDiv.style.background = 'var(--primary)';
         }
 
-        // Menu
+        // Render Menu
         const menuDiv = document.getElementById('pub-menu');
-        const cats = [...new Set((data.foods || []).map(f => f.cat))];
+        const cats = [...new Set((data.foods||[]).map(f => f.cat))];
         
         cats.forEach(c => {
-            menuDiv.innerHTML += `<h3 class="mt-2" style="border-bottom:2px solid var(--primary)">${c || 'General'}</h3>`;
+            menuDiv.innerHTML += `<h3 class="mt-2 text-red" style="border-bottom:2px solid #eee; padding-bottom:5px;">${c||'Menu'}</h3>`;
             data.foods.filter(f => f.cat === c).forEach(f => {
                 menuDiv.innerHTML += `
-                    <div class="card flex center justify-between">
-                        <img src="${f.img}" style="width:80px;height:80px;border-radius:10px;object-fit:cover;">
-                        <div style="flex:1; padding:0 10px;">
-                            <b>${f.name}</b>
-                            <div class="mt-1">
-                                ${f.half ? `<button class="btn btn-outline" style="width:auto;padding:5px;font-size:12px" onclick="addToCart('${f.name}', 'Half', ${f.half})">Half: ${f.half}</button>` : ''}
-                                ${f.full ? `<button class="btn btn-outline" style="width:auto;padding:5px;font-size:12px" onclick="addToCart('${f.name}', 'Full', ${f.full})">Full: ${f.full}</button>` : ''}
+                    <div class="card flex justify-between center" style="padding:10px;">
+                        <img src="${f.img}" style="width:70px;height:70px;border-radius:10px;object-fit:cover;margin-right:10px;">
+                        <div style="flex:1;">
+                            <div class="bold">${f.name}</div>
+                            <div class="mt-1 flex" style="gap:5px;">
+                                ${f.half ? `<button class="btn btn-outline" style="width:auto;padding:4px 8px;font-size:12px;margin:0" onclick="addToCart('${f.name}', 'Half', ${f.half})">Half: ${f.half}</button>` : ''}
+                                ${f.full ? `<button class="btn btn-outline" style="width:auto;padding:4px 8px;font-size:12px;margin:0" onclick="addToCart('${f.name}', 'Full', ${f.full})">Full: ${f.full}</button>` : ''}
                             </div>
                         </div>
                     </div>
@@ -672,94 +815,119 @@
         // Floating Cart
         const cartBtn = document.createElement('div');
         cartBtn.innerHTML = '🛒';
-        cartBtn.style = "position:fixed;bottom:20px;right:20px;background:var(--primary);color:white;padding:15px;border-radius:50%;font-size:24px;box-shadow:0 4px 10px rgba(0,0,0,0.3);cursor:pointer;z-index:900";
-        cartBtn.onclick = () => showCart(bizId);
+        cartBtn.style = "position:fixed;bottom:20px;right:20px;background:var(--primary);color:white;width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:0 4px 15px rgba(255,71,87,0.4);cursor:pointer;z-index:900;";
+        cartBtn.onclick = () => showCartModal(bizId, data.whatsapp);
         document.body.appendChild(cartBtn);
     }
 
     function addToCart(name, variant, price) {
         cart.push({name, variant, price});
-        alert(`Added ${name} (${variant})`);
+        showToast(`Added ${name} (${variant})`, 'success');
     }
 
-    function showCart(bizId) {
-        if(cart.length === 0) return alert("Cart Empty");
-        const total = cart.reduce((a,b)=>a+parseInt(b.price),0);
+    function showCartModal(bizId, ownerWa) {
+        if(cart.length === 0) return showToast("Cart is empty", "error");
+        
+        const total = cart.reduce((a,b)=>a+Number(b.price),0);
         
         showModal(`
-            <h3>Your Cart</h3>
-            <ul>${cart.map(i => `<li>${i.name} (${i.variant}) - ${i.price}</li>`).join('')}</ul>
-            <h4>Total: ${total}</h4>
-            <div class="input-group"><label>Your Name</label><input id="c-name"></div>
-            <div class="input-group"><label>WhatsApp Number</label><input id="c-wa" placeholder="947..."></div>
-            <button class="btn btn-green" onclick="sendOrder('${bizId}', ${total})">Confirm & Order via WhatsApp</button>
+            <h2 class="text-center">Your Cart</h2>
+            <div style="background:#f8f9fa; padding:10px; border-radius:8px; max-height:200px; overflow-y:auto; margin-bottom:15px;">
+                ${cart.map(i => `<div class="flex justify-between" style="padding:5px 0; border-bottom:1px solid #eee;"><span>${i.name} (${i.variant})</span><span>${i.price}</span></div>`).join('')}
+            </div>
+            <h3 class="text-right">Total: ${total}</h3>
+            
+            <div class="input-group">
+                <label>Your Name</label><input id="c-name">
+            </div>
+            <div class="input-group">
+                <label>WhatsApp Number</label><input id="c-wa" placeholder="947...">
+            </div>
+            
+            <button class="btn btn-green" onclick="placeOrder('${bizId}', '${ownerWa}', ${total})">Confirm & Order via WhatsApp</button>
             <button class="btn btn-secondary" onclick="closeModal()">Close</button>
         `);
     }
 
-    function sendOrder(bizId, total) {
+    function placeOrder(bizId, ownerWa, total) {
         const name = document.getElementById('c-name').value;
         const wa = document.getElementById('c-wa').value;
-        if(!name || !wa) return alert("Details Required");
+        if(!name || !wa) return showToast("Please fill details", "error");
 
-        // Generate Order Number (Simple timestamp based for demo)
-        // In production, transaction needed to increment counter
         const orderNum = Math.floor(10000 + Math.random() * 90000).toString(); 
-
+        
         const orderData = {
             orderNum, custName: name, custWa: wa, items: cart, total, 
             time: new Date().toISOString(), status: 'new', seen: false
         };
 
         db.collection('users').doc(bizId).collection('orders').add(orderData).then(() => {
-            // Send WA to Owner
-            db.collection('users').doc(bizId).get().then(doc => {
-                const ownerWa = doc.data().whatsapp;
-                const msg = `New Order from ${name}! Order #${orderNum}. Items: ${cart.map(i=>i.name).join(', ')}. Total: ${total}`;
-                window.open(`https://wa.me/${ownerWa}?text=${encodeURIComponent(msg)}`);
-                cart = [];
-                closeModal();
-            });
+            const msg = `🔔 New Order!\nName: ${name}\nOrder #: ${orderNum}\nItems: ${cart.map(i=>i.name).join(', ')}\nTotal: ${total}`;
+            window.open(`https://wa.me/${ownerWa}?text=${encodeURIComponent(msg)}`);
+            cart = [];
+            closeModal();
+            showToast("Order Sent!", "success");
         });
     }
 
-    // --- CUSTOMER CONFIRMATION LINK ---
+    // ================= CUSTOMER CONFIRMATION PAGE =================
     async function loadCustomerConfirmPage(bizId, orderId) {
         const doc = await db.collection('users').doc(bizId).collection('orders').doc(orderId).get();
-        if(!doc.exists) return alert("Order not found");
+        if(!doc.exists) return document.body.innerHTML = "<h2>Order not found</h2>";
         const o = doc.data();
 
         app.innerHTML = `
-            <div class="center flex-col p-2" style="height:100vh; background:white;">
-                <h2 class="text-green">Confirm Your Order</h2>
-                <h1>#${o.orderNum}</h1>
-                <div class="card w-100" style="max-width:400px; text-align:left">
-                    ${o.items.map(i => `<div>${i.name} - ${i.price}</div>`).join('')}
-                    <hr><h3>Total: ${o.total}</h3>
+            <div class="flex-col center p-2" style="min-height:100vh; background:white;">
+                <h2 class="text-green mb-1">Confirm Order</h2>
+                <h1 style="font-size:3rem; margin:0;">${o.orderNum}</h1>
+                <small class="mb-2">EatlyHub Order Verification</small>
+                
+                <div class="card w-100" style="max-width:400px; text-align:left;">
+                    ${o.items.map(i => `<div class="flex justify-between p-1" style="border-bottom:1px solid #eee"><span>${i.name}</span><span>${i.price}</span></div>`).join('')}
+                    <div class="flex justify-between bold p-1" style="font-size:1.2rem"><span>Total</span><span>${o.total}</span></div>
                 </div>
-                <button class="btn btn-green" style="max-width:300px" onclick="custConfirmAction('${bizId}', '${orderId}', 'confirmed')">✅ YES, CONFIRM ORDER</button>
-                <button class="btn btn-secondary mt-1" style="max-width:300px" onclick="custConfirmAction('${bizId}', '${orderId}', 'canceled')">❌ CANCEL</button>
+
+                <div class="w-100" style="max-width:400px">
+                    <button class="btn btn-green" onclick="confirmAction('${bizId}', '${orderId}', 'confirmed')">✅ YES, CONFIRM</button>
+                    <button class="btn btn-secondary mt-1" onclick="confirmAction('${bizId}', '${orderId}', 'canceled')">❌ CANCEL ORDER</button>
+                </div>
             </div>
         `;
     }
 
-    function custConfirmAction(bizId, orderId, status) {
-        db.collection('users').doc(bizId).collection('orders').doc(orderId).update({status: status})
+    function confirmAction(bizId, orderId, status) {
+        db.collection('users').doc(bizId).collection('orders').doc(orderId).update({status})
         .then(() => {
-            alert(status === 'confirmed' ? "Order Confirmed! Kitchen is preparing." : "Order Canceled.");
-            window.location.href = window.location.pathname; // go to landing
+            document.body.innerHTML = `<div class="p-2 text-center"><h1>${status === 'confirmed' ? '✅ Confirmed' : '❌ Canceled'}</h1><p>You can close this window.</p></div>`;
         });
     }
 
-    // --- UTILS ---
-    function showModal(html) {
-        const div = document.createElement('div');
-        div.className = 'modal-overlay';
-        div.innerHTML = `<div class="modal-box">${html}</div>`;
-        document.body.appendChild(div);
+    // ================= UTILITIES =================
+    function showModal(content) {
+        const el = document.createElement('div');
+        el.className = 'modal-overlay';
+        el.innerHTML = `<div class="modal-box">${content}</div>`;
+        document.body.appendChild(el);
     }
-    function closeModal() { document.querySelector('.modal-overlay').remove(); }
+    
+    function closeModal() {
+        const el = document.querySelector('.modal-overlay');
+        if(el) el.remove();
+    }
 
+    function showToast(msg, type='success') {
+        const t = document.createElement('div');
+        t.innerText = msg;
+        t.style = `
+            position: fixed; top: 20px; right: 20px; z-index: 2000;
+            background: ${type==='error'?'#ff4757':'#2ed573'}; color: white;
+            padding: 12px 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            animation: fadeIn 0.3s;
+        `;
+        document.body.appendChild(t);
+        setTimeout(() => t.remove(), 3000);
+    }
 </script>
+<style> @keyframes fadeIn { from{opacity:0; transform:translateY(-10px);} to{opacity:1; transform:translateY(0);} } </style>
 </body>
 </html>

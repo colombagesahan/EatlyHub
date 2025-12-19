@@ -2,41 +2,51 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>EatlyHub | Food Delivery Platform</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>EatlyHub | Premium Food Platform</title>
     
-    <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#ff4757">
+    <!-- PWA Configuration -->
+    <meta name="theme-color" content="#ffffff">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3075/3075977.png">
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-    <!-- Firebase SDKs -->
+    <!-- Firebase SDKs (Compat) -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
 
     <style>
+        /* --- 1. DESIGN TOKENS & RESET --- */
         :root {
-            --primary: #ff4757; 
+            --primary: #ff4757;
             --primary-dark: #e84118;
             --secondary: #2f3542;
-            --bg: #f1f2f6;
-            --surface: #ffffff;
+            --text-main: #2f3542;
+            --text-muted: #747d8c;
+            --bg-body: #f8f9fa;
+            --bg-surface: #ffffff;
             --green: #2ed573;
             --red: #ff6b81;
             --yellow: #ffa502;
-            --gray: #ced6e0;
-            --shadow: 0 8px 24px rgba(149, 157, 165, 0.2);
-            --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            --radius: 16px;
+            --radius-sm: 8px;
+            --radius-md: 16px;
+            --radius-lg: 24px;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.04);
+            --shadow-md: 0 8px 24px rgba(0,0,0,0.08);
+            --font-main: 'Inter', sans-serif;
+            --safe-area-bottom: env(safe-area-inset-bottom, 20px);
         }
 
-        /* --- RESET & BASE --- */
-        * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
-        body { margin: 0; padding: 0; font-family: var(--font); background: var(--bg); color: var(--secondary); font-size: 14px; line-height: 1.5; overflow-x: hidden; padding-bottom: 20px; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        body { margin: 0; padding: 0; font-family: var(--font-main); background: var(--bg-body); color: var(--text-main); font-size: 14px; line-height: 1.5; overflow-x: hidden; min-height: 100vh; }
         
-        /* --- UTILITY CLASSES --- */
+        /* --- 2. UTILITY CLASSES --- */
         .flex { display: flex; }
         .flex-col { flex-direction: column; }
         .center { align-items: center; justify-content: center; }
@@ -54,168 +64,147 @@
         .text-green { color: var(--green); }
         .text-white { color: white !important; }
         .bold { font-weight: 700; }
-        .relative { position: relative; }
-        
-        /* --- TYPOGRAPHY --- */
-        h1, h2, h3, h4 { margin: 0 0 8px 0; color: var(--secondary); font-weight: 800; }
-        small { color: #747d8c; font-size: 0.8rem; }
+        .disabled { opacity: 0.6; pointer-events: none; }
 
-        /* --- 300px SCREEN OPTIMIZATION --- */
-        .card, .hero, nav, .container { min-width: 0; word-break: break-word; }
-        
-        @media (max-width: 340px) {
-            body { font-size: 13px; }
-            h1 { font-size: 1.5rem; }
-            .btn { padding: 10px 12px !important; font-size: 0.85rem !important; }
-            .nav-brand { font-size: 1.1rem !important; }
-            .tab-btn { padding: 8px 12px !important; font-size: 0.85rem !important; }
-        }
+        /* Typography */
+        h1, h2, h3, h4 { margin: 0 0 8px 0; color: var(--secondary); font-weight: 700; letter-spacing: -0.02em; }
+        h1 { font-size: 2rem; }
+        small { color: var(--text-muted); font-size: 0.85rem; }
 
-        /* --- COMPONENTS --- */
+        /* --- 3. COMPONENTS --- */
         
         /* Buttons */
         .btn { 
-            padding: 14px 20px; border: none; border-radius: 12px; cursor: pointer; 
-            font-weight: 600; font-size: 1rem; transition: transform 0.1s; 
-            width: 100%; text-align: center; display: block; text-decoration: none; 
-            margin-bottom: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            position: relative; overflow: hidden;
+            padding: 14px 20px; border: none; border-radius: var(--radius-md); cursor: pointer; 
+            font-weight: 600; font-size: 1rem; transition: transform 0.1s, box-shadow 0.2s; 
+            width: 100%; text-align: center; display: inline-flex; align-items: center; justify-content: center;
+            text-decoration: none; margin-bottom: 10px; position: relative; overflow: hidden;
         }
-        .btn:active { transform: scale(0.97); }
-        .btn-primary { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; }
+        .btn:active { transform: scale(0.96); }
+        .btn-primary { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; box-shadow: 0 4px 15px rgba(255, 71, 87, 0.3); }
         .btn-secondary { background: var(--secondary); color: white; }
         .btn-green { background: var(--green); color: white; }
         .btn-yellow { background: var(--yellow); color: white; }
-        .btn-outline { border: 2px solid var(--primary); color: var(--primary); background: transparent; box-shadow: none; }
-        
+        .btn-outline { border: 2px solid var(--primary); color: var(--primary); background: transparent; }
+
         /* Cards */
         .card { 
-            background: var(--surface); padding: 20px; border-radius: var(--radius); 
-            box-shadow: var(--shadow); margin-bottom: 20px; border: 1px solid rgba(0,0,0,0.03);
-            animation: slideUp 0.3s ease-out;
+            background: var(--bg-surface); padding: 20px; border-radius: var(--radius-md); 
+            box-shadow: var(--shadow-sm); margin-bottom: 16px; border: 1px solid rgba(0,0,0,0.02);
+            transition: transform 0.2s;
         }
         
         /* Inputs */
         .input-group { margin-bottom: 16px; position: relative; }
-        .input-group label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.9rem; color: var(--secondary); }
+        .input-group label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 0.9rem; color: var(--secondary); }
         .input-group input, .input-group select, .input-group textarea { 
-            width: 100%; padding: 14px; border: 2px solid #dfe4ea; border-radius: 12px; 
-            font-size: 1rem; background: #ffffff; transition: all 0.2s; -webkit-appearance: none;
+            width: 100%; padding: 14px; border: 2px solid #edf2f7; border-radius: var(--radius-sm); 
+            font-size: 1rem; background: #ffffff; transition: all 0.2s; -webkit-appearance: none; font-family: var(--font-main);
         }
-        .input-group input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(255, 71, 87, 0.1); }
-        
-        /* Image Upload Wrapper */
-        .file-upload-wrapper {
-            border: 2px dashed #dfe4ea; border-radius: 12px; padding: 20px;
-            text-align: center; cursor: pointer; background: #fdfdfd;
-        }
-        .file-upload-wrapper:hover { border-color: var(--primary); background: #fff5f6; }
+        .input-group input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(255, 71, 87, 0.1); }
+        .input-error { border-color: var(--primary) !important; animation: shake 0.3s; }
 
         /* Navigation */
         nav { 
-            background: var(--surface); padding: 15px; position: sticky; top: 0; z-index: 100; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: space-between; 
+            background: var(--bg-surface); padding: 15px 20px; position: sticky; top: 0; z-index: 100; 
+            box-shadow: var(--shadow-sm); display: flex; align-items: center; justify-content: space-between;
+            backdrop-filter: blur(10px); background: rgba(255,255,255,0.9);
         }
-        .nav-brand { display: flex; align-items: center; gap: 8px; font-size: 1.4rem; font-weight: 900; color: var(--primary); }
+        .nav-brand { display: flex; align-items: center; gap: 10px; font-size: 1.3rem; font-weight: 800; color: var(--primary); }
         .nav-logo-svg { width: 32px; height: 32px; fill: var(--primary); }
 
-        /* Dashboard Tabs (Fixed Horizontal Slide) */
+        /* Sliding Tabs */
         .tabs-wrapper { 
-            background: var(--surface); border-bottom: 1px solid #eee; position: sticky; top: 62px; z-index: 90; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
-            width: 100%; overflow: hidden; 
+            background: var(--bg-surface); border-bottom: 1px solid #f1f2f6; position: sticky; top: 62px; z-index: 90; 
+            width: 100%; overflow: hidden; padding-bottom: 5px;
         }
         .tabs-container { 
-            display: flex; flex-wrap: nowrap; overflow-x: auto; padding: 10px 15px; 
-            -webkit-overflow-scrolling: touch; scrollbar-width: none; gap: 10px;
-            width: 100%;
+            display: flex; flex-wrap: nowrap; overflow-x: auto; padding: 10px 20px; 
+            -webkit-overflow-scrolling: touch; scrollbar-width: none; gap: 12px;
         }
         .tabs-container::-webkit-scrollbar { display: none; }
         .tab-btn { 
-            padding: 10px 18px; white-space: nowrap; cursor: pointer; color: #747d8c; 
-            font-weight: 600; border-radius: 20px; background: #f1f2f6; transition: all 0.2s; 
+            padding: 8px 16px; white-space: nowrap; cursor: pointer; color: var(--text-muted); 
+            font-weight: 600; border-radius: 20px; background: #f1f2f6; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); 
             font-size: 0.9rem; flex-shrink: 0;
         }
-        .tab-btn.active { background: var(--primary); color: white; box-shadow: 0 4px 10px rgba(255, 71, 87, 0.3); }
+        .tab-btn.active { background: var(--primary); color: white; transform: scale(1.05); box-shadow: 0 4px 10px rgba(255, 71, 87, 0.3); }
 
-        /* Hero Section */
+        /* Hero & Status */
         .hero { 
             background: linear-gradient(135deg, var(--primary), var(--primary-dark)); 
             color: white; padding: 60px 20px 40px; text-align: center; 
-            border-radius: 0 0 30px 30px; box-shadow: var(--shadow); 
-            margin-bottom: 20px;
+            border-radius: 0 0 40px 40px; box-shadow: var(--shadow-md); margin-bottom: 25px;
         }
-
-        /* Status Badges */
-        .status-badge { padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; display: inline-block; cursor: pointer; }
+        .status-badge { padding: 6px 14px; border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; display: inline-flex; align-items: center; gap: 5px; letter-spacing: 0.05em; }
         .st-new { background: #eafff3; color: #00b894; border: 1px solid #00b894; }
-        .st-unverified { background: #fff0f0; color: var(--primary); border: 1px solid var(--primary); }
-        
-        /* Order Card Status Colors */
+        .st-unverified { background: #fff0f0; color: var(--primary); border: 1px solid var(--primary); cursor: pointer; }
+
+        /* Orders */
         .card.status-new { border-left: 5px solid var(--green); }
         .card.status-confirm { border-left: 5px solid var(--yellow); }
         .card.status-active { border-left: 5px solid #70a1ff; } 
-        .card.status-ready { border-left: 5px solid #ff6b81; }
-        .card.status-completed { border-left: 5px solid #2f3542; }
-        .card.status-unpaid { border-left: 5px solid #ffa502; }
-
-        /* Receipt / Bill Styles */
-        .bill-wrapper { 
-            background: #fff; padding: 20px; border: 1px solid #eee; 
-            box-shadow: 0 0 15px rgba(0,0,0,0.05); margin-top: 15px; 
-            font-family: 'Courier New', monospace; position: relative; 
-            background-image: radial-gradient(#eee 1px, transparent 1px);
-            background-size: 10px 10px;
-        }
-        .bill-header { text-align: center; border-bottom: 2px dashed #000; padding-bottom: 15px; margin-bottom: 15px; }
-        .bill-item { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.95rem; }
-        .bill-total { border-top: 2px dashed #000; padding-top: 15px; margin-top: 15px; display: flex; justify-content: space-between; font-weight: 900; font-size: 1.2rem; }
         
+        /* Receipt */
+        .bill-wrapper { 
+            background: #fff; padding: 25px; border: 1px solid #eee; 
+            box-shadow: var(--shadow-md); margin-top: 15px; border-radius: 12px;
+            font-family: 'Courier New', monospace; position: relative; 
+            background-image: radial-gradient(#ddd 1px, transparent 1px);
+            background-size: 15px 15px;
+        }
         .watermark { 
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); 
-            font-size: 2.5rem; font-weight: 900; color: rgba(255, 71, 87, 0.1); 
-            border: 5px solid rgba(255, 71, 87, 0.1); padding: 10px 20px; 
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); 
+            font-size: 3rem; font-weight: 900; color: rgba(255, 71, 87, 0.08); 
+            border: 6px solid rgba(255, 71, 87, 0.08); padding: 10px 40px; 
             white-space: nowrap; pointer-events: none; z-index: 0;
         }
 
-        /* Modals */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; display: flex; justify-content: center; align-items: flex-end; backdrop-filter: blur(4px); }
+        /* Modals & Cart */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; display: flex; justify-content: center; align-items: flex-end; backdrop-filter: blur(5px); }
         @media(min-width: 600px) { .modal-overlay { align-items: center; } }
         .modal-box { 
-            background: white; width: 100%; max-width: 500px; padding: 25px; 
-            border-radius: 25px 25px 0 0; max-height: 90vh; overflow-y: auto; 
-            animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            background: white; width: 100%; max-width: 500px; padding: 30px; 
+            border-radius: 30px 30px 0 0; max-height: 90vh; overflow-y: auto; 
+            animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        @media(min-width: 600px) { .modal-box { border-radius: 20px; } }
-        
-        /* Loading & Animations */
-        @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        .loader { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; width: 40px; height: 40px; animation: spin 0.8s linear infinite; margin: 0 auto; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @media(min-width: 600px) { .modal-box { border-radius: 24px; } }
 
-        /* Floating Cart */
         .floating-cart {
-            position: fixed; bottom: 20px; right: 20px; background: var(--primary); 
+            position: fixed; bottom: 30px; right: 25px; background: var(--text-main); 
             color: white; width: 65px; height: 65px; border-radius: 50%; 
             display: flex; align-items: center; justify-content: center; 
-            font-size: 28px; box-shadow: 0 10px 25px rgba(255,71,87,0.4); 
-            cursor: pointer; z-index: 900; transition: transform 0.2s;
+            font-size: 28px; box-shadow: 0 15px 30px rgba(0,0,0,0.3); 
+            cursor: pointer; z-index: 900; transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
         .floating-cart:active { transform: scale(0.9); }
         .cart-badge { 
-            position: absolute; top: -5px; right: -5px; background: var(--secondary); 
-            color: white; width: 24px; height: 24px; border-radius: 50%; font-size: 12px; 
+            position: absolute; top: -5px; right: -5px; background: var(--primary); 
+            color: white; width: 26px; height: 26px; border-radius: 50%; font-size: 13px; font-weight: bold;
             display: flex; align-items: center; justify-content: center; border: 2px solid white; 
         }
+
+        /* Animations */
+        @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+        
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; width: 40px; height: 40px; animation: spin 0.8s linear infinite; margin: 0 auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Skeleton Loading */
+        .skeleton { background: #eee; border-radius: 8px; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
 
     </style>
 </head>
 <body>
 
 <div id="app">
+    <!-- Initial Loading State -->
     <div style="height:100vh; display:flex; align-items:center; justify-content:center; flex-direction:column;">
         <div class="loader"></div>
-        <p class="mt-2 bold text-red">EatlyHub</p>
+        <p class="mt-2 bold text-red" style="font-size:1.2rem;">EatlyHub</p>
     </div>
 </div>
 
@@ -227,29 +216,31 @@
         <svg class="nav-logo-svg" viewBox="0 0 24 24" fill="white" style="width:80px;height:80px;margin-bottom:15px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));">
             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
         </svg>
-        <h1 style="color:white; font-size:2.5rem;">EatlyHub</h1>
-        <p style="opacity:0.9; margin-bottom:20px;">All-in-One Platform for Hotels, Restaurants & Home Kitchens</p>
-        <button class="btn" onclick="authLogin()" style="background:white; color:var(--primary); font-weight:800; border-radius:30px;">
-            <svg style="width:20px;height:20px;vertical-align:middle;margin-right:8px;" viewBox="0 0 24 24"><path d="M12.545 10.239v3.821h5.445c-.712 2.315-2.647 3.972-5.445 3.972-3.332 0-6.033-2.531-6.033-5.97 0-3.438 2.701-5.97 6.033-5.97 1.414 0 2.675.525 3.636 1.35l2.802-2.818C17.396 2.922 15.115 1.761 12.545 1.761 6.615 1.761 1.76 6.345 1.76 12s4.855 10.239 10.785 10.239c6.234 0 10.39-4.313 10.39-10.239 0-.693-.061-1.373-.18-2.025l-10.21.264z"/></svg>
+        <h1 style="color:white; font-size:2.8rem;">EatlyHub</h1>
+        <p style="opacity:0.9; margin-bottom:30px; font-size:1.1rem;">The All-in-One Platform for<br>Restaurants & Home Kitchens</p>
+        <button class="btn" onclick="App.Auth.login()" style="background:white; color:var(--primary); font-weight:800; border-radius:30px; padding:16px 24px;">
+            <svg style="width:20px;height:20px;vertical-align:middle;margin-right:10px;" viewBox="0 0 24 24"><path d="M12.545 10.239v3.821h5.445c-.712 2.315-2.647 3.972-5.445 3.972-3.332 0-6.033-2.531-6.033-5.97 0-3.438 2.701-5.97 6.033-5.97 1.414 0 2.675.525 3.636 1.35l2.802-2.818C17.396 2.922 15.115 1.761 12.545 1.761 6.615 1.761 1.76 6.345 1.76 12s4.855 10.239 10.785 10.239c6.234 0 10.39-4.313 10.39-10.239 0-.693-.061-1.373-.18-2.025l-10.21.264z"/></svg>
             Continue with Gmail
         </button>
     </div>
 
-    <div class="container p-2">
-        <h3 class="text-center mb-1">Why EatlyHub?</h3>
+    <div class="container p-2" style="max-width:800px; margin:0 auto;">
+        <h3 class="text-center mb-2">Start Your Journey</h3>
         
-        <div class="card">
-            <h4>🏨 Hotels & Restaurants</h4>
+        <div class="card flex center flex-col text-center">
+            <div style="font-size:3rem; margin-bottom:10px;">🏨</div>
+            <h4>Hotels & Restaurants</h4>
             <p>Digital menus for room service. No hardware needed.</p>
         </div>
 
-        <div class="card" style="border-left:5px solid var(--green);">
-            <h4>🏠 Home Based Kitchens</h4>
-            <p>Start your food business today! Create a menu, get a link, and accept orders via WhatsApp.</p>
-            <div class="text-green bold text-center mt-1">Start Home Production!</div>
+        <div class="card flex center flex-col text-center" style="border-top:5px solid var(--green);">
+            <div style="font-size:3rem; margin-bottom:10px;">🏠</div>
+            <h4>Home Based Kitchens</h4>
+            <p>Start your food business today! Get a free website link and accept orders.</p>
+            <div class="text-green bold mt-1">Start Today!</div>
         </div>
     </div>
-    <div class="text-center p-2 text-red" style="font-size:0.8rem">Powered by EatlyHub</div>
+    <div class="text-center p-2 text-muted" style="font-size:0.8rem">Powered by EatlyHub &copy; 2025</div>
 </template>
 
 <!-- 2. DASHBOARD SHELL (User & Admin) -->
@@ -257,1145 +248,915 @@
     <nav>
         <div class="nav-brand">
             <svg class="nav-logo-svg" viewBox="0 0 24 24"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/></svg>
-            EatlyHub <span id="admin-tag" class="hidden" style="font-size:0.7rem; background:black; color:white; padding:2px 5px; border-radius:5px; margin-left:5px;">ADMIN</span>
+            EatlyHub <span id="admin-tag" class="hidden" style="font-size:0.7rem; background:var(--secondary); color:white; padding:3px 8px; border-radius:6px;">ADMIN</span>
         </div>
-        <button class="btn btn-secondary" style="width:auto; padding:8px 14px; font-size:0.85rem; margin:0; border-radius:20px;" onclick="authLogout()">Logout</button>
+        <button class="btn btn-secondary" style="width:auto; padding:8px 16px; font-size:0.85rem; margin:0; border-radius:20px;" onclick="App.Auth.logout()">Logout</button>
     </nav>
 
     <div class="tabs-wrapper">
-        <div class="tabs-container" id="dash-tabs">
-            <!-- Injected by JS -->
-        </div>
+        <div class="tabs-container" id="dash-tabs"></div>
     </div>
 
-    <div id="dash-content" class="p-2" style="padding-bottom: 80px; max-width:800px; margin:0 auto;">
-        <!-- Content Injected by JS -->
-    </div>
+    <div id="dash-content" class="p-2" style="padding-bottom: 100px; max-width:900px; margin:0 auto; animation: fadeIn 0.3s;"></div>
 </template>
 
-<!-- ================= JAVASCRIPT LOGIC ================= -->
+<!-- ================= JAVASCRIPT LOGIC (MODULAR STRUCTURE) ================= -->
 
 <script>
-    // ============================================
-    // IMPORTANT: REPLACE WITH YOUR ADMIN EMAIL
-    // ============================================
-    const ADMIN_EMAIL = "admin@eatlyhub.com"; 
+    /**
+     * EatlyHub v4.0 - Production Grade MVP
+     * 100% Modular, Local Storage Caching, Skeleton Loading, Validation
+     */
 
-    // --- 1. CONFIGURATION ---
-    const firebaseConfig = {
-      apiKey: "AIzaSyA4mlpgLA8l1N8VHqwpVLbPXvDvPxGPcSI",
-      authDomain: "eatlyhub.firebaseapp.com",
-      projectId: "eatlyhub",
-      storageBucket: "eatlyhub.firebasestorage.app",
-      messagingSenderId: "1094045089044",
-      appId: "1:1094045089044:web:397e0fd73412a07c3ad601",
-      measurementId: "G-V3K3QB1715"
+    // --- 1. CONFIGURATION & CONSTANTS ---
+    const CONFIG = {
+        ADMIN_EMAIL: "admin@eatlyhub.com", // CHANGE THIS TO YOUR REAL EMAIL
+        FIREBASE: {
+            apiKey: "AIzaSyA4mlpgLA8l1N8VHqwpVLbPXvDvPxGPcSI",
+            authDomain: "eatlyhub.firebaseapp.com",
+            projectId: "eatlyhub",
+            storageBucket: "eatlyhub.firebasestorage.app",
+            messagingSenderId: "1094045089044",
+            appId: "1:1094045089044:web:397e0fd73412a07c3ad601"
+        }
     };
 
-    // --- 2. INIT FIREBASE ---
-    try {
-        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-    } catch(e) { 
-        console.error("Firebase Init Error", e); 
-    }
-    const auth = firebase.auth();
-    const db = firebase.firestore();
+    // --- 2. INITIALIZATION ---
+    // Namespace: App
+    const App = {
+        state: {
+            user: null,
+            profile: {},
+            orders: [],
+            reviews: [],
+            adminRequests: [],
+            currentTab: 'Dashboard',
+            cart: JSON.parse(localStorage.getItem('eatly_cart')) || [],
+            bizId: null // If in public mode
+        },
 
-    // --- 3. STATE MANAGEMENT ---
-    const app = document.getElementById('app');
-    let currentUser = null;
-    let bizProfile = {};
-    let bizOrders = [];
-    let bizReviews = [];
-    let adminRequests = []; // For Admin
-    let currentTab = 'Dashboard';
+        init: function() {
+            try {
+                if (!firebase.apps.length) firebase.initializeApp(CONFIG.FIREBASE);
+                App.Auth.listen();
+                App.Router.check();
+            } catch(e) {
+                console.error("Init Error", e);
+                document.body.innerHTML = `<h2 class="text-center p-2">System Error. Check Console.</h2>`;
+            }
+        }
+    };
 
-    // Tabs List (User)
-    const TABS = [
-        'Dashboard', 'Profile', 'Open/Close', 'Add Foods', 'My Webpage', 'Reviews',
-        'New Orders', 'Confirmed Orders', 'Active Orders', 'Ready Orders', 
-        'Completed Orders', 'Unpaid Bills', 'Reports', 'Admin Messages'
-    ];
+    // --- 3. MODULES ---
 
-    // Tabs List (Admin)
-    const ADMIN_TABS = ['Verification Requests', 'Admin Messages'];
+    // === AUTH MODULE ===
+    App.Auth = {
+        obj: firebase.auth(),
+        
+        login: () => {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            App.Auth.obj.signInWithPopup(provider).catch(e => App.UI.toast("Login Failed: " + e.message, 'error'));
+        },
 
-    // --- 4. IMAGE COMPRESSION UTILITY ---
-    function compressImage(file) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = (event) => {
-                const img = new Image();
-                img.src = event.target.result;
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    const MAX_WIDTH = 800;
-                    const scaleSize = MAX_WIDTH / img.width;
-                    canvas.width = MAX_WIDTH;
-                    canvas.height = img.height * scaleSize;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    resolve(canvas.toDataURL('image/jpeg', 0.7)); 
-                };
-                img.onerror = (err) => reject(err);
-            };
-            reader.onerror = (err) => reject(err);
-        });
-    }
+        logout: () => {
+            App.Auth.obj.signOut().then(() => window.location.reload());
+        },
 
-    // --- 5. ROUTING ---
-    window.addEventListener('load', () => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const bizId = urlParams.get('biz');
-        const orderId = urlParams.get('orderId');
-
-        if (bizId && orderId) {
-            loadCustomerConfirmPage(bizId, orderId);
-        } else if (bizId) {
-            loadPublicPage(bizId);
-        } else {
-            auth.onAuthStateChanged(user => {
+        listen: () => {
+            App.Auth.obj.onAuthStateChanged(user => {
+                if(App.Router.isPublic()) return; // Don't load dash logic if on public page
+                
                 if (user) {
-                    currentUser = user;
-                    // Check if Admin
-                    if(user.email === ADMIN_EMAIL) {
-                        loadAdminDashboard();
+                    App.state.user = user;
+                    if(user.email === CONFIG.ADMIN_EMAIL) {
+                        App.UI.renderAdminDash();
                     } else {
-                        loadDashboard();
+                        App.UI.renderUserDash();
                     }
                 } else {
-                    render('tpl-landing');
+                    App.UI.renderLanding();
                 }
             });
         }
-    });
+    };
 
-    function render(tplId) {
-        app.innerHTML = '';
-        const tpl = document.getElementById(tplId);
-        if(tpl) app.appendChild(tpl.content.cloneNode(true));
-    }
+    // === DATABASE MODULE ===
+    App.DB = {
+        db: firebase.firestore(),
 
-    // --- 6. AUTHENTICATION ---
-    function authLogin() {
-        const provider = new firebase.auth.GoogleAuthProvider();
-        auth.signInWithPopup(provider).catch(e => showToast("Login Error: " + e.message, 'error'));
-    }
-    
-    function authLogout() { 
-        auth.signOut().then(() => window.location.reload()); 
-    }
+        // User Profile
+        listenProfile: (uid) => {
+            App.DB.db.collection('users').doc(uid).onSnapshot(doc => {
+                if(doc.exists) {
+                    App.state.profile = doc.data();
+                } else {
+                    // Create default
+                    App.state.profile = { locked: false, verified: false, foods: [], schedule: {} };
+                    App.DB.db.collection('users').doc(uid).set(App.state.profile);
+                }
+                App.UI.refreshContent();
+            });
+        },
 
-    // --- 7. ADMIN DASHBOARD LOGIC ---
-    function loadAdminDashboard() {
-        render('tpl-dashboard');
-        document.getElementById('admin-tag').classList.remove('hidden');
-        
-        // Setup Admin Tabs
-        const tabsContainer = document.getElementById('dash-tabs');
-        tabsContainer.innerHTML = ADMIN_TABS.map(t => 
-            `<div class="tab-btn" onclick="switchAdminTab('${t}')">${t}</div>`
-        ).join('');
+        updateProfile: (data) => {
+            return App.DB.db.collection('users').doc(App.state.user.uid).set(data, {merge: true});
+        },
 
-        // Listen for Verification Requests
-        db.collection('admin_requests').onSnapshot(snap => {
-            adminRequests = snap.docs.map(d => ({id: d.id, ...d.data()}));
-            refreshAdminContent();
-        });
+        // Orders
+        listenOrders: (uid) => {
+            App.DB.db.collection('users').doc(uid).collection('orders')
+                .orderBy('time', 'desc').limit(50)
+                .onSnapshot(snap => {
+                    App.state.orders = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                    const newOrders = App.state.orders.filter(o => o.status === 'new' && !o.seen);
+                    if(newOrders.length > 0) App.UI.toast(`🔔 ${newOrders.length} New Order(s)!`);
+                    App.UI.refreshContent();
+                });
+        },
 
-        switchAdminTab('Verification Requests');
-    }
+        // Reviews
+        listenReviews: (uid) => {
+            App.DB.db.collection('users').doc(uid).collection('reviews')
+                .orderBy('time', 'desc').limit(20)
+                .onSnapshot(snap => {
+                    App.state.reviews = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                    App.UI.refreshContent();
+                });
+        },
 
-    function switchAdminTab(name) {
-        currentTab = name;
-        document.querySelectorAll('.tab-btn').forEach(b => {
-            b.classList.toggle('active', b.innerText === name);
-        });
-        refreshAdminContent();
-    }
+        // Admin
+        listenAdminRequests: () => {
+            App.DB.db.collection('admin_requests').onSnapshot(snap => {
+                App.state.adminRequests = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                App.UI.refreshAdminContent();
+            });
+        }
+    };
 
-    function refreshAdminContent() {
-        const container = document.getElementById('dash-content');
-        container.innerHTML = '';
+    // === UI MODULE ===
+    App.UI = {
+        el: document.getElementById('app'),
+        tabsUser: ['Dashboard', 'Profile', 'Open/Close', 'Add Foods', 'My Webpage', 'Reviews', 'New Orders', 'Confirmed Orders', 'Active Orders', 'Ready Orders', 'Completed Orders', 'Unpaid Bills', 'Reports', 'Admin Messages'],
+        tabsAdmin: ['Verification Requests', 'Admin Messages'],
 
-        if(currentTab === 'Verification Requests') {
-            if(adminRequests.length === 0) {
-                container.innerHTML = '<div class="card text-center text-gray"><h3>No Pending Requests</h3></div>';
-                return;
+        renderLanding: () => {
+            App.UI.renderTpl('tpl-landing');
+        },
+
+        renderUserDash: () => {
+            App.UI.renderTpl('tpl-dashboard');
+            App.DB.listenProfile(App.state.user.uid);
+            App.DB.listenOrders(App.state.user.uid);
+            App.DB.listenReviews(App.state.user.uid);
+            App.UI.setupTabs(App.UI.tabsUser);
+            App.UI.switchTab('Dashboard');
+        },
+
+        renderAdminDash: () => {
+            App.UI.renderTpl('tpl-dashboard');
+            document.getElementById('admin-tag').classList.remove('hidden');
+            App.DB.listenAdminRequests();
+            App.UI.setupTabs(App.UI.tabsAdmin);
+            App.UI.switchTab('Verification Requests');
+        },
+
+        renderTpl: (id) => {
+            App.UI.el.innerHTML = '';
+            const tpl = document.getElementById(id);
+            if(tpl) App.UI.el.appendChild(tpl.content.cloneNode(true));
+        },
+
+        setupTabs: (tabs) => {
+            const container = document.getElementById('dash-tabs');
+            container.innerHTML = tabs.map(t => 
+                `<div class="tab-btn" onclick="App.UI.switchTab('${t}')">${t}</div>`
+            ).join('');
+        },
+
+        switchTab: (name) => {
+            // Guard: Force Profile
+            if (App.state.user.email !== CONFIG.ADMIN_EMAIL && 
+                !['Dashboard','Profile','Admin Messages'].includes(name) && 
+                !App.state.profile.locked) {
+                App.UI.toast("⚠ Please complete & LOCK your profile first.", "error");
+                name = 'Profile';
             }
-            container.innerHTML = adminRequests.map(r => `
+
+            App.state.currentTab = name;
+            document.querySelectorAll('.tab-btn').forEach(b => {
+                b.classList.toggle('active', b.innerText === name);
+                if(b.innerText === name) b.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+            });
+
+            if (App.state.user.email === CONFIG.ADMIN_EMAIL) {
+                App.UI.refreshAdminContent();
+            } else {
+                App.UI.refreshContent();
+            }
+        },
+
+        // --- DYNAMIC CONTENT RENDERERS ---
+        
+        refreshContent: () => {
+            const c = document.getElementById('dash-content');
+            if(!c) return;
+            c.innerHTML = '';
+            const tab = App.state.currentTab;
+            
+            if(tab === 'Dashboard') App.Components.DashHome(c);
+            else if(tab === 'Profile') App.Components.Profile(c);
+            else if(tab === 'Open/Close') App.Components.Schedule(c);
+            else if(tab === 'Add Foods') App.Components.AddFoods(c);
+            else if(tab === 'My Webpage') App.Components.WebSettings(c);
+            else if(tab === 'Reviews') App.Components.Reviews(c);
+            else if(tab === 'Reports') App.Components.Reports(c);
+            else if(tab === 'Admin Messages') App.Components.Chat(c);
+            else App.Components.OrdersList(c, tab);
+        },
+
+        refreshAdminContent: () => {
+            const c = document.getElementById('dash-content');
+            if(!c) return;
+            c.innerHTML = '';
+            const tab = App.state.currentTab;
+
+            if(tab === 'Verification Requests') App.Components.AdminRequests(c);
+            else App.Components.Chat(c);
+        },
+
+        toast: (msg, type='success') => {
+            const t = document.createElement('div');
+            t.innerText = msg;
+            t.style = `
+                position: fixed; top: 20px; right: 20px; z-index: 2000;
+                background: ${type==='error'?'var(--primary)':(type==='info'?'var(--secondary)':'var(--green)')}; 
+                color: white; padding: 12px 24px; border-radius: 50px; 
+                box-shadow: 0 10px 30px rgba(0,0,0,0.2); font-weight:600; font-size:0.9rem;
+                animation: slideUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            `;
+            document.body.appendChild(t);
+            setTimeout(() => {
+                t.style.opacity = '0';
+                t.style.transform = 'translateY(-20px)';
+                setTimeout(() => t.remove(), 300);
+            }, 3000);
+        }
+    };
+
+    // === COMPONENTS (Logic for each screen) ===
+    App.Components = {
+        
+        DashHome: (el) => {
+            const p = App.state.profile;
+            const newCount = App.state.orders.filter(o => o.status === 'new').length;
+            const activeCount = App.state.orders.filter(o => ['confirmed', 'active', 'ready'].includes(o.status)).length;
+            const completedCount = App.state.orders.filter(o => o.status === 'completed').length;
+            const totalRev = App.state.orders.filter(o => o.status === 'completed').reduce((a,b) => a + Number(b.total), 0);
+
+            el.innerHTML = `
+                <div class="card center flex-col" style="border-top: 5px solid var(--primary);">
+                    <img src="${p.logo || 'https://via.placeholder.com/100'}" style="width:100px;height:100px;border-radius:50%;object-fit:cover;margin-bottom:10px;border:4px solid white; box-shadow: var(--shadow-md);">
+                    <h3>${p.businessName || 'Setup Your Business'}</h3>
+                    ${p.verified 
+                        ? '<div class="status-badge st-new">✔ Verified Business</div>' 
+                        : `<div class="status-badge st-unverified" onclick="App.UI.switchTab('Profile')">❌ Not Verified (Click to Fix)</div>`}
+                </div>
+
+                <div class="flex" style="gap:15px; margin-bottom:20px;">
+                    <div class="card w-100 text-center" style="margin:0; background:var(--primary); color:white; cursor:pointer;" onclick="App.UI.switchTab('New Orders')">
+                        <h1 style="color:white; margin-bottom:0;">${newCount}</h1>
+                        <small style="color:white; opacity:0.9;">New Orders</small>
+                    </div>
+                    <div class="card w-100 text-center" style="margin:0; cursor:pointer;" onclick="App.UI.switchTab('Active Orders')">
+                        <h1 style="margin-bottom:0;">${activeCount}</h1>
+                        <small>In Kitchen</small>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h4>📊 Business Snapshot</h4>
+                    <div class="flex justify-between" style="border-bottom:1px solid #f1f2f6; padding:10px 0;"><span>Total Revenue</span><b class="text-green">Rs. ${totalRev.toLocaleString()}</b></div>
+                    <div class="flex justify-between" style="padding:10px 0;"><span>Completed Orders</span><b>${completedCount}</b></div>
+                </div>
+            `;
+        },
+
+        Profile: (el) => {
+            const p = App.state.profile;
+            const disabled = p.locked ? 'disabled' : '';
+            
+            // Logic for Logo UI
+            let logoUi = `<label class="btn btn-secondary" style="width:auto;"><input type="file" hidden onchange="App.Utils.handleImg(this, 'logo')">Upload Logo</label>`;
+            if(p.logo) logoUi = `<img src="${p.logo}" style="width:100px;height:100px;border-radius:50%;object-fit:cover;margin-bottom:10px;">${!p.locked ? '<br><button class="btn btn-outline" style="width:auto; padding:5px 10px; font-size:0.8rem" onclick="App.Utils.removeLogo()">Remove</button>' : ''}`;
+
+            el.innerHTML = `
+                <div class="card">
+                    <h3>Business Profile</h3>
+                    <p class="text-red mb-1" style="font-size:0.85rem">All fields are required. Lock to enable other tabs.</p>
+                    <div class="center flex-col mb-1">${logoUi}</div>
+                    <div class="input-group"><label>Business Name</label><input id="p-name" value="${p.businessName||''}" ${disabled}></div>
+                    <div class="input-group"><label>Address</label><textarea id="p-addr" ${disabled} rows="2">${p.address||''}</textarea></div>
+                    <div class="input-group"><label>Owner Name</label><input id="p-owner" value="${p.ownerName||''}" ${disabled}></div>
+                    <div class="input-group"><label>Reg No / NIC</label><input id="p-nic" value="${p.nic||''}" ${disabled}></div>
+                    <div class="input-group"><label>Hotline</label><input type="tel" id="p-hot" value="${p.hotline||''}" ${disabled}></div>
+                    <div class="input-group"><label>WhatsApp</label><input type="tel" id="p-wa" value="${p.whatsapp||''}" ${disabled}></div>
+                    ${p.locked 
+                        ? `<button class="btn btn-yellow" onclick="App.Utils.toggleLock(false)">Unlock to Edit</button>` 
+                        : `<button class="btn btn-primary" onclick="App.Utils.saveProfile()">Save & Lock Profile</button>`}
+                </div>
+                <!-- Verification Section -->
+                <div class="card" id="verify-section">
+                    <h3>Verification (Rs 2500)</h3>
+                    ${p.verified ? '<div class="text-green bold text-center p-2" style="background:#eafff3; border-radius:12px;">✅ You are Verified!</div>' : `
+                        <p class="mb-1">Get the Green Badge. Upload documents below.</p>
+                        <div style="background:#f8f9fa; padding:15px; border-radius:12px; font-size:0.9rem; margin-bottom:15px;">
+                            <b>Bank:</b> Commercial Bank, Homagama<br><b>Acc:</b> 8750053306 (Colombage SD)
+                        </div>
+                        <div class="input-group"><label>1. Grama Niladhari Letter</label><input type="file" onchange="App.Utils.handleImg(this, 'letter')"><small id="stat-letter" class="hidden text-green">Uploaded</small></div>
+                        <div class="input-group"><label>2. Payment Slip</label><input type="file" onchange="App.Utils.handleImg(this, 'slip')"><small id="stat-slip" class="hidden text-green">Uploaded</small></div>
+                        <button class="btn btn-green" onclick="App.Utils.reqVerify()">Submit Verification</button>
+                    `}
+                </div>
+            `;
+        },
+
+        Schedule: (el) => {
+            const today = new Date().toLocaleDateString('en-US', {weekday:'long'});
+            const s = App.state.profile.schedule?.[today] || {open: false, start:'08:00', end:'20:00'};
+            
+            el.innerHTML = `
+                <div class="card">
+                    <h3>📅 ${today}'s Schedule</h3>
+                    <div class="input-group">
+                        <label>Status</label>
+                        <select id="oc-stat" onchange="App.Utils.saveSched('${today}')">
+                            <option value="yes" ${s.open?'selected':''}>Open</option>
+                            <option value="no" ${!s.open?'selected':''}>Closed</option>
+                        </select>
+                    </div>
+                    <div class="flex" style="gap:10px;">
+                        <div class="input-group w-100"><label>Open Time</label><input type="time" id="oc-start" value="${s.start}" onchange="App.Utils.saveSched('${today}')"></div>
+                        <div class="input-group w-100"><label>Close Time</label><input type="time" id="oc-end" value="${s.end}" onchange="App.Utils.saveSched('${today}')"></div>
+                    </div>
+                </div>
+                <div class="card text-white" style="background:${s.open ? 'var(--green)' : 'var(--primary)'};">
+                    <h3 class="text-white" style="margin:0;">Preview</h3>
+                    <p style="margin:0;">${s.open ? `WE ARE OPEN (${s.start} - ${s.end})` : 'WE ARE CLOSED TODAY'}</p>
+                </div>
+            `;
+        },
+
+        AddFoods: (el) => {
+            el.innerHTML = `
+                <div class="card">
+                    <h3>Add Item</h3>
+                    <div class="input-group">
+                        <label>Food Image</label>
+                        <div class="file-upload-wrapper" onclick="document.getElementById('f-file').click()">
+                            <span id="f-file-txt">Click to Upload</span>
+                            <input type="file" id="f-file" hidden onchange="App.Utils.handleFoodImg(this)">
+                        </div>
+                        <img id="f-prev" class="hidden mt-1" style="width:100%; height:150px; object-fit:cover; border-radius:8px;">
+                    </div>
+                    <div class="input-group"><label>Category</label><input id="f-cat" placeholder="e.g. Rice"></div>
+                    <div class="input-group"><label>Name</label><input id="f-name" placeholder="Item Name"></div>
+                    <div class="flex" style="gap:10px">
+                        <div class="input-group w-100"><label>Half Price</label><input id="f-half" type="number"></div>
+                        <div class="input-group w-100"><label>Full Price</label><input id="f-full" type="number"></div>
+                    </div>
+                    <button class="btn btn-green" onclick="App.Utils.addFood()">+ Add to Menu</button>
+                </div>
+                
+                <h3>Menu List</h3>
+                <div id="menu-list">
+                    ${(App.state.profile.foods||[]).map((f,i) => `
+                        <div class="card flex justify-between center" style="padding:15px;">
+                            <div class="flex center">
+                                <img src="${f.img}" style="width:60px;height:60px;border-radius:12px;margin-right:15px;object-fit:cover;">
+                                <div>
+                                    <div class="bold">${f.name}</div>
+                                    <small>${f.cat}</small>
+                                </div>
+                            </div>
+                            <button class="btn btn-secondary" style="width:auto;padding:8px 12px;margin:0;" onclick="App.Utils.delFood(${i})">🗑</button>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        },
+
+        WebSettings: (el) => {
+            const url = `${window.location.origin}${window.location.pathname}?biz=${App.state.user.uid}`;
+            const links = App.state.profile.socialLinks || {};
+            
+            el.innerHTML = `
+                <div class="card text-center">
+                    <h3>🌍 Public Link</h3>
+                    <input class="w-100 p-2 mb-1 text-center" value="${url}" readonly style="background:#edf2f7;border:none;border-radius:8px;font-size:0.9rem;">
+                    <div class="flex" style="gap:10px">
+                        <a href="${url}" target="_blank" class="btn btn-primary">Open</a>
+                        <button class="btn btn-secondary" onclick="navigator.clipboard.writeText('${url}');App.UI.toast('Copied!')">Copy</button>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>Webpage Content</h3>
+                    <div class="input-group"><label>Hero Message</label><input id="hero-txt" value="${App.state.profile.heroText || 'Welcome'}" onchange="App.Utils.saveWebSettings()"></div>
+                    <div class="input-group"><label>Facebook Link</label><input id="s-fb" value="${links.fb||''}" onchange="App.Utils.saveWebSettings()"></div>
+                    <div class="input-group"><label>Instagram Link</label><input id="s-ig" value="${links.ig||''}" onchange="App.Utils.saveWebSettings()"></div>
+                    <div class="input-group"><label>YouTube Links (Comma Sep)</label><textarea id="s-yt" rows="2" onchange="App.Utils.saveWebSettings()">${links.yt||''}</textarea></div>
+                </div>
+            `;
+        },
+
+        OrdersList: (el, statusName) => {
+            const map = { 'New Orders': 'new', 'Confirmed Orders': 'confirmed', 'Active Orders': 'active', 'Ready Orders': 'ready', 'Completed Orders': 'completed', 'Unpaid Bills': 'unpaid' };
+            const status = map[statusName];
+            if(!status) return;
+
+            const list = App.state.orders.filter(o => o.status === status);
+            if(list.length === 0) return el.innerHTML = '<div class="text-center p-2 text-muted">No orders found here.</div>';
+
+            el.innerHTML = list.map(o => {
+                let actions = '';
+                if(status === 'new') {
+                    actions = `<button class="btn btn-yellow" onclick="App.Utils.reqConfirm('${o.id}', '${o.custWa}')">Request Confirm</button><button class="btn btn-outline" style="color:var(--primary);border-color:var(--primary);" onclick="App.Utils.setStatus('${o.id}', 'canceled')">Decline</button>`;
+                } else if(status === 'confirmed') {
+                    actions = `<button class="btn btn-primary" onclick="App.Utils.genBill('${o.id}')">🖨 Print Bill</button>`;
+                } else if(status === 'active') {
+                    actions = `<div class="bill-wrapper"><div class="watermark">NOT PAID</div><div class="text-center bold mb-1">${App.state.profile.businessName}</div>${o.items.map(i=>`<div class="flex justify-between"><span>${i.name} (${i.variant})</span><span>${i.price}</span></div>`).join('')}<div class="flex justify-between bold mt-1" style="border-top:1px dashed #000;padding-top:5px;"><span>Total</span><span>${o.total}</span></div></div><button class="btn btn-green mt-1" onclick="App.Utils.markReady('${o.id}', '${o.custWa}')">Mark Ready</button>`;
+                } else if(status === 'ready') {
+                    actions = `<button class="btn btn-secondary" onclick="App.Utils.setStatus('${o.id}', 'completed')">💰 Paid & Complete</button><button class="btn btn-outline" onclick="App.Utils.setStatus('${o.id}', 'unpaid')">⚠ Unpaid</button>`;
+                }
+
+                return `
+                    <div class="card status-${status}">
+                        <div class="flex justify-between center">
+                            <h4 class="text-red">#${o.orderNum}</h4>
+                            <small>${new Date(o.time).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</small>
+                        </div>
+                        <div class="mb-1"><b>${o.custName}</b> <a href="https://wa.me/${o.custWa}" class="text-green bold" style="text-decoration:none;">✆ WhatsApp</a></div>
+                        <div style="background:#f8f9fa; padding:10px; border-radius:8px;">${o.items.map(i => `<div>• ${i.name} (${i.variant}) - ${i.price}</div>`).join('')}</div>
+                        <div class="text-right mt-1 bold">Total: ${o.total}</div>
+                        <div class="mt-1">${actions}</div>
+                    </div>
+                `;
+            }).join('');
+        },
+
+        AdminRequests: (el) => {
+            if(App.state.adminRequests.length === 0) return el.innerHTML = '<div class="text-center p-2 text-muted">No pending requests.</div>';
+            el.innerHTML = App.state.adminRequests.map(r => `
                 <div class="card">
                     <h4>${r.name}</h4>
                     <p>Request ID: ${r.id}</p>
                     <div class="flex flex-col mt-1" style="gap:10px;">
-                        <div>
-                            <small>Grama Niladhari Letter</small>
-                            <img src="${r.letter}" style="width:100%; max-height:200px; object-fit:contain; border:1px solid #eee;">
-                        </div>
-                        <div>
-                            <small>Payment Slip</small>
-                            <img src="${r.slip}" style="width:100%; max-height:200px; object-fit:contain; border:1px solid #eee;">
-                        </div>
+                        <div><small>Letter</small><img src="${r.letter}" style="width:100%; max-height:200px; object-fit:contain; border:1px solid #eee;"></div>
+                        <div><small>Slip</small><img src="${r.slip}" style="width:100%; max-height:200px; object-fit:contain; border:1px solid #eee;"></div>
                     </div>
                     <div class="flex mt-2" style="gap:10px;">
-                        <button class="btn btn-green" onclick="approveUser('${r.uid}', '${r.id}')">Approve & Verify</button>
-                        <button class="btn btn-outline" style="border-color:red; color:red;" onclick="rejectRequest('${r.id}')">Reject</button>
+                        <button class="btn btn-green" onclick="App.Utils.approveUser('${r.uid}', '${r.id}')">Approve</button>
+                        <button class="btn btn-outline text-red" onclick="App.Utils.rejectRequest('${r.id}')">Reject</button>
                     </div>
                 </div>
             `).join('');
-        } else if (currentTab === 'Admin Messages') {
-            container.innerHTML = '<div class="card text-center"><h3>Inbox</h3><p>Chat feature coming soon.</p></div>';
-        }
-    }
+        },
 
-    function approveUser(uid, reqId) {
-        if(confirm("Confirm Verification for this user?")) {
-            // Update User Profile
-            db.collection('users').doc(uid).update({verified: true}).then(() => {
-                // Delete Request
-                db.collection('admin_requests').doc(reqId).delete();
-                showToast("User Verified Successfully!");
-            });
-        }
-    }
+        Chat: (el) => {
+            el.innerHTML = `<div class="card text-center" style="height:300px; display:flex; align-items:center; justify-content:center;"><h3>💬 Inbox</h3><p>Messaging coming soon.</p></div>`;
+        },
 
-    function rejectRequest(reqId) {
-        if(confirm("Reject this request?")) {
-            db.collection('admin_requests').doc(reqId).delete();
-            showToast("Request Rejected");
-        }
-    }
+        Reviews: (el) => {
+            if(App.state.reviews.length === 0) return el.innerHTML = '<div class="text-center p-2 text-muted">No reviews yet.</div>';
+            el.innerHTML = App.state.reviews.map(r => `
+                <div class="card">
+                    <div class="flex justify-between"><b>${r.name}</b><span class="text-yellow">${'★'.repeat(r.stars)}</span></div>
+                    <p class="mt-1">${r.text}</p>
+                    <div class="mt-1 flex" style="gap:10px;">
+                        ${r.status==='pending' ? `<button class="btn btn-green" style="width:auto; padding:5px 12px; margin:0;" onclick="App.Utils.pubReview('${r.id}')">Publish</button>` : '<span class="status-badge st-new">Published</span>'}
+                        <button class="btn btn-outline" style="width:auto; padding:5px 12px; margin:0; border-color:red; color:red;" onclick="App.Utils.delReview('${r.id}')">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        },
 
+        Reports: (el) => { App.Components.DashHome(el); } // Reusing dash logic for simplicity
+    };
 
-    // --- 8. USER DASHBOARD LOGIC ---
-    async function loadDashboard() {
-        render('tpl-dashboard');
-        
-        // Setup Tabs
-        const tabsContainer = document.getElementById('dash-tabs');
-        tabsContainer.innerHTML = TABS.map(t => 
-            `<div class="tab-btn" onclick="switchTab('${t}')">${t}</div>`
-        ).join('');
-
-        // Real-time Listener User Profile
-        db.collection('users').doc(currentUser.uid).onSnapshot(doc => {
-            if(doc.exists) {
-                bizProfile = doc.data();
-            } else {
-                bizProfile = { locked: false, verified: false, foods: [], schedule: {} };
-                db.collection('users').doc(currentUser.uid).set(bizProfile);
+    // === UTILITIES & ACTIONS ===
+    App.Utils = {
+        // Image Handling
+        handleImg: async (input, key) => {
+            if (input.files[0]) {
+                App.UI.toast("Compressing...");
+                try {
+                    const base64 = await compressImage(input.files[0]);
+                    if(key === 'logo') {
+                        App.state.profile.tempLogo = base64;
+                        App.UI.refreshContent();
+                    } else {
+                        App.state.profile['temp_' + key] = base64;
+                        document.getElementById('stat-' + key).classList.remove('hidden');
+                    }
+                    App.UI.toast("Ready to Save");
+                } catch(e) { App.UI.toast("Error processing image", 'error'); }
             }
-            refreshTabContent(); 
-        });
+        },
 
-        // Real-time Listener Orders
-        db.collection('users').doc(currentUser.uid).collection('orders')
-          .orderBy('time', 'desc').limit(50)
-          .onSnapshot(snap => {
-              bizOrders = snap.docs.map(d => ({id: d.id, ...d.data()}));
-              const newOrders = bizOrders.filter(o => o.status === 'new' && !o.seen);
-              if(newOrders.length > 0) {
-                  showToast(`🔔 ${newOrders.length} New Order(s)!`, 'success');
-              }
-              refreshTabContent();
-          });
-          
-        // Real-time Listener Reviews
-        db.collection('users').doc(currentUser.uid).collection('reviews')
-          .orderBy('time', 'desc').limit(20)
-          .onSnapshot(snap => {
-              bizReviews = snap.docs.map(d => ({id: d.id, ...d.data()}));
-              refreshTabContent();
-          });
-
-        switchTab('Dashboard');
-    }
-
-    function switchTab(name) {
-        if (name !== 'Dashboard' && name !== 'Profile' && name !== 'Admin Messages' && (!bizProfile.locked)) {
-            showToast("⚠ Please Complete & LOCK your Profile first.", "error");
-            name = 'Profile';
-        }
-
-        currentTab = name;
-        document.querySelectorAll('.tab-btn').forEach(b => {
-            b.classList.toggle('active', b.innerText === name);
-        });
-        
-        const activeBtn = document.querySelector('.tab-btn.active');
-        if(activeBtn) activeBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-
-        refreshTabContent();
-    }
-
-    function refreshTabContent() {
-        const container = document.getElementById('dash-content');
-        if (!container || !currentUser) return;
-
-        container.innerHTML = ''; 
-
-        if(currentTab === 'Dashboard') renderDashHome(container);
-        else if(currentTab === 'Profile') renderProfile(container);
-        else if(currentTab === 'Open/Close') renderSchedule(container);
-        else if(currentTab === 'Add Foods') renderAddFoods(container);
-        else if(currentTab === 'My Webpage') renderWebpageInfo(container);
-        else if(currentTab === 'Reviews') renderReviews(container);
-        else if(currentTab === 'Reports') renderReports(container);
-        else if(currentTab === 'Admin Messages') renderAdminChat(container);
-        else renderOrdersList(container, currentTab);
-    }
-
-    // --- TAB IMPLEMENTATIONS ---
-
-    // A) DASHBOARD HOME
-    function renderDashHome(target) {
-        const newCount = bizOrders.filter(o => o.status === 'new').length;
-        const activeCount = bizOrders.filter(o => ['confirmed', 'active', 'ready'].includes(o.status)).length;
-        
-        // "All Datas" Display
-        const completedCount = bizOrders.filter(o => o.status === 'completed').length;
-        const totalRev = bizOrders.filter(o => o.status === 'completed').reduce((a,b) => a + Number(b.total), 0);
-
-        // Not Verified Click Action
-        const verifyAction = `onclick="switchTab('Profile'); setTimeout(() => document.getElementById('verify-section').scrollIntoView({behavior:'smooth'}), 500)"`;
-
-        target.innerHTML = `
-            <div class="card center flex-col">
-                <img src="${bizProfile.logo || 'https://cdn-icons-png.flaticon.com/512/847/847969.png'}" style="width:100px;height:100px;border-radius:50%;object-fit:cover;margin-bottom:10px;border:4px solid var(--primary);">
-                <h3>${bizProfile.businessName || 'Setup Your Business'}</h3>
-                ${bizProfile.verified 
-                    ? '<div class="status-badge st-new">✔ Verified Business</div>' 
-                    : `<div class="status-badge st-unverified" ${verifyAction}>❌ Not Verified (Click to Fix)</div>`}
-            </div>
-
-            <div class="flex" style="gap:10px; margin-bottom:20px;">
-                <div class="card w-100 text-center" style="margin:0; background:var(--primary); color:white;" onclick="switchTab('New Orders')">
-                    <h1>${newCount}</h1>
-                    <small style="color:white;">New Orders</small>
-                </div>
-                <div class="card w-100 text-center" style="margin:0;" onclick="switchTab('Active Orders')">
-                    <h1>${activeCount}</h1>
-                    <small>In Kitchen</small>
-                </div>
-            </div>
-            
-            <div class="card">
-                <h4>📊 Quick Stats</h4>
-                <div class="flex justify-between" style="border-bottom:1px solid #eee; padding:5px 0;"><span>Total Revenue</span><b>Rs. ${totalRev}</b></div>
-                <div class="flex justify-between" style="padding:5px 0;"><span>Completed Orders</span><b>${completedCount}</b></div>
-            </div>
-            
-            <div class="card">
-                <h4>🔍 Quick Search</h4>
-                <div class="input-group">
-                    <label>Track Order Number</label>
-                    <input type="text" placeholder="e.g. 12345" onkeyup="searchOrder(this.value)">
-                    <div id="res-order" class="mt-1"></div>
-                </div>
-                <div class="input-group">
-                    <label>Check Unpaid Customer (WhatsApp)</label>
-                    <input type="text" placeholder="e.g. 9477..." onkeyup="searchUnpaid(this.value)">
-                    <div id="res-unpaid" class="mt-1"></div>
-                </div>
-            </div>
-        `;
-    }
-
-    // B) PROFILE
-    function renderProfile(target) {
-        const p = bizProfile;
-        const disabled = p.locked ? 'disabled' : '';
-        
-        let logoHtml = '';
-        if(p.logo && p.locked) {
-            logoHtml = `<img src="${p.logo}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;">`;
-        } else if(p.logo) {
-             logoHtml = `
-                <img src="${p.logo}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;">
-                <button class="btn btn-outline mt-1" style="padding:5px 10px; font-size:0.8rem; width:auto;" onclick="removeLogo()">Remove Logo</button>
-             `;
-        } else {
-            logoHtml = `<label class="btn btn-secondary mt-1" style="width:auto;padding:5px 10px;font-size:0.8rem">Upload Logo <input type="file" hidden onchange="handleImageUpload(this, 'logo')"></label>`;
-        }
-        
-        let html = `
-            <div class="card">
-                <h3>Business Profile</h3>
-                <p class="text-red" style="font-size:0.85rem">All fields required. Lock profile to enable other tabs.</p>
-                
-                <div class="center flex-col mb-1" id="logo-section">
-                    ${logoHtml}
-                </div>
-
-                <div class="input-group"><label>Business Name</label><input id="p-name" value="${p.businessName||''}" ${disabled}></div>
-                <div class="input-group"><label>Business Address / Home Address</label><textarea id="p-addr" ${disabled} rows="2">${p.address||''}</textarea></div>
-                <div class="input-group"><label>Owner Name</label><input id="p-owner" value="${p.ownerName||''}" ${disabled}></div>
-                <div class="input-group"><label>Reg No / NIC</label><input id="p-nic" value="${p.nic||''}" ${disabled}></div>
-                <div class="input-group"><label>Hotline</label><input type="tel" id="p-hot" value="${p.hotline||''}" ${disabled}></div>
-                <div class="input-group"><label>WhatsApp Number</label><input type="tel" id="p-wa" value="${p.whatsapp||''}" ${disabled}></div>
-                
-                ${p.locked 
-                    ? `<button class="btn btn-yellow" onclick="toggleLock(false)">Unlock to Edit</button>` 
-                    : `<button class="btn btn-primary" onclick="saveProfile()">Save & Lock Profile</button>`}
-            </div>
-
-            <div class="card" id="verify-section">
-                <h3>Verification Badge (Rs 2500)</h3>
-                ${p.verified ? '<div class="text-green bold text-center" style="font-size:1.2rem; padding:20px;">✅ You are Verified!</div>' : `
-                    <p class="mb-1">Get the Green Badge to build trust. One-time payment.</p>
-                    <div style="background:#f1f2f6; padding:15px; border-radius:12px; font-size:0.9rem; margin-bottom:15px;">
-                        <b>Bank:</b> Commercial Bank, Homagama<br>
-                        <b>Acc:</b> 8750053306 (Colombage SD)<br>
-                        <b>Amount:</b> Rs. 2,500
-                    </div>
-                    <div class="input-group">
-                        <label>1. Grama Niladhari Letter</label>
-                        <input type="file" id="v-letter" onchange="handleImageUpload(this, 'letter')">
-                        <div id="stat-letter" class="text-green hidden">✔ Uploaded</div>
-                    </div>
-                    <div class="input-group">
-                        <label>2. Payment Slip</label>
-                        <input type="file" id="v-slip" onchange="handleImageUpload(this, 'slip')">
-                        <div id="stat-slip" class="text-green hidden">✔ Uploaded</div>
-                    </div>
-                    <button class="btn btn-green" onclick="requestVerification()">Submit for Verification</button>
-                    <button class="btn btn-outline" onclick="switchTab('Admin Messages')">Message Admin for Info</button>
-                `}
-            </div>
-        `;
-        target.innerHTML = html;
-    }
-
-    async function handleImageUpload(input, type) {
-        if (input.files && input.files[0]) {
-            showToast("Compressing Image...", "info");
-            try {
+        handleFoodImg: async (input) => {
+            if (input.files[0]) {
+                App.UI.toast("Compressing...");
                 const base64 = await compressImage(input.files[0]);
-                if(type === 'logo') {
-                    // Update locally first for preview
-                    bizProfile.tempLogo = base64;
-                    renderProfile(document.getElementById('dash-content')); 
-                } else {
-                    bizProfile['temp_' + type] = base64;
-                    document.getElementById('stat-' + type).classList.remove('hidden');
-                }
-                showToast("Image Ready", "success");
-            } catch (e) {
-                showToast("Image Error", "error");
+                document.getElementById('f-prev').src = base64;
+                document.getElementById('f-prev').classList.remove('hidden');
+                document.getElementById('f-file-txt').innerText = "Image Selected";
+                App.state.tempFoodImg = base64;
             }
-        }
-    }
-    
-    function removeLogo() {
-        if(confirm("Remove current logo?")) {
-            db.collection('users').doc(currentUser.uid).update({ logo: firebase.firestore.FieldValue.delete() });
-            delete bizProfile.logo;
-            delete bizProfile.tempLogo;
-            renderProfile(document.getElementById('dash-content'));
-        }
-    }
+        },
 
-    function saveProfile() {
-        const logo = bizProfile.tempLogo || bizProfile.logo;
-        const name = document.getElementById('p-name').value;
-        const addr = document.getElementById('p-addr').value;
-        const owner = document.getElementById('p-owner').value;
-        const nic = document.getElementById('p-nic').value;
-        const hot = document.getElementById('p-hot').value;
-        const wa = document.getElementById('p-wa').value;
+        // Profile Actions
+        removeLogo: () => {
+            if(confirm("Remove logo?")) {
+                App.DB.db.collection('users').doc(App.state.user.uid).update({logo: firebase.firestore.FieldValue.delete()});
+                delete App.state.profile.logo;
+                App.UI.refreshContent();
+            }
+        },
 
-        if(!logo || !name || !addr || !owner || !nic || !hot || !wa) {
-            return showToast("All profile fields & Logo are REQUIRED!", "error");
-        }
+        toggleLock: (state) => App.DB.updateProfile({locked: state}),
 
-        const updatedProfile = {
-            ...bizProfile,
-            logo, businessName: name, address: addr, ownerName: owner, 
-            nic, hotline: hot, whatsapp: wa, locked: true
-        };
-        delete updatedProfile.tempLogo; 
-
-        db.collection('users').doc(currentUser.uid).set(updatedProfile, {merge:true})
-            .then(() => { showToast("Profile Locked & Saved", "success"); switchTab('Dashboard'); })
-            .catch(e => showToast("Save Failed: " + e.message, "error"));
-    }
-
-    function toggleLock(state) {
-        db.collection('users').doc(currentUser.uid).update({locked: state});
-    }
-
-    function requestVerification() {
-        if(!bizProfile.temp_letter || !bizProfile.temp_slip) return showToast("Please upload both documents.", "error");
-        showToast("Documents Submitted! Admin will review.", "success");
-        db.collection('admin_requests').add({
-            uid: currentUser.uid, 
-            name: bizProfile.businessName, 
-            letter: bizProfile.temp_letter, 
-            slip: bizProfile.temp_slip,
-            timestamp: new Date()
-        });
-    }
-
-    // C) OPEN / CLOSE
-    function renderSchedule(target) {
-        const today = new Date().toLocaleDateString('en-US', {weekday:'long'});
-        const s = bizProfile.schedule?.[today] || {open: false, start:'08:00', end:'20:00'};
-        
-        target.innerHTML = `
-            <div class="card">
-                <h3>📅 Schedule for ${today}</h3>
-                <div class="input-group">
-                    <label>Are you Open Today?</label>
-                    <select id="oc-stat" onchange="saveSched('${today}')" style="background:${s.open?'#eafff3':'#fff0f0'}">
-                        <option value="yes" ${s.open?'selected':''}>Yes, Open</option>
-                        <option value="no" ${!s.open?'selected':''}>No, Closed</option>
-                    </select>
-                </div>
-                <div class="flex" style="gap:10px;">
-                    <div class="input-group w-100">
-                        <label>Open Time</label>
-                        <input type="time" id="oc-start" value="${s.start}" onchange="saveSched('${today}')">
-                    </div>
-                    <div class="input-group w-100">
-                        <label>Close Time</label>
-                        <input type="time" id="oc-end" value="${s.end}" onchange="saveSched('${today}')">
-                    </div>
-                </div>
-                <div class="text-center text-green" style="font-size:0.8rem">Settings auto-save for ${today}</div>
-            </div>
+        saveProfile: () => {
+            const p = {
+                logo: App.state.profile.tempLogo || App.state.profile.logo,
+                businessName: document.getElementById('p-name').value,
+                address: document.getElementById('p-addr').value,
+                ownerName: document.getElementById('p-owner').value,
+                nic: document.getElementById('p-nic').value,
+                hotline: document.getElementById('p-hot').value,
+                whatsapp: document.getElementById('p-wa').value,
+                locked: true,
+                verified: App.state.profile.verified || false
+            };
+            if(!p.logo || !p.businessName || !p.whatsapp) return App.UI.toast("Logo, Name & WhatsApp Required", "error");
             
-            <!-- Fixed Preview Card Contrast -->
-            <div class="card text-white" style="background:${s.open ? 'var(--green)' : 'var(--primary)'};">
-                <h3 class="text-white" style="margin:0;">Preview</h3>
-                <p class="text-white" style="margin:0;">Webpage Status: ${s.open ? `WE ARE OPEN (${s.start} - ${s.end})` : 'WE ARE CLOSED TODAY'}</p>
-            </div>
-        `;
-    }
+            App.DB.updateProfile(p).then(() => {
+                App.UI.toast("Profile Saved!");
+                App.UI.switchTab('Dashboard');
+            });
+        },
 
-    function saveSched(day) {
-        const open = document.getElementById('oc-stat').value === 'yes';
-        const start = document.getElementById('oc-start').value;
-        const end = document.getElementById('oc-end').value;
-        const schedule = bizProfile.schedule || {};
-        schedule[day] = { open, start, end };
-        
-        db.collection('users').doc(currentUser.uid).update({ schedule });
-    }
+        reqVerify: () => {
+            if(!App.state.profile.temp_letter || !App.state.profile.temp_slip) return App.UI.toast("Upload both docs!", "error");
+            App.DB.db.collection('admin_requests').add({
+                uid: App.state.user.uid,
+                name: App.state.profile.businessName,
+                letter: App.state.profile.temp_letter,
+                slip: App.state.profile.temp_slip,
+                timestamp: new Date().toISOString()
+            }).then(() => App.UI.toast("Request Sent!"));
+        },
 
-    // D) ADD FOODS
-    function renderAddFoods(target) {
-        target.innerHTML = `
-            <div class="card">
-                <h3>Add New Item</h3>
-                <div class="input-group">
-                    <label>Food Image</label>
-                    <div class="file-upload-wrapper" onclick="document.getElementById('f-file').click()">
-                        <span id="f-file-txt">Click to Upload Image</span>
-                        <input type="file" id="f-file" hidden onchange="handleFoodImg(this)">
-                    </div>
-                    <img id="f-prev" class="hidden mt-1" style="width:100%; height:150px; object-fit:cover; border-radius:10px;">
-                </div>
-                <div class="input-group"><label>Category</label><input id="f-cat" placeholder="e.g. Fried Rice"></div>
-                <div class="input-group"><label>Food Name</label><input id="f-name" placeholder="Item Name"></div>
-                <div class="flex" style="gap:10px">
-                    <div class="input-group w-100"><label>Half Price</label><input id="f-half" type="number" placeholder="Optional"></div>
-                    <div class="input-group w-100"><label>Full Price</label><input id="f-full" type="number" placeholder="Required if no half"></div>
-                </div>
-                <button class="btn btn-green mt-1" onclick="addFood()">+ Add to Menu</button>
-            </div>
+        // Schedule
+        saveSched: (day) => {
+            const open = document.getElementById('oc-stat').value === 'yes';
+            const start = document.getElementById('oc-start').value;
+            const end = document.getElementById('oc-end').value;
+            const s = App.state.profile.schedule || {};
+            s[day] = {open, start, end};
+            App.DB.updateProfile({schedule: s});
+        },
+
+        // Foods
+        addFood: () => {
+            const cat = document.getElementById('f-cat').value;
+            const name = document.getElementById('f-name').value;
+            const half = document.getElementById('f-half').value;
+            const full = document.getElementById('f-full').value;
+            if(!App.state.tempFoodImg || !name || (!half && !full)) return App.UI.toast("Missing details", "error");
             
-            <h3>Current Menu</h3>
-            <div id="menu-list">
-                ${(bizProfile.foods||[]).map((f,i) => `
-                    <div class="card flex justify-between center" style="padding:10px;">
-                        <div class="flex center">
-                            <img src="${f.img}" style="width:60px;height:60px;border-radius:10px;margin-right:15px;object-fit:cover;">
-                            <div>
-                                <div class="bold">${f.name}</div>
-                                <small>${f.cat}</small>
-                                <div style="font-size:0.8rem; margin-top:4px;">
-                                    ${f.half ? `H: ${f.half} ` : ''} ${f.full ? `F: ${f.full}` : ''}
+            const foods = [...(App.state.profile.foods||[]), {cat, name, img: App.state.tempFoodImg, half, full}];
+            App.DB.updateProfile({foods}).then(() => {
+                App.UI.toast("Added!");
+                App.UI.refreshContent();
+            });
+        },
+
+        delFood: (i) => {
+            if(confirm("Delete item?")) {
+                const foods = App.state.profile.foods.filter((_, idx) => idx !== i);
+                App.DB.updateProfile({foods}).then(() => App.UI.refreshContent());
+            }
+        },
+
+        // Web Settings
+        saveWebSettings: () => {
+            const heroText = document.getElementById('hero-txt').value;
+            const socialLinks = {
+                fb: document.getElementById('s-fb').value,
+                ig: document.getElementById('s-ig').value,
+                yt: document.getElementById('s-yt').value
+            };
+            App.DB.updateProfile({heroText, socialLinks}).then(() => App.UI.toast("Saved"));
+        },
+
+        // Order Actions
+        reqConfirm: (id, wa) => {
+            const link = `${window.location.origin}${window.location.pathname}?biz=${App.state.user.uid}&orderId=${id}`;
+            const msg = `Please confirm your order by clicking here: ${link}`;
+            window.open(`https://wa.me/${wa}?text=${encodeURIComponent(msg)}`);
+        },
+
+        genBill: (id) => {
+            const o = App.state.orders.find(x => x.id === id);
+            let txt = `🧾 *BILL - ${App.state.profile.businessName}*\nOrder #${o.orderNum}\n\n`;
+            o.items.forEach(i => txt += `${i.name} (${i.variant}): ${i.price}\n`);
+            txt += `\n*Total: ${o.total}*`;
+            window.open(`https://wa.me/${o.custWa}?text=${encodeURIComponent(txt)}`);
+            App.Utils.setStatus(id, 'active');
+        },
+
+        markReady: (id, wa) => {
+            window.open(`https://wa.me/${wa}?text=${encodeURIComponent("🍽 Your order is READY! Please pick it up.")}`);
+            App.Utils.setStatus(id, 'ready');
+        },
+
+        setStatus: (id, status) => {
+            App.DB.db.collection('users').doc(App.state.user.uid).collection('orders').doc(id).update({status, seen: true});
+        },
+
+        // Admin Actions
+        approveUser: (uid, reqId) => {
+            if(confirm("Verify User?")) {
+                App.DB.db.collection('users').doc(uid).update({verified: true});
+                App.DB.db.collection('admin_requests').doc(reqId).delete();
+                App.UI.toast("User Verified");
+            }
+        },
+        rejectRequest: (id) => {
+            if(confirm("Reject?")) App.DB.db.collection('admin_requests').doc(id).delete();
+        },
+
+        // Review Actions
+        pubReview: (id) => App.DB.db.collection('users').doc(App.state.user.uid).collection('reviews').doc(id).update({status: 'published'}),
+        delReview: (id) => { if(confirm("Delete?")) App.DB.db.collection('users').doc(App.state.user.uid).collection('reviews').doc(id).delete(); }
+    };
+
+    // === ROUTER & PUBLIC VIEW LOGIC ===
+    App.Router = {
+        check: () => {
+            const params = new URLSearchParams(window.location.search);
+            const bizId = params.get('biz');
+            const orderId = params.get('orderId');
+
+            if(bizId && orderId) {
+                App.Public.renderConfirmPage(bizId, orderId);
+            } else if(bizId) {
+                App.state.bizId = bizId;
+                App.Public.renderStore(bizId);
+            }
+        },
+        isPublic: () => {
+            return !!(new URLSearchParams(window.location.search).get('biz'));
+        }
+    };
+
+    App.Public = {
+        renderStore: async (bizId) => {
+            // Skeleton Loading State
+            document.body.innerHTML = `
+                <div style="padding:20px; max-width:600px; margin:0 auto;">
+                    <div class="skeleton" style="height:200px; margin-bottom:20px;"></div>
+                    <div class="skeleton" style="height:100px; margin-bottom:20px;"></div>
+                    <div class="skeleton" style="height:60px;"></div>
+                </div>
+            `;
+
+            try {
+                const doc = await App.DB.db.collection('users').doc(bizId).get();
+                if(!doc.exists) return document.body.innerHTML = "<h2 class='text-center p-2'>Store Not Found</h2>";
+                
+                const data = doc.data();
+                App.state.publicData = data;
+
+                // Build UI
+                const social = data.socialLinks || {};
+                const ytId = (url) => { const m = url.match(/^.*(youtu.be\/|v\/|embed\/|watch\?v=|&v=)([^#&?]*).*/); return (m && m[2].length===11) ? m[2] : null; };
+                const ytHtml = (social.yt||'').split(',').map(u => { const id = ytId(u.trim()); return id ? `<iframe src="https://www.youtube.com/embed/${id}" style="width:100%; height:200px; border-radius:12px; margin-bottom:10px; border:none;"></iframe>` : ''; }).join('');
+
+                const html = `
+                    <div id="public-app">
+                        <!-- Sticky Status -->
+                        <div id="pub-status" class="p-1 text-center bold text-white" style="position:sticky; top:0; z-index:900;"></div>
+                        
+                        <div class="container p-2" style="background:white; border-radius:0 0 30px 30px; box-shadow:0 10px 30px rgba(0,0,0,0.05); text-align:center; padding-top:40px;">
+                            <img src="${data.logo || 'https://via.placeholder.com/100'}" style="width:120px; height:120px; border-radius:50%; object-fit:cover; border:5px solid white; box-shadow:0 5px 15px rgba(0,0,0,0.1);">
+                            <h1 style="margin:10px 0 5px;">${data.businessName}</h1>
+                            ${data.verified ? '<span class="status-badge st-new">✔ Verified</span>' : ''}
+                            <p style="color:#888; margin-top:10px;">${data.address}</p>
+                            
+                            <div class="flex center mt-2" style="gap:15px;">
+                                ${social.fb ? `<a href="${social.fb}" target="_blank" style="font-size:1.8rem;text-decoration:none;">🔵</a>` : ''}
+                                ${social.ig ? `<a href="${social.ig}" target="_blank" style="font-size:1.8rem;text-decoration:none;">🟣</a>` : ''}
+                            </div>
+                            <div class="flex center mt-2" style="gap:10px;">
+                                <a href="tel:${data.hotline}" class="btn btn-green" style="flex:1; border-radius:50px;">📞 Call</a>
+                                <a href="https://wa.me/${data.whatsapp}" class="btn btn-green" style="flex:1; border-radius:50px;">💬 Chat</a>
+                            </div>
+                        </div>
+
+                        <div class="container p-2">
+                            <div class="hero mt-2" style="padding:40px 20px;">
+                                <h2>${data.heroText || "Welcome!"}</h2>
+                                <button class="btn btn-secondary mt-1" style="background:white; color:var(--primary); width:auto; border-radius:50px; padding:12px 30px;" onclick="document.getElementById('menu-sec').scrollIntoView({behavior:'smooth'})">ORDER NOW</button>
+                            </div>
+
+                            ${ytHtml ? `<div class="mb-2"><h3>Gallery</h3>${ytHtml}</div>` : ''}
+
+                            <div id="menu-sec">
+                                <div class="flex justify-between center mb-2">
+                                    <h3>Menu</h3>
+                                    <input placeholder="🔍 Search food..." style="padding:10px; border-radius:20px; border:1px solid #eee; width:150px;" onkeyup="App.Public.filterMenu(this.value)">
+                                </div>
+                                <div id="pub-menu-list"></div>
+                            </div>
+
+                            <div class="card mt-2">
+                                <h3>Reviews</h3>
+                                <div id="pub-reviews" style="max-height:300px; overflow-y:auto;">Loading...</div>
+                                <div class="mt-2" style="background:#f8f9fa; padding:15px; border-radius:12px;">
+                                    <h4>Leave a Review</h4>
+                                    <input id="rv-name" placeholder="Name" class="w-100 p-1 mb-1" style="border:1px solid #ddd;border-radius:8px;">
+                                    <select id="rv-stars" class="w-100 p-1 mb-1" style="border:1px solid #ddd;border-radius:8px;"><option value="5">★★★★★</option><option value="4">★★★★</option></select>
+                                    <textarea id="rv-msg" placeholder="Message" class="w-100 p-1 mb-1" style="border:1px solid #ddd;border-radius:8px;"></textarea>
+                                    <button class="btn btn-primary" onclick="App.Public.sendReview('${bizId}')">Submit</button>
                                 </div>
                             </div>
                         </div>
-                        <button class="btn btn-secondary" style="width:auto;padding:8px 12px;" onclick="deleteFood(${i})">🗑</button>
+
+                        <div class="floating-cart" onclick="App.Public.openCart()">
+                            🛒 <div class="cart-badge" id="cart-count">${App.state.cart.length}</div>
+                        </div>
+                    </div>
+                `;
+                document.body.innerHTML = html;
+                App.Public.renderMenu(data.foods || []);
+                App.Public.loadReviews(bizId);
+                App.Public.checkStatus(data.schedule);
+
+            } catch(e) { document.body.innerHTML = "<h2>Error Loading Store</h2>"; console.error(e); }
+        },
+
+        renderMenu: (foods) => {
+            const container = document.getElementById('pub-menu-list');
+            const cats = [...new Set(foods.map(f => f.cat))];
+            
+            container.innerHTML = cats.map(c => `
+                <h4 class="text-red mt-2" style="border-bottom:1px dashed #eee; padding-bottom:5px;">${c}</h4>
+                ${foods.filter(f => f.cat === c).map(f => `
+                    <div class="card flex center justify-between" style="padding:15px; border:none; box-shadow:0 4px 10px rgba(0,0,0,0.03);">
+                        <img src="${f.img}" style="width:80px;height:80px;border-radius:12px;object-fit:cover;margin-right:15px;">
+                        <div style="flex:1;">
+                            <div class="bold">${f.name}</div>
+                            <div class="flex mt-1" style="gap:5px; flex-wrap:wrap;">
+                                ${f.half ? `<button class="btn btn-outline" style="width:auto;padding:5px 10px;font-size:0.8rem;margin:0;" onclick="App.Public.addToCart('${f.name}', 'Half', ${f.half})">Half: ${f.half}</button>` : ''}
+                                ${f.full ? `<button class="btn btn-outline" style="width:auto;padding:5px 10px;font-size:0.8rem;margin:0;" onclick="App.Public.addToCart('${f.name}', 'Full', ${f.full})">Full: ${f.full}</button>` : ''}
+                            </div>
+                        </div>
                     </div>
                 `).join('')}
-            </div>
-        `;
-    }
+            `).join('');
+        },
 
-    let tempFoodImg = null;
-    async function handleFoodImg(input) {
-        if(input.files[0]) {
-            tempFoodImg = await compressImage(input.files[0]);
-            const img = document.getElementById('f-prev');
-            img.src = tempFoodImg;
-            img.classList.remove('hidden');
-            document.getElementById('f-file-txt').innerText = "Image Selected";
-        }
-    }
+        filterMenu: (term) => {
+            const foods = App.state.publicData.foods || [];
+            const filtered = foods.filter(f => f.name.toLowerCase().includes(term.toLowerCase()));
+            App.Public.renderMenu(filtered);
+        },
 
-    function addFood() {
-        const cat = document.getElementById('f-cat').value;
-        const name = document.getElementById('f-name').value;
-        const half = document.getElementById('f-half').value;
-        const full = document.getElementById('f-full').value;
-
-        if(!tempFoodImg) return showToast("Image is required", "error");
-        if(!name) return showToast("Name is required", "error");
-        if(!half && !full) return showToast("At least one price is required", "error");
-
-        const foods = [...(bizProfile.foods||[]), {cat, name, img: tempFoodImg, half, full}];
-        
-        db.collection('users').doc(currentUser.uid).update({foods})
-        .then(() => {
-            showToast("Food Added", "success");
-            tempFoodImg = null;
-            renderAddFoods(document.getElementById('dash-content')); 
-        });
-    }
-
-    function deleteFood(idx) {
-        if(!confirm("Delete this item?")) return;
-        const foods = bizProfile.foods.filter((_, i) => i !== idx);
-        db.collection('users').doc(currentUser.uid).update({foods})
-        .then(() => renderAddFoods(document.getElementById('dash-content')));
-    }
-
-    // E) MY WEBPAGE (Social & YouTube)
-    function renderWebpageInfo(target) {
-        const url = `${window.location.origin}${window.location.pathname}?biz=${currentUser.uid}`;
-        const links = bizProfile.socialLinks || {};
-        
-        target.innerHTML = `
-            <div class="card text-center">
-                <img src="${bizProfile.logo}" style="width:80px;height:80px;border-radius:50%;margin:0 auto 10px;">
-                <h3>${bizProfile.businessName}</h3>
-                <p>Share this link with your customers:</p>
-                <input class="w-100 p-2 mb-1" value="${url}" readonly style="background:#eee;border:none;border-radius:8px;">
-                <div class="flex" style="gap:10px">
-                    <a href="${url}" target="_blank" class="btn btn-primary">Open Webpage</a>
-                    <button class="btn btn-secondary" onclick="navigator.clipboard.writeText('${url}');showToast('Copied!')">Copy Link</button>
-                </div>
-            </div>
-            <div class="card">
-                <h3>Hero Settings</h3>
-                <div class="input-group">
-                    <label>Welcome Message</label>
-                    <input id="hero-txt" value="${bizProfile.heroText || 'Welcome to ' + bizProfile.businessName}" onchange="updateWebSettings()">
-                </div>
-            </div>
-            
-            <div class="card">
-                <h3>Social Media & Gallery</h3>
-                <div class="input-group"><label>Facebook Link</label><input id="s-fb" value="${links.fb||''}" onchange="updateWebSettings()"></div>
-                <div class="input-group"><label>Instagram Link</label><input id="s-ig" value="${links.ig||''}" onchange="updateWebSettings()"></div>
-                <div class="input-group">
-                    <label>YouTube Video Links (Comma separated)</label>
-                    <textarea id="s-yt" rows="3" placeholder="https://youtube.com/watch?v=..., https://youtu.be/..." onchange="updateWebSettings()">${links.yt||''}</textarea>
-                </div>
-            </div>
-        `;
-    }
-    
-    function updateWebSettings() {
-        const heroText = document.getElementById('hero-txt').value;
-        const fb = document.getElementById('s-fb').value;
-        const ig = document.getElementById('s-ig').value;
-        const yt = document.getElementById('s-yt').value;
-        
-        db.collection('users').doc(currentUser.uid).update({
-            heroText,
-            socialLinks: { fb, ig, yt }
-        }).then(() => showToast("Webpage Settings Saved"));
-    }
-
-    // NEW: REVIEWS TAB
-    function renderReviews(target) {
-        if(bizReviews.length === 0) {
-            target.innerHTML = `<div class="card text-center text-gray"><h3>No reviews yet.</h3></div>`;
-            return;
-        }
-
-        target.innerHTML = bizReviews.map(r => `
-            <div class="card">
-                <div class="flex justify-between">
-                    <b>${r.name || 'Anonymous'}</b>
-                    <span class="text-yellow">${'★'.repeat(r.stars)}</span>
-                </div>
-                <p class="mt-1">${r.text}</p>
-                <small>${new Date(r.time).toLocaleDateString()}</small>
-                <div class="mt-1 flex" style="gap:10px;">
-                    ${r.status === 'pending' ? `<button class="btn btn-green" style="width:auto; padding:5px 10px;" onclick="updateReview('${r.id}', 'published')">Post to Webpage</button>` : '<span class="status-badge st-new">Published</span>'}
-                    <button class="btn btn-outline" style="width:auto; padding:5px 10px; border-color:red; color:red;" onclick="deleteReview('${r.id}')">Delete</button>
-                </div>
-            </div>
-        `).join('');
-    }
-
-    function updateReview(id, status) {
-        db.collection('users').doc(currentUser.uid).collection('reviews').doc(id).update({status});
-    }
-
-    function deleteReview(id) {
-        if(confirm("Delete this review?")) {
-            db.collection('users').doc(currentUser.uid).collection('reviews').doc(id).delete();
-        }
-    }
-
-    // F) ORDERS WORKFLOW
-    function renderOrdersList(target, tabName) {
-        const map = {
-            'New Orders': 'new', 'Confirmed Orders': 'confirmed', 
-            'Active Orders': 'active', 'Ready Orders': 'ready', 
-            'Completed Orders': 'completed', 'Unpaid Bills': 'unpaid'
-        };
-        const status = map[tabName];
-        if(!status) return;
-
-        const list = bizOrders.filter(o => o.status === status);
-        if(list.length === 0) {
-            target.innerHTML = '<div class="text-center p-2 text-gray mt-2"><h3 style="color:#ddd">No Orders Here</h3></div>';
-            return;
-        }
-
-        target.innerHTML = list.map(o => {
-            let actions = '';
-            
-            if(status === 'new') {
-                actions = `
-                    <button class="btn btn-yellow" onclick="reqConfirm('${o.id}', '${o.custWa}')">Request Confirmation (WhatsApp)</button>
-                    <button class="btn btn-outline" style="border-color:var(--primary); color:var(--primary);" onclick="setStatus('${o.id}', 'canceled')">Decline Order</button>
-                `;
-            }
-            else if(status === 'confirmed') {
-                actions = `<button class="btn btn-primary" onclick="generateBill('${o.id}')">🖨 Print Bill & Start Cooking</button>`;
-            }
-            else if(status === 'active') {
-                actions = `
-                    <div class="bill-wrapper">
-                        <div class="watermark">NOT PAID</div>
-                        <div class="bill-header">
-                            <div class="bold" style="font-size:1.2em">${bizProfile.businessName}</div>
-                            <small>Order #${o.orderNum}</small><br>
-                            <small>${new Date(o.time).toLocaleString()}</small>
-                        </div>
-                        ${o.items.map(i => `<div class="bill-item"><span>${i.name} (${i.variant})</span><span>${i.price}</span></div>`).join('')}
-                        <div class="bill-total"><span>Total</span><span>${o.total}</span></div>
-                        <div class="text-center mt-2 small">Thank you!</div>
-                    </div>
-                    <button class="btn btn-green mt-1" onclick="markReady('${o.id}', '${o.custWa}')">✅ Mark Ready & Notify Customer</button>
-                `;
-            }
-            else if(status === 'ready') {
-                actions = `
-                    <button class="btn btn-secondary" onclick="setStatus('${o.id}', 'completed')">💰 Payment Received (Complete)</button>
-                    <button class="btn btn-outline" style="border-color:var(--yellow); color:var(--yellow);" onclick="setStatus('${o.id}', 'unpaid')">⚠ Not Paid (Record as Unpaid)</button>
-                `;
-            }
-
-            return `
-                <div class="card status-${status}">
-                    <div class="flex justify-between center">
-                        <h4 class="text-red">#${o.orderNum}</h4>
-                        <small>${new Date(o.time).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</small>
-                    </div>
-                    <div class="mb-1">
-                        <b>${o.custName}</b> <a href="https://wa.me/${o.custWa}" class="btn btn-green" style="display:inline-block; width:auto; padding:2px 8px; font-size:12px; margin-left:10px;">✆ WhatsApp</a>
-                    </div>
-                    <div style="background:#f8f9fa; padding:10px; border-radius:10px; border:1px solid #eee;">
-                        ${o.items.map(i => `<div>• ${i.name} (${i.variant}) - ${i.price}</div>`).join('')}
-                    </div>
-                    <div class="text-right mt-1 bold" style="font-size:1.1rem">Total: ${o.total}</div>
-                    <div class="mt-1">${actions}</div>
-                </div>
-            `;
-        }).join('');
-    }
-
-    // ACTIONS
-    function reqConfirm(id, wa) {
-        const link = `${window.location.origin}${window.location.pathname}?biz=${currentUser.uid}&orderId=${id}`;
-        const msg = `Hello! Please confirm your *${bizProfile.businessName}* order by clicking here: ${link}`;
-        window.open(`https://wa.me/${wa}?text=${encodeURIComponent(msg)}`);
-    }
-
-    function generateBill(id) {
-        const o = bizOrders.find(x => x.id === id);
-        setStatus(id, 'active');
-        
-        let txt = `🧾 *BILL - ${bizProfile.businessName}*\nOrder #${o.orderNum}\n\n`;
-        o.items.forEach(i => txt += `${i.name} (${i.variant}): ${i.price}\n`);
-        txt += `\n*Total: ${o.total}*\nStatus: Preparing...`;
-        
-        window.open(`https://wa.me/${o.custWa}?text=${encodeURIComponent(txt)}`);
-    }
-
-    function markReady(id, wa) {
-        const msg = `🍽 Your order is *READY*! Please come and pick it up.`;
-        window.open(`https://wa.me/${wa}?text=${encodeURIComponent(msg)}`);
-        setStatus(id, 'ready');
-    }
-
-    function setStatus(id, status) {
-        db.collection('users').doc(currentUser.uid).collection('orders').doc(id).update({status, seen: true});
-    }
-
-    // G) REPORTS
-    function renderReports(target) {
-        const completed = bizOrders.filter(o => o.status === 'completed');
-        const unpaid = bizOrders.filter(o => o.status === 'unpaid');
-        const revenue = completed.reduce((a,b) => a + Number(b.total), 0);
-
-        target.innerHTML = `
-            <div class="card text-center">
-                <h3>📊 Business Snapshot</h3>
-                <h1 class="text-green mt-2" style="font-size:2.5rem">Rs. ${revenue}</h1>
-                <small>Total Revenue</small>
-                
-                <div class="flex mt-2" style="gap:10px">
-                    <div class="w-100 p-1" style="background:#f1f2f6; border-radius:12px;">
-                        <h3>${completed.length}</h3><small>Completed Orders</small>
-                    </div>
-                    <div class="w-100 p-1" style="background:#fff0f0; border-radius:12px; color:var(--primary);">
-                        <h3>${unpaid.length}</h3><small>Unpaid Bills</small>
-                    </div>
-                </div>
-            </div>
-            
-            <h3>Unpaid List</h3>
-            ${unpaid.length === 0 ? '<p>No unpaid bills.</p>' : unpaid.map(u => `
-                <div class="card status-unpaid">
-                    <div class="flex justify-between">
-                        <b>${u.custName}</b>
-                        <b class="text-red">${u.total}</b>
-                    </div>
-                    <small>${u.custWa} - Order #${u.orderNum}</small>
-                </div>
-            `).join('')}
-        `;
-    }
-
-    // H) ADMIN CHAT (User Side)
-    function renderAdminChat(target) {
-        target.innerHTML = `
-            <div class="card" style="height:60vh; display:flex; flex-direction:column;">
-                <h3 style="border-bottom:1px solid #eee; padding-bottom:10px;">Admin Support</h3>
-                <div style="flex:1; display:flex; align-items:center; justify-content:center; color:#ccc;">
-                    No messages yet.
-                </div>
-                <div class="input-group flex mt-1">
-                    <input placeholder="Type message..." style="margin-bottom:0; border-radius: 20px 0 0 20px;">
-                    <button class="btn btn-primary" style="width:auto; margin:0; border-radius: 0 20px 20px 0;">Send</button>
-                </div>
-            </div>
-        `;
-    }
-
-    // SEARCH UTILS
-    function searchOrder(val) {
-        if(!val) return document.getElementById('res-order').innerHTML = '';
-        const o = bizOrders.find(x => x.orderNum === val);
-        document.getElementById('res-order').innerHTML = o 
-            ? `<div class="p-1 border text-green" style="background:#eafff3; border-radius:8px;">Found: <b>${o.status.toUpperCase()}</b></div>`
-            : '<small>Not found</small>';
-    }
-
-    function searchUnpaid(val) {
-        if(val.length < 5) return;
-        const found = bizOrders.filter(x => x.custWa.includes(val) && x.status === 'unpaid');
-        document.getElementById('res-unpaid').innerHTML = found.length 
-            ? `<div class="p-1 border text-red" style="background:#fff0f0; border-radius:8px;">⚠ <b>${found.length} Unpaid Bills!</b></div>`
-            : '<div class="text-green p-1">No unpaid records found.</div>';
-    }
-
-
-    // ================= PUBLIC PAGE LOGIC (Customer View) =================
-    let cart = [];
-    let bizIdForCart = null;
-    let bizOwnerWa = null;
-
-    async function loadPublicPage(bizId) {
-        bizIdForCart = bizId;
-        
-        // Show Loading State (Spinner) instead of Landing Page
-        app.innerHTML = `<div style="height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;"><div class="loader"></div></div>`;
-        
-        // Helper to extract YouTube ID
-        const getYoutubeId = (url) => {
-            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-            const match = url.match(regExp);
-            return (match && match[2].length === 11) ? match[2] : null;
-        };
-
-        try {
-            const doc = await db.collection('users').doc(bizId).get();
-            if(!doc.exists) return app.innerHTML = "<h2 class='text-center p-2'>Business Not Found</h2>";
-            const data = doc.data();
-            bizOwnerWa = data.whatsapp;
-
-            // Load Reviews
-            const reviewSnap = await db.collection('users').doc(bizId).collection('reviews').where('status', '==', 'published').limit(10).get();
-            const reviews = reviewSnap.docs.map(d => d.data());
-
-            // Parse YouTube Links
-            const social = data.socialLinks || {};
-            let ytGalleryHtml = '';
-            if(social.yt) {
-                const urls = social.yt.split(',');
-                ytGalleryHtml = urls.map(u => {
-                    const id = getYoutubeId(u.trim());
-                    // FIX: Added the missing src URL that caused iframe issues
-                    return id ? `<iframe src="https://www.youtube.com/embed/${id}" style="width:100%; height:200px; border-radius:12px; margin-bottom:10px; border:none;"></iframe>` : '';
-                }).join('');
-            }
-
-            // Generate HTML
-            app.innerHTML = `
-                <div id="public-view">
-                    <div id="public-status" class="p-1 text-center bold text-white" style="position:sticky; top:0; z-index:900; font-size:0.9rem"></div>
-                    
-                    <div class="container p-2" style="background:white; border-radius:0 0 20px 20px; box-shadow:0 5px 15px rgba(0,0,0,0.05); text-align:center;">
-                        <div class="center flex-col">
-                            <img id="pub-logo" src="${data.logo || 'https://via.placeholder.com/100'}" style="width:110px; height:110px; border-radius:50%; object-fit:cover; border:5px solid var(--primary); margin-bottom:10px; margin-top:-10px;">
-                            <h2 id="pub-name" style="margin:0;">${data.businessName}</h2>
-                            ${data.verified ? `<div class="mt-1"><span class="status-badge st-new">✔ Verified Business</span></div>` : ''}
-                            <p style="color:#888; margin-top:5px; font-size:0.9rem;">${data.address}</p>
-                            
-                            <!-- Social Icons -->
-                            <div class="flex center mt-1" style="gap:15px;">
-                                ${social.fb ? `<a href="${social.fb}" target="_blank" style="font-size:1.5rem; text-decoration:none;">🔵</a>` : ''}
-                                ${social.ig ? `<a href="${social.ig}" target="_blank" style="font-size:1.5rem; text-decoration:none;">🟣</a>` : ''}
-                            </div>
-
-                            <div class="flex center mt-1" style="gap:10px; width:100%;">
-                                <a href="tel:${data.hotline}" class="btn btn-green" style="flex:1;">📞 ${data.hotline}</a>
-                                <a href="https://wa.me/${data.whatsapp}" class="btn btn-green" style="flex:1;">💬 WhatsApp</a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="hero mt-2" style="border-radius:20px; padding:30px 20px; margin: 15px;">
-                        <h2 style="font-size:1.5rem;">${data.heroText || "Welcome!"}</h2>
-                        <button class="btn btn-secondary mt-1" style="background:white; color:var(--primary);" onclick="document.getElementById('pub-menu').scrollIntoView({behavior:'smooth'})">ORDER NOW</button>
-                    </div>
-
-                    <!-- Video Gallery -->
-                    ${ytGalleryHtml ? `<div class="p-2 container"><h3>Video Gallery</h3>${ytGalleryHtml}</div>` : ''}
-
-                    <div id="pub-menu" class="p-2 container">
-                        <!-- Menu Items Injected Here -->
-                    </div>
-                    
-                    <!-- Reviews Section -->
-                    <div class="p-2 container mt-2" style="background:#fff; border-radius:20px; margin:15px;">
-                        <h3>Customer Reviews</h3>
-                        <div style="max-height:300px; overflow-y:auto; margin-bottom:15px;">
-                            ${reviews.length ? reviews.map(r => `<div style="border-bottom:1px solid #eee; padding:10px 0;"><b>${r.name}</b> <span class="text-yellow">${'★'.repeat(r.stars)}</span><p style="margin:5px 0; font-size:0.9rem;">${r.text}</p></div>`).join('') : '<p style="color:#888">No reviews yet.</p>'}
-                        </div>
-                        <h4>Write a Review</h4>
-                        <input id="rev-name" class="w-100 p-1 mb-1" style="border:1px solid #ddd; border-radius:8px;" placeholder="Your Name">
-                        <select id="rev-star" class="w-100 p-1 mb-1" style="border:1px solid #ddd; border-radius:8px;">
-                            <option value="5">★★★★★</option>
-                            <option value="4">★★★★</option>
-                            <option value="3">★★★</option>
-                        </select>
-                        <textarea id="rev-text" class="w-100 p-1 mb-1" style="border:1px solid #ddd; border-radius:8px;" placeholder="Message"></textarea>
-                        <button class="btn btn-primary" onclick="submitReview('${bizId}')">Submit Review</button>
-                    </div>
-                    
-                    <footer class="text-center p-2 mt-2" style="background:var(--secondary); color:white;">
-                        <h4>${data.businessName}</h4>
-                        <p style="font-size:0.8rem; opacity:0.8;">${data.address}</p>
-                        <small style="display:block; opacity:0.5; margin-top:10px;">Powered by EatlyHub</small>
-                    </footer>
-
-                    <div class="floating-cart" onclick="showCartModal()">
-                        🛒 <div class="cart-badge" id="cart-count">0</div>
-                    </div>
-                </div>
-            `;
-
-            // Render Menu with Beautiful Cards
-            const menuDiv = document.getElementById('pub-menu');
-            const cats = [...new Set((data.foods||[]).map(f => f.cat))];
-            
-            cats.forEach(c => {
-                menuDiv.innerHTML += `<h3 class="mt-2 text-red" style="border-bottom:2px solid #eee; padding-bottom:5px;">${c||'Menu'}</h3>`;
-                data.foods.filter(f => f.cat === c).forEach(f => {
-                    menuDiv.innerHTML += `
-                        <div class="card flex justify-between center" style="padding:15px; margin-bottom:15px; box-shadow:0 4px 15px rgba(0,0,0,0.05); border:none;">
-                            <img src="${f.img}" style="width:90px;height:90px;border-radius:12px;object-fit:cover;margin-right:15px;">
-                            <div style="flex:1;">
-                                <div class="bold" style="font-size:1.1rem;">${f.name}</div>
-                                <div class="mt-1 flex" style="gap:5px; flex-wrap:wrap;">
-                                    ${f.half ? `<button class="btn btn-outline" style="width:auto;padding:6px 12px;font-size:12px;margin:0" onclick="addToCart('${f.name}', 'Half', ${f.half})">Half: ${f.half}</button>` : ''}
-                                    ${f.full ? `<button class="btn btn-outline" style="width:auto;padding:6px 12px;font-size:12px;margin:0" onclick="addToCart('${f.name}', 'Full', ${f.full})">Full: ${f.full}</button>` : ''}
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                });
-            });
-            
-            // Status Bar Logic
+        checkStatus: (sched) => {
             const today = new Date().toLocaleDateString('en-US', {weekday:'long'});
-            const sched = data.schedule?.[today];
-            const statusDiv = document.getElementById('public-status');
-            let isOpenNow = false;
-            if(sched && sched.open) {
+            const s = sched?.[today];
+            const el = document.getElementById('pub-status');
+            let isOpen = false;
+            
+            if(s && s.open) {
                 const now = new Date();
-                const curMins = now.getHours() * 60 + now.getMinutes();
-                const [sh, sm] = sched.start.split(':').map(Number);
-                const [eh, em] = sched.end.split(':').map(Number);
-                const startMins = sh * 60 + sm;
-                const endMins = eh * 60 + em;
-                if(curMins >= startMins && curMins <= endMins) isOpenNow = true;
+                const cur = now.getHours() * 60 + now.getMinutes();
+                const [sh, sm] = s.start.split(':').map(Number);
+                const [eh, em] = s.end.split(':').map(Number);
+                if(cur >= (sh*60+sm) && cur <= (eh*60+em)) isOpen = true;
             }
-            if(isOpenNow) {
-                statusDiv.innerText = `OPEN NOW (${sched.start} - ${sched.end})`;
-                statusDiv.style.background = 'var(--green)';
-            } else {
-                statusDiv.innerText = "WE ARE CLOSED NOW";
-                statusDiv.style.background = 'var(--secondary)';
-            }
-        } catch (e) {
-            console.error(e);
-            app.innerHTML = "<h2 class='text-center p-2'>Error Loading Page</h2>";
+            
+            el.innerText = isOpen ? `OPEN NOW (${s.start} - ${s.end})` : "CLOSED NOW";
+            el.style.background = isOpen ? 'var(--green)' : 'var(--secondary)';
+        },
+
+        loadReviews: async (bizId) => {
+            const snap = await App.DB.db.collection('users').doc(bizId).collection('reviews').where('status','==','published').limit(10).get();
+            const reviews = snap.docs.map(d => d.data());
+            document.getElementById('pub-reviews').innerHTML = reviews.length 
+                ? reviews.map(r => `<div style="border-bottom:1px solid #eee; padding:10px 0;"><b>${r.name}</b> <span class="text-yellow">${'★'.repeat(r.stars)}</span><p class="mt-1 text-muted">${r.text}</p></div>`).join('') 
+                : '<p class="text-muted">No reviews yet.</p>';
+        },
+
+        sendReview: (bizId) => {
+            const name = document.getElementById('rv-name').value;
+            const stars = document.getElementById('rv-stars').value;
+            const text = document.getElementById('rv-msg').value;
+            if(!name || !text) return alert("Fill all fields");
+            App.DB.db.collection('users').doc(bizId).collection('reviews').add({
+                name, stars: Number(stars), text, status: 'pending', time: new Date().toISOString()
+            }).then(() => { alert("Review submitted for approval!"); document.getElementById('rv-msg').value = ''; });
+        },
+
+        addToCart: (name, variant, price) => {
+            App.state.cart.push({name, variant, price});
+            localStorage.setItem('eatly_cart', JSON.stringify(App.state.cart));
+            document.getElementById('cart-count').innerText = App.state.cart.length;
+            App.Public.openCart();
+        },
+
+        openCart: () => {
+            const cart = App.state.cart;
+            if(cart.length === 0) return alert("Cart Empty");
+            const total = cart.reduce((a,b) => a + Number(b.price), 0);
+            
+            const html = `
+                <h2 class="text-center">Your Order</h2>
+                <div style="background:#f8f9fa; padding:15px; border-radius:12px; max-height:250px; overflow-y:auto; margin-bottom:15px;">
+                    ${cart.map((i, idx) => `
+                        <div class="flex justify-between center" style="padding:8px 0; border-bottom:1px solid #eee;">
+                            <span>${i.name} (${i.variant})</span>
+                            <div class="flex center"><b class="mr-1">${i.price}</b> <span onclick="App.Public.remItem(${idx})" style="color:red; cursor:pointer; margin-left:10px;">✕</span></div>
+                        </div>`).join('')}
+                </div>
+                <div class="flex justify-between bold" style="font-size:1.2rem; margin-bottom:15px;"><span>Total</span><span>Rs. ${total}</span></div>
+                <div class="input-group"><label>Your Name</label><input id="c-name"></div>
+                <div class="input-group"><label>WhatsApp</label><input id="c-wa" type="tel"></div>
+                <button class="btn btn-green" onclick="App.Public.checkout(${total})">Confirm & Order via WhatsApp</button>
+                <button class="btn btn-secondary" onclick="document.querySelector('.modal-overlay').remove()">Close</button>
+            `;
+            
+            const el = document.createElement('div');
+            el.className = 'modal-overlay';
+            el.innerHTML = `<div class="modal-box">${html}</div>`;
+            document.body.appendChild(el);
+        },
+
+        remItem: (idx) => {
+            App.state.cart.splice(idx, 1);
+            localStorage.setItem('eatly_cart', JSON.stringify(App.state.cart));
+            document.querySelector('.modal-overlay').remove();
+            document.getElementById('cart-count').innerText = App.state.cart.length;
+            App.Public.openCart();
+        },
+
+        checkout: (total) => {
+            const name = document.getElementById('c-name').value;
+            const wa = document.getElementById('c-wa').value;
+            if(!name || !wa) return alert("Details Required");
+
+            const orderNum = Math.floor(10000 + Math.random() * 90000).toString();
+            const order = {
+                orderNum, custName: name, custWa: wa, items: App.state.cart, total, 
+                time: new Date().toISOString(), status: 'new', seen: false
+            };
+
+            App.DB.db.collection('users').doc(App.state.bizId).collection('orders').add(order).then(() => {
+                const msg = `🔔 *New Order!* \nName: ${name}\nItems:\n${App.state.cart.map(i=>`- ${i.name} (${i.variant})`).join('\n')}\n*Total: ${total}*`;
+                window.open(`https://wa.me/${App.state.publicData.whatsapp}?text=${encodeURIComponent(msg)}`);
+                App.state.cart = [];
+                localStorage.removeItem('eatly_cart');
+                window.location.reload();
+            });
+        },
+
+        renderConfirmPage: async (bizId, orderId) => {
+            const doc = await App.DB.db.collection('users').doc(bizId).collection('orders').doc(orderId).get();
+            if(!doc.exists) return document.body.innerHTML = "<h2>Order Not Found</h2>";
+            const o = doc.data();
+            
+            document.body.innerHTML = `
+                <div class="flex center flex-col p-2" style="height:100vh;">
+                    <h1 class="text-green">Confirm Order</h1>
+                    <h2 style="font-size:3rem;">${o.orderNum}</h2>
+                    <p class="text-muted">Total: ${o.total}</p>
+                    <div class="w-100" style="max-width:400px; margin-top:20px;">
+                        <button class="btn btn-green" onclick="App.Public.doConfirm('${bizId}','${orderId}','confirmed')">✅ YES, CONFIRM</button>
+                        <button class="btn btn-secondary text-red" onclick="App.Public.doConfirm('${bizId}','${orderId}','canceled')">❌ CANCEL</button>
+                    </div>
+                </div>
+            `;
+        },
+
+        doConfirm: (biz, oid, status) => {
+            App.DB.db.collection('users').doc(biz).collection('orders').doc(oid).update({status, seen:true})
+            .then(() => document.body.innerHTML = `<div class="flex center" style="height:100vh"><h1>${status==='confirmed'?'Confirmed ✅':'Cancelled ❌'}</h1></div>`);
         }
-    }
+    };
 
-    function addToCart(name, variant, price) {
-        cart.push({name, variant, price});
-        document.getElementById('cart-count').innerText = cart.length;
-        // Auto Open Cart
-        showCartModal();
-    }
-    
-    function submitReview(bizId) {
-        const name = document.getElementById('rev-name').value;
-        const stars = document.getElementById('rev-star').value;
-        const text = document.getElementById('rev-text').value;
-        if(!name || !text) return showToast("Please fill all fields", "error");
-        
-        db.collection('users').doc(bizId).collection('reviews').add({
-            name, stars: Number(stars), text, status: 'pending', time: new Date().toISOString()
-        }).then(() => {
-            showToast("Review submitted for approval!");
-            document.getElementById('rev-text').value = '';
-        });
-    }
+    // Initialize App
+    App.init();
 
-    function showCartModal() {
-        if(cart.length === 0) return showToast("Cart is empty", "error");
-        const total = cart.reduce((a,b)=>a+Number(b.price),0);
-        showModal(`
-            <h2 class="text-center">Your Order</h2>
-            <div style="background:#f8f9fa; padding:10px; border-radius:12px; max-height:250px; overflow-y:auto; margin-bottom:15px;">
-                ${cart.map(i => `<div class="flex justify-between" style="padding:8px 0; border-bottom:1px solid #eee;"><span>${i.name} (${i.variant})</span><b>${i.price}</b></div>`).join('')}
-            </div>
-            <h3 class="text-right text-red">Total: ${total}</h3>
-            <div class="input-group"><label>Your Name *</label><input id="c-name" placeholder="John Doe"></div>
-            <div class="input-group"><label>WhatsApp Number *</label><input id="c-wa" type="tel" placeholder="947..."></div>
-            <button class="btn btn-green" onclick="placeOrder('${bizIdForCart}', ${total})">Confirm & Order via WhatsApp</button>
-            <button class="btn btn-secondary" onclick="closeModal()">Close</button>
-        `);
-    }
-
-    function placeOrder(bizId, total) {
-        const name = document.getElementById('c-name').value;
-        const wa = document.getElementById('c-wa').value;
-        if(!name || !wa) return showToast("Please fill name and number", "error");
-
-        const orderNum = Math.floor(10000 + Math.random() * 90000).toString(); 
-        const orderData = {
-            orderNum, custName: name, custWa: wa, items: cart, total, 
-            time: new Date().toISOString(), status: 'new', seen: false
-        };
-
-        db.collection('users').doc(bizId).collection('orders').add(orderData).then(() => {
-            const msg = `🔔 *New Order!* \nName: ${name}\nOrder #: ${orderNum}\n\nItems:\n${cart.map(i=>`- ${i.name} (${i.variant})`).join('\n')}\n\n*Total: ${total}*`;
-            window.open(`https://wa.me/${bizOwnerWa}?text=${encodeURIComponent(msg)}`);
-            cart = [];
-            document.getElementById('cart-count').innerText = '0';
-            closeModal();
-            showToast("Order Sent!", "success");
-        });
-    }
-
-    // ================= CUSTOMER CONFIRMATION PAGE =================
-    async function loadCustomerConfirmPage(bizId, orderId) {
-        const doc = await db.collection('users').doc(bizId).collection('orders').doc(orderId).get();
-        if(!doc.exists) return app.innerHTML = "<h2>Order not found</h2>";
-        const o = doc.data();
-
-        app.innerHTML = `
-            <div class="flex-col center p-2" style="min-height:100vh; background:white;">
-                <svg viewBox="0 0 24 24" fill="var(--green)" style="width:64px;height:64px;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-                <h2 class="text-green mb-1">Confirm Order</h2>
-                <h1 style="font-size:3rem; margin:0;">${o.orderNum}</h1>
-                <small class="mb-2">EatlyHub Order Verification</small>
-                
-                <div class="card w-100" style="max-width:400px; text-align:left;">
-                    ${o.items.map(i => `<div class="flex justify-between p-1" style="border-bottom:1px solid #eee"><span>${i.name}</span><span>${i.price}</span></div>`).join('')}
-                    <div class="flex justify-between bold p-1" style="font-size:1.2rem"><span>Total</span><span>${o.total}</span></div>
-                </div>
-
-                <div class="w-100" style="max-width:400px">
-                    <button class="btn btn-green" onclick="confirmAction('${bizId}', '${orderId}', 'confirmed')">✅ YES, CONFIRM ORDER</button>
-                    <button class="btn btn-secondary mt-1" style="background:#ff6b81" onclick="confirmAction('${bizId}', '${orderId}', 'canceled')">❌ CANCEL ORDER</button>
-                </div>
-            </div>
-        `;
-    }
-
-    function confirmAction(bizId, orderId, status) {
-        db.collection('users').doc(bizId).collection('orders').doc(orderId).update({status, seen: true})
-        .then(() => {
-            document.body.innerHTML = `<div style="height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;">
-                <h1 style="color:${status === 'confirmed' ? 'var(--green)' : 'red'}">${status === 'confirmed' ? '✅ Confirmed' : '❌ Canceled'}</h1>
-                <p>Thank you. You can close this window.</p>
-            </div>`;
-        });
-    }
-
-    // ================= UTILITIES =================
-    function showModal(content) {
-        const el = document.createElement('div');
-        el.className = 'modal-overlay';
-        el.innerHTML = `<div class="modal-box">${content}</div>`;
-        document.body.appendChild(el);
-    }
-    
-    function closeModal() {
-        const el = document.querySelector('.modal-overlay');
-        if(el) el.remove();
-    }
-
-    function showToast(msg, type='success') {
-        const t = document.createElement('div');
-        t.innerText = msg;
-        t.style = `
-            position: fixed; top: 20px; right: 20px; z-index: 2000;
-            background: ${type==='error'?'#ff4757':(type==='info'?'#2f3542':'#2ed573')}; 
-            color: white; padding: 12px 20px; border-radius: 50px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2); font-weight:600; font-size:0.9rem;
-            animation: slideIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        `;
-        document.body.appendChild(t);
-        setTimeout(() => {
-            t.style.animation = 'fadeOut 0.3s forwards';
-            setTimeout(() => t.remove(), 300);
-        }, 3000);
-    }
 </script>
-
-<style> 
-    @keyframes slideIn { from{opacity:0; transform:translateX(20px);} to{opacity:1; transform:translateX(0);} } 
-    @keyframes fadeOut { from{opacity:1; transform:translateY(0);} to{opacity:0; transform:translateY(-20px);} } 
-</style>
-
 </body>
 </html>

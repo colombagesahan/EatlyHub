@@ -3,130 +3,217 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>EatlyHub | Food Ordering System</title>
-    <link rel="manifest" href="./manifest.json">
-    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3075/3075977.png">
+    <title>EatlyHub | Food Delivery Platform</title>
     
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#ff4757">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3075/3075977.png">
+
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-    
+
     <style>
         :root {
-            --primary: #ff4757;
+            --primary: #ff4757; 
             --primary-dark: #e84118;
-            --bg: #f4f5f7;
+            --secondary: #2f3542;
+            --bg: #f1f2f6;
             --surface: #ffffff;
-            --text: #2f3542;
-            --green: #2ecc71;
-            --red: #e74c3c;
-            --yellow: #f1c40f;
-            --shadow: 0 4px 6px rgba(0,0,0,0.05);
-            --radius: 12px;
+            --green: #2ed573;
+            --red: #ff6b81;
+            --yellow: #ffa502;
+            --gray: #ced6e0;
+            --shadow: 0 8px 24px rgba(149, 157, 165, 0.2);
+            --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            --radius: 16px;
         }
 
-        /* --- BASE STYLES --- */
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-        body { margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 14px; padding-bottom: 20px; }
+        /* --- RESET & BASE --- */
+        * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; padding: 0; font-family: var(--font); background: var(--bg); color: var(--secondary); font-size: 14px; line-height: 1.5; overflow-x: hidden; padding-bottom: 20px; }
         
-        /* --- UTILITIES --- */
+        /* --- UTILITY CLASSES --- */
         .flex { display: flex; }
         .flex-col { flex-direction: column; }
         .center { align-items: center; justify-content: center; }
         .justify-between { justify-content: space-between; }
         .w-100 { width: 100%; }
         .hidden { display: none !important; }
-        .mt-1 { margin-top: 10px; }
-        .mb-1 { margin-bottom: 10px; }
-        .p-2 { padding: 15px; }
+        .mt-1 { margin-top: 0.5rem; }
+        .mt-2 { margin-top: 1rem; }
+        .mb-1 { margin-bottom: 0.5rem; }
+        .p-1 { padding: 0.5rem; }
+        .p-2 { padding: 1rem; }
         .text-center { text-align: center; }
         .text-right { text-align: right; }
+        .text-red { color: var(--primary); }
         .text-green { color: var(--green); }
-        .text-red { color: var(--red); }
         .bold { font-weight: 700; }
+        .relative { position: relative; }
+        
+        /* --- TYPOGRAPHY --- */
+        h1, h2, h3, h4 { margin: 0 0 8px 0; color: var(--secondary); font-weight: 800; }
+        small { color: #747d8c; font-size: 0.8rem; }
 
-        /* --- RESPONSIVE 300px SUPPORT --- */
-        @media (max-width: 320px) {
-            body { font-size: 12px; }
+        /* --- 300px SCREEN OPTIMIZATION --- */
+        /* Ensures flexible layouts don't break on tiny screens */
+        .card, .hero, nav, .container { min-width: 0; word-break: break-word; }
+        
+        @media (max-width: 340px) {
+            body { font-size: 13px; }
             h1 { font-size: 1.5rem; }
-            .btn { padding: 8px !important; font-size: 0.8rem !important; }
+            .btn { padding: 10px 12px !important; font-size: 0.85rem !important; }
+            .nav-brand { font-size: 1.1rem !important; }
+            .tab-btn { padding: 8px 12px !important; font-size: 0.85rem !important; }
         }
 
         /* --- COMPONENTS --- */
-        .btn { border: none; padding: 12px; border-radius: 8px; font-weight: 600; width: 100%; cursor: pointer; transition: 0.2s; margin-bottom: 5px; }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-secondary { background: #dfe4ea; color: var(--text); }
+        
+        /* Buttons */
+        .btn { 
+            padding: 14px 20px; border: none; border-radius: 12px; cursor: pointer; 
+            font-weight: 600; font-size: 1rem; transition: transform 0.1s; 
+            width: 100%; text-align: center; display: block; text-decoration: none; 
+            margin-bottom: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            position: relative; overflow: hidden;
+        }
+        .btn:active { transform: scale(0.97); }
+        .btn-primary { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; }
+        .btn-secondary { background: var(--secondary); color: white; }
         .btn-green { background: var(--green); color: white; }
-        .btn-outline { border: 1px solid var(--primary); background: transparent; color: var(--primary); }
-
-        .card { background: var(--surface); padding: 15px; border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 15px; border-left: 4px solid transparent; overflow: hidden; }
+        .btn-yellow { background: var(--yellow); color: white; }
+        .btn-outline { border: 2px solid var(--primary); color: var(--primary); background: transparent; box-shadow: none; }
         
-        /* Input Fields */
-        .form-group { margin-bottom: 12px; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.9rem; }
-        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ced6e0; border-radius: 8px; font-size: 1rem; }
-        .form-group input:disabled { background: #f1f2f6; color: #a4b0be; }
-
-        /* Image Upload Box */
-        .img-upload-box { border: 2px dashed #ccc; padding: 20px; text-align: center; border-radius: 8px; cursor: pointer; margin-bottom: 10px; position: relative; }
-        .img-preview { max-width: 100%; height: 100px; object-fit: cover; display: none; margin: 10px auto; border-radius: 5px; }
-
-        /* --- DASHBOARD NAVIGATION (Fixed Visibility) --- */
-        nav { background: var(--surface); padding: 10px; position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow); }
-        .nav-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        
-        .tab-scroll-container { 
-            display: flex; 
-            overflow-x: auto; 
-            gap: 10px; 
-            padding-bottom: 5px; 
-            scrollbar-width: none; /* Firefox */
+        /* Cards */
+        .card { 
+            background: var(--surface); padding: 20px; border-radius: var(--radius); 
+            box-shadow: var(--shadow); margin-bottom: 20px; border: 1px solid rgba(0,0,0,0.03);
+            animation: slideUp 0.3s ease-out;
         }
-        .tab-scroll-container::-webkit-scrollbar { display: none; } /* Chrome */
         
+        /* Inputs */
+        .input-group { margin-bottom: 16px; position: relative; }
+        .input-group label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.9rem; color: var(--secondary); }
+        .input-group input, .input-group select, .input-group textarea { 
+            width: 100%; padding: 14px; border: 2px solid #dfe4ea; border-radius: 12px; 
+            font-size: 1rem; background: #ffffff; transition: all 0.2s; -webkit-appearance: none;
+        }
+        .input-group input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(255, 71, 87, 0.1); }
+        
+        /* Image Upload Wrapper */
+        .file-upload-wrapper {
+            border: 2px dashed #dfe4ea; border-radius: 12px; padding: 20px;
+            text-align: center; cursor: pointer; background: #fdfdfd;
+        }
+        .file-upload-wrapper:hover { border-color: var(--primary); background: #fff5f6; }
+
+        /* Navigation */
+        nav { 
+            background: var(--surface); padding: 15px; position: sticky; top: 0; z-index: 100; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: space-between; 
+        }
+        .nav-brand { display: flex; align-items: center; gap: 8px; font-size: 1.4rem; font-weight: 900; color: var(--primary); }
+        .nav-logo-svg { width: 32px; height: 32px; fill: var(--primary); }
+
+        /* Dashboard Tabs (Horizontal Scroll Fix) */
+        .tabs-wrapper { 
+            background: var(--surface); border-bottom: 1px solid #eee; position: sticky; top: 62px; z-index: 90; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
+        .tabs-container { 
+            display: flex; flex-wrap: nowrap; overflow-x: auto; padding: 10px 15px; 
+            -webkit-overflow-scrolling: touch; scrollbar-width: none; gap: 10px;
+        }
+        .tabs-container::-webkit-scrollbar { display: none; }
         .tab-btn { 
-            white-space: nowrap; 
-            padding: 8px 15px; 
-            background: #f1f2f6; 
-            border-radius: 20px; 
-            font-size: 0.9rem; 
-            color: #747d8c; 
-            cursor: pointer; 
-            flex-shrink: 0; /* Prevents shrinking */
+            padding: 10px 18px; white-space: nowrap; cursor: pointer; color: #747d8c; 
+            font-weight: 600; border-radius: 20px; background: #f1f2f6; transition: all 0.2s; 
+            font-size: 0.9rem; flex-shrink: 0;
         }
-        .tab-btn.active { background: var(--primary); color: white; font-weight: bold; }
+        .tab-btn.active { background: var(--primary); color: white; box-shadow: 0 4px 10px rgba(255, 71, 87, 0.3); }
 
-        /* --- ORDER STATUS COLORS --- */
-        .status-new { border-left-color: var(--green); }
-        .status-confirmed { border-left-color: var(--yellow); }
-        .status-active { border-left-color: #3498db; }
-        .status-ready { border-left-color: #9b59b6; }
-        .status-completed { border-left-color: #2f3542; }
-        .status-unpaid { border-left-color: var(--red); }
+        /* Hero Section */
+        .hero { 
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark)); 
+            color: white; padding: 60px 20px 40px; text-align: center; 
+            border-radius: 0 0 30px 30px; box-shadow: var(--shadow); 
+            margin-bottom: 20px;
+        }
 
-        /* --- THERMAL BILL STYLE --- */
-        .bill-paper { background: #fffbe7; padding: 15px; border: 1px dashed #ccc; font-family: 'Courier New', monospace; position: relative; margin-top: 10px; }
-        .watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); font-size: 2rem; border: 3px solid rgba(231, 76, 60, 0.2); color: rgba(231, 76, 60, 0.2); font-weight: 900; padding: 5px; pointer-events: none; }
+        /* Status Badges */
+        .status-badge { padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; display: inline-block; }
+        .st-new { background: #eafff3; color: #00b894; border: 1px solid #00b894; }
+        .st-unverified { background: #fff0f0; color: var(--primary); border: 1px solid var(--primary); }
+        
+        /* Order Card Status Colors */
+        .card.status-new { border-left: 5px solid var(--green); }
+        .card.status-confirm { border-left: 5px solid var(--yellow); }
+        .card.status-active { border-left: 5px solid #70a1ff; } 
+        .card.status-ready { border-left: 5px solid #ff6b81; }
+        .card.status-completed { border-left: 5px solid #2f3542; }
+        .card.status-unpaid { border-left: 5px solid #ffa502; }
 
-        /* --- MODAL --- */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; display: flex; justify-content: center; align-items: flex-end; }
-        .modal-content { background: white; width: 100%; max-width: 500px; padding: 20px; border-radius: 15px 15px 0 0; max-height: 85vh; overflow-y: auto; animation: slideUp 0.3s; }
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        /* Receipt / Bill Styles */
+        .bill-wrapper { 
+            background: #fff; padding: 20px; border: 1px solid #eee; 
+            box-shadow: 0 0 15px rgba(0,0,0,0.05); margin-top: 15px; 
+            font-family: 'Courier New', monospace; position: relative; 
+            background-image: radial-gradient(#eee 1px, transparent 1px);
+            background-size: 10px 10px;
+        }
+        .bill-header { text-align: center; border-bottom: 2px dashed #000; padding-bottom: 15px; margin-bottom: 15px; }
+        .bill-item { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.95rem; }
+        .bill-total { border-top: 2px dashed #000; padding-top: 15px; margin-top: 15px; display: flex; justify-content: space-between; font-weight: 900; font-size: 1.2rem; }
+        
+        .watermark { 
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); 
+            font-size: 2.5rem; font-weight: 900; color: rgba(255, 71, 87, 0.1); 
+            border: 5px solid rgba(255, 71, 87, 0.1); padding: 10px 20px; 
+            white-space: nowrap; pointer-events: none; z-index: 0;
+        }
 
-        /* --- VERIFICATION BADGE --- */
-        .verified-badge { display: inline-flex; align-items: center; gap: 4px; background: #dff9fb; color: #2ecc71; padding: 4px 8px; border-radius: 12px; font-size: 0.8rem; border: 1px solid #2ecc71; margin-top: 5px; }
+        /* Modals */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; display: flex; justify-content: center; align-items: flex-end; backdrop-filter: blur(4px); }
+        @media(min-width: 600px) { .modal-overlay { align-items: center; } }
+        .modal-box { 
+            background: white; width: 100%; max-width: 500px; padding: 25px; 
+            border-radius: 25px 25px 0 0; max-height: 90vh; overflow-y: auto; 
+            animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @media(min-width: 600px) { .modal-box { border-radius: 20px; } }
+        
+        /* Loading & Animations */
+        @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; width: 40px; height: 40px; animation: spin 0.8s linear infinite; margin: 0 auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Floating Cart */
+        .floating-cart {
+            position: fixed; bottom: 20px; right: 20px; background: var(--primary); 
+            color: white; width: 65px; height: 65px; border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; 
+            font-size: 28px; box-shadow: 0 10px 25px rgba(255,71,87,0.4); 
+            cursor: pointer; z-index: 900; transition: transform 0.2s;
+        }
+        .floating-cart:active { transform: scale(0.9); }
+        .cart-badge { 
+            position: absolute; top: -5px; right: -5px; background: var(--secondary); 
+            color: white; width: 24px; height: 24px; border-radius: 50%; font-size: 12px; 
+            display: flex; align-items: center; justify-content: center; border: 2px solid white; 
+        }
 
     </style>
 </head>
 <body>
 
 <div id="app">
-    <!-- Loading Screen -->
-    <div style="height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center;">
-        <img src="https://cdn-icons-png.flaticon.com/512/3075/3075977.png" width="80">
-        <h2 style="color:var(--primary)">EatlyHub</h2>
-        <p>Loading...</p>
+    <div style="height:100vh; display:flex; align-items:center; justify-content:center; flex-direction:column;">
+        <div class="loader"></div>
+        <p class="mt-2 bold text-red">EatlyHub</p>
     </div>
 </div>
 
@@ -134,110 +221,129 @@
 
 <!-- 1. LANDING PAGE -->
 <template id="tpl-landing">
-    <div style="background: linear-gradient(135deg, var(--primary), #e84118); color: white; padding: 50px 20px; text-align: center; border-radius: 0 0 30px 30px;">
-        <img src="https://cdn-icons-png.flaticon.com/512/3075/3075977.png" width="80" style="background:white; border-radius:50%; padding:5px;">
-        <h1>EatlyHub</h1>
-        <p>All-in-One Food Platform for Hotels, Restaurants & Home Kitchens</p>
-        <button class="btn" style="background:white; color:var(--primary); font-weight:bold; margin-top:20px;" onclick="handleLogin()">Login with Gmail</button>
+    <div class="hero">
+        <svg class="nav-logo-svg" viewBox="0 0 24 24" fill="white" style="width:80px;height:80px;margin-bottom:15px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
+        </svg>
+        <h1 style="color:white; font-size:2.5rem;">EatlyHub</h1>
+        <p style="opacity:0.9; margin-bottom:20px;">All-in-One Platform for Hotels, Restaurants & Home Kitchens</p>
+        <button class="btn" onclick="authLogin()" style="background:white; color:var(--primary); font-weight:800; border-radius:30px;">
+            <svg style="width:20px;height:20px;vertical-align:middle;margin-right:8px;" viewBox="0 0 24 24"><path d="M12.545 10.239v3.821h5.445c-.712 2.315-2.647 3.972-5.445 3.972-3.332 0-6.033-2.531-6.033-5.97 0-3.438 2.701-5.97 6.033-5.97 1.414 0 2.675.525 3.636 1.35l2.802-2.818C17.396 2.922 15.115 1.761 12.545 1.761 6.615 1.761 1.76 6.345 1.76 12s4.855 10.239 10.785 10.239c6.234 0 10.39-4.313 10.39-10.239 0-.693-.061-1.373-.18-2.025l-10.21.264z"/></svg>
+            Continue with Gmail
+        </button>
     </div>
-    
-    <div class="p-2">
-        <h3 class="text-center">Start Your Business</h3>
+
+    <div class="container p-2">
+        <h3 class="text-center mb-1">Why EatlyHub?</h3>
+        
         <div class="card">
             <h4>🏨 Hotels & Restaurants</h4>
-            <p>Digitalize your room service and table ordering.</p>
+            <p>Digital menus for room service. No hardware needed.</p>
         </div>
-        <div class="card">
+
+        <div class="card" style="border-left:5px solid var(--green);">
             <h4>🏠 Home Based Kitchens</h4>
-            <p>Start selling homemade food today! Create menu, share link, get WhatsApp orders.</p>
+            <p>Start your food business today! Create a menu, get a link, and accept orders via WhatsApp.</p>
+            <div class="text-green bold text-center mt-1">Start Home Production!</div>
         </div>
     </div>
+    <div class="text-center p-2 text-red" style="font-size:0.8rem">Powered by EatlyHub</div>
 </template>
 
 <!-- 2. DASHBOARD SHELL -->
 <template id="tpl-dashboard">
     <nav>
-        <div class="nav-top">
-            <div class="bold" style="font-size:1.2rem; color:var(--primary)">EatlyHub</div>
-            <button onclick="authLogout()" style="background:none; border:none; color:#747d8c;">Logout</button>
+        <div class="nav-brand">
+            <svg class="nav-logo-svg" viewBox="0 0 24 24"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/></svg>
+            EatlyHub
         </div>
-        <!-- Scrollable Tabs -->
-        <div class="tab-scroll-container" id="dash-tabs">
-            <!-- Tabs injected here -->
-        </div>
+        <button class="btn btn-secondary" style="width:auto; padding:8px 14px; font-size:0.85rem; margin:0; border-radius:20px;" onclick="authLogout()">Logout</button>
     </nav>
-    <div id="dash-content" class="p-2" style="padding-bottom: 80px;"></div>
-</template>
 
-<!-- 3. PUBLIC WEBPAGE -->
-<template id="tpl-public">
-    <div id="pub-status-bar" class="text-center p-2 bold" style="color:white; font-size:0.9rem;"></div>
-    
-    <div class="text-center p-2" style="background:white; border-bottom:1px solid #eee;">
-        <img id="pub-logo" src="" style="width:100px; height:100px; border-radius:50%; object-fit:cover; border:3px solid var(--primary);">
-        <h2 id="pub-name" class="mt-1 mb-1"></h2>
-        <div id="pub-verified" class="hidden center" style="justify-content:center"><span class="verified-badge">✔ Verified Business</span></div>
-        <p id="pub-address" style="color:#7f8c8d; font-size:0.9rem;"></p>
-        <div class="flex mt-1" style="gap:10px;">
-            <a id="pub-call" class="btn btn-green">Call</a>
-            <a id="pub-wa" class="btn btn-green">WhatsApp</a>
+    <div class="tabs-wrapper">
+        <div class="tabs-container" id="dash-tabs">
+            <!-- Injected by JS -->
         </div>
     </div>
 
-    <div style="background:var(--primary); color:white; padding:30px 20px; text-align:center;">
-        <h2 id="pub-hero"></h2>
-        <button class="btn" style="background:white; color:var(--primary); width:auto; padding:10px 30px;" onclick="document.getElementById('pub-menu').scrollIntoView({behavior:'smooth'})">ORDER NOW</button>
+    <div id="dash-content" class="p-2" style="padding-bottom: 80px; max-width:800px; margin:0 auto;">
+        <!-- Content Injected by JS -->
     </div>
-
-    <div id="pub-menu" class="p-2"></div>
-
-    <footer class="text-center p-2 mt-1" style="background:#2f3542; color:white;">
-        <h4 id="foot-name"></h4>
-        <p id="foot-details" style="font-size:0.8rem; opacity:0.7;"></p>
-        <div id="foot-ver" class="hidden verified-badge" style="background:transparent; border:1px solid white; color:white; width:fit-content; margin:10px auto; cursor:pointer;">✔ Verified (View Proof)</div>
-        <small>Powered by EatlyHub</small>
-    </footer>
 </template>
 
-<!-- ================= LOGIC ================= -->
+<!-- ================= JAVASCRIPT LOGIC ================= -->
+
 <script>
-    // --- 1. FIREBASE CONFIG ---
+    // --- 1. CONFIGURATION ---
+    // TODO: REPLACE THIS WITH YOUR FIREBASE CONFIG
     const firebaseConfig = {
-        apiKey: "AIzaSyA4mlpgLA8l1N8VHqwpVLbPXvDvPxGPcSI",
+        apiKey: "YOUR_API_KEY_HERE",
         authDomain: "eatlyhub.firebaseapp.com",
         projectId: "eatlyhub",
-        storageBucket: "eatlyhub.firebasestorage.app",
-        messagingSenderId: "1094045089044",
-        appId: "1:1094045089044:web:397e0fd73412a07c3ad601"
+        storageBucket: "eatlyhub.appspot.com",
+        messagingSenderId: "123456789",
+        appId: "1:123456789:web:abcdef"
     };
 
+    // --- 2. INIT FIREBASE ---
     try {
-        firebase.initializeApp(firebaseConfig);
-    } catch(e) { console.error("Firebase Init Error", e); }
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    } catch(e) { 
+        console.error("Firebase Init Error - Make sure to add your config!", e); 
+        alert("System Error: Firebase Config missing. Please edit the code.");
+    }
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // --- 2. STATE ---
+    // --- 3. STATE MANAGEMENT ---
     const app = document.getElementById('app');
     let currentUser = null;
     let bizProfile = {};
     let bizOrders = [];
     let currentTab = 'Dashboard';
 
+    // Tabs List
     const TABS = [
         'Dashboard', 'Profile', 'Open/Close', 'Add Foods', 'My Webpage',
         'New Orders', 'Confirmed Orders', 'Active Orders', 'Ready Orders', 
         'Completed Orders', 'Unpaid Bills', 'Reports', 'Admin Messages'
     ];
 
-    // --- 3. INIT ---
+    // --- 4. IMAGE COMPRESSION UTILITY (Client Side) ---
+    // Resizes image to max 800px and converts to Base64
+    function compressImage(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (event) => {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 800;
+                    const scaleSize = MAX_WIDTH / img.width;
+                    canvas.width = MAX_WIDTH;
+                    canvas.height = img.height * scaleSize;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    resolve(canvas.toDataURL('image/jpeg', 0.7)); // Compress to 70% quality
+                };
+                img.onerror = (err) => reject(err);
+            };
+            reader.onerror = (err) => reject(err);
+        });
+    }
+
+    // --- 5. ROUTING ---
     window.addEventListener('load', () => {
-        // Router Logic
-        const params = new URLSearchParams(window.location.search);
-        if (params.get('biz') && params.get('orderId')) {
-            loadCustomerConfirm(params.get('biz'), params.get('orderId'));
-        } else if (params.get('biz')) {
-            loadPublicPage(params.get('biz'));
+        const urlParams = new URLSearchParams(window.location.search);
+        const bizId = urlParams.get('biz');
+        const orderId = urlParams.get('orderId');
+
+        if (bizId && orderId) {
+            loadCustomerConfirmPage(bizId, orderId);
+        } else if (bizId) {
+            loadPublicPage(bizId);
         } else {
             auth.onAuthStateChanged(user => {
                 if (user) {
@@ -250,238 +356,341 @@
         }
     });
 
-    // --- 4. RENDERER ---
     function render(tplId) {
         app.innerHTML = '';
         const tpl = document.getElementById(tplId);
         if(tpl) app.appendChild(tpl.content.cloneNode(true));
     }
 
-    // --- 5. AUTH ---
-    function handleLogin() {
-        auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(alert);
+    // --- 6. AUTHENTICATION ---
+    function authLogin() {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        auth.signInWithPopup(provider).catch(e => showToast("Login Error: " + e.message, 'error'));
     }
-    function authLogout() { auth.signOut().then(() => location.reload()); }
+    
+    function authLogout() { 
+        auth.signOut().then(() => window.location.reload()); 
+    }
 
-    // --- 6. DASHBOARD LOGIC ---
-    function loadDashboard() {
+    // --- 7. DASHBOARD LOGIC ---
+    async function loadDashboard() {
         render('tpl-dashboard');
         
-        // Render Tabs
-        const tabContainer = document.getElementById('dash-tabs');
-        tabContainer.innerHTML = TABS.map(t => `<div class="tab-btn" onclick="switchTab('${t}')">${t}</div>`).join('');
+        // Setup Tabs
+        const tabsContainer = document.getElementById('dash-tabs');
+        tabsContainer.innerHTML = TABS.map(t => 
+            `<div class="tab-btn" onclick="switchTab('${t}')">${t}</div>`
+        ).join('');
 
-        // Realtime Profile Listener
+        // Real-time Listener User Profile
         db.collection('users').doc(currentUser.uid).onSnapshot(doc => {
-            bizProfile = doc.exists ? doc.data() : { locked: false, verified: false, foods: [], schedule: {} };
-            refreshTab();
+            if(doc.exists) {
+                bizProfile = doc.data();
+            } else {
+                // Initialize new user
+                bizProfile = { locked: false, verified: false, foods: [], schedule: {} };
+                db.collection('users').doc(currentUser.uid).set(bizProfile);
+            }
+            refreshTabContent(); 
         });
 
-        // Realtime Orders Listener
-        db.collection('users').doc(currentUser.uid).collection('orders').orderBy('time', 'desc').limit(50)
-            .onSnapshot(snap => {
-                bizOrders = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                refreshTab();
-            });
+        // Real-time Listener Orders
+        db.collection('users').doc(currentUser.uid).collection('orders')
+          .orderBy('time', 'desc').limit(50)
+          .onSnapshot(snap => {
+              bizOrders = snap.docs.map(d => ({id: d.id, ...d.data()}));
+              
+              // Notification for New Orders
+              const newOrders = bizOrders.filter(o => o.status === 'new' && !o.seen);
+              if(newOrders.length > 0) {
+                  showToast(`🔔 ${newOrders.length} New Order(s)!`, 'success');
+                  // Play Sound (Optional)
+                  // markAsSeen(newOrders);
+              }
+              refreshTabContent();
+          });
 
         switchTab('Dashboard');
     }
 
     function switchTab(name) {
-        // Guard: Profile must be complete & locked to access other tabs
-        if (name !== 'Dashboard' && name !== 'Profile' && !bizProfile.locked) {
-            alert("Please complete and LOCK your profile first!");
+        // Guard: Force Profile Completion
+        // If profile is NOT locked (meaning not complete), force user to Profile tab
+        if (name !== 'Dashboard' && name !== 'Profile' && name !== 'Admin Messages' && (!bizProfile.locked)) {
+            showToast("⚠ Please Complete & LOCK your Profile first.", "error");
             name = 'Profile';
         }
+
         currentTab = name;
+        // Update UI Tabs
         document.querySelectorAll('.tab-btn').forEach(b => {
             b.classList.toggle('active', b.innerText === name);
         });
-        refreshTab();
+        
+        // Auto scroll active tab into view
+        const activeBtn = document.querySelector('.tab-btn.active');
+        if(activeBtn) activeBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+
+        refreshTabContent();
     }
 
-    function refreshTab() {
-        const content = document.getElementById('dash-content');
-        if(!content) return;
-        content.innerHTML = '';
+    function refreshTabContent() {
+        const container = document.getElementById('dash-content');
+        if (!container || !currentUser) return;
 
-        if(currentTab === 'Dashboard') renderDashHome(content);
-        else if(currentTab === 'Profile') renderProfile(content);
-        else if(currentTab === 'Open/Close') renderSchedule(content);
-        else if(currentTab === 'Add Foods') renderAddFoods(content);
-        else if(currentTab === 'My Webpage') renderWebpageInfo(content);
-        else if(currentTab === 'Reports') renderReports(content);
-        else if(currentTab === 'Admin Messages') content.innerHTML = '<div class="card text-center">No New Messages</div>';
-        else renderOrders(content, currentTab);
+        container.innerHTML = ''; // Clear
+
+        // Route logic
+        if(currentTab === 'Dashboard') renderDashHome(container);
+        else if(currentTab === 'Profile') renderProfile(container);
+        else if(currentTab === 'Open/Close') renderSchedule(container);
+        else if(currentTab === 'Add Foods') renderAddFoods(container);
+        else if(currentTab === 'My Webpage') renderWebpageInfo(container);
+        else if(currentTab === 'Reports') renderReports(container);
+        else if(currentTab === 'Admin Messages') renderAdminChat(container);
+        else renderOrdersList(container, currentTab);
     }
 
-    // --- 7. IMAGE COMPRESSOR (CLIENT SIDE) ---
-    function compressImage(file, callback) {
-        if(!file) return;
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = (e) => {
-            const img = new Image();
-            img.src = e.target.result;
-            img.onload = () => {
-                const canvas = document.createElement('canvas');
-                const MAX_WIDTH = 400; // Resize to 400px width
-                const scale = MAX_WIDTH / img.width;
-                canvas.width = MAX_WIDTH;
-                canvas.height = img.height * scale;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                callback(canvas.toDataURL('image/jpeg', 0.7)); // 0.7 quality
-            }
-        }
-    }
+    // --- TAB IMPLEMENTATIONS ---
 
-    // --- 8. TAB CONTENTS ---
+    // A) DASHBOARD HOME
+    function renderDashHome(target) {
+        const newCount = bizOrders.filter(o => o.status === 'new').length;
+        const activeCount = bizOrders.filter(o => ['confirmed', 'active', 'ready'].includes(o.status)).length;
 
-    // A) DASHBOARD
-    function renderDashHome(div) {
-        div.innerHTML = `
-            <div class="card text-center">
-                <img src="${bizProfile.logo || 'https://via.placeholder.com/100'}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;">
-                <h3>${bizProfile.businessName || 'Welcome'}</h3>
-                ${bizProfile.verified ? '<div class="verified-badge">✔ Verified</div>' : '<div class="text-red bold">❌ Not Verified</div>'}
+        target.innerHTML = `
+            <div class="card center flex-col">
+                <img src="${bizProfile.logo || 'https://cdn-icons-png.flaticon.com/512/847/847969.png'}" style="width:100px;height:100px;border-radius:50%;object-fit:cover;margin-bottom:10px;border:4px solid var(--primary);">
+                <h3>${bizProfile.businessName || 'Setup Your Business'}</h3>
+                ${bizProfile.verified 
+                    ? '<div class="status-badge st-new">✔ Verified Business</div>' 
+                    : '<div class="status-badge st-unverified">❌ Not Verified</div>'}
             </div>
+
+            <div class="flex" style="gap:10px; margin-bottom:20px;">
+                <div class="card w-100 text-center" style="margin:0; background:var(--primary); color:white;" onclick="switchTab('New Orders')">
+                    <h1>${newCount}</h1>
+                    <small style="color:white;">New Orders</small>
+                </div>
+                <div class="card w-100 text-center" style="margin:0;" onclick="switchTab('Active Orders')">
+                    <h1>${activeCount}</h1>
+                    <small>In Kitchen</small>
+                </div>
+            </div>
+            
             <div class="card">
-                <h4>Search</h4>
-                <div class="form-group"><input placeholder="Order ID" onkeyup="searchOrder(this.value)"></div>
-                <div id="s-res-ord"></div>
-                <div class="form-group"><input placeholder="Customer WhatsApp (e.g. 9477...)" onkeyup="searchUnpaid(this.value)"></div>
-                <div id="s-res-unp"></div>
+                <h4>🔍 Quick Search</h4>
+                <div class="input-group">
+                    <label>Track Order Number</label>
+                    <input type="text" placeholder="e.g. 12345" onkeyup="searchOrder(this.value)">
+                    <div id="res-order" class="mt-1"></div>
+                </div>
+                <div class="input-group">
+                    <label>Check Unpaid Customer (WhatsApp)</label>
+                    <input type="text" placeholder="e.g. 9477..." onkeyup="searchUnpaid(this.value)">
+                    <div id="res-unpaid" class="mt-1"></div>
+                </div>
             </div>
         `;
     }
 
     // B) PROFILE
-    function renderProfile(div) {
+    function renderProfile(target) {
         const p = bizProfile;
-        const lock = p.locked;
-        div.innerHTML = `
+        const disabled = p.locked ? 'disabled' : '';
+        
+        let html = `
             <div class="card">
                 <h3>Business Profile</h3>
-                <div class="img-upload-box" onclick="document.getElementById('upl-logo').click()">
-                    ${p.logo ? `<img src="${p.logo}" class="img-preview" style="display:block">` : '<span>Click to Upload Logo</span>'}
+                <p class="text-red" style="font-size:0.85rem">All fields required. Lock profile to enable other tabs.</p>
+                
+                <div class="center flex-col mb-1">
+                    <img id="prev-logo" src="${p.logo||'https://via.placeholder.com/100'}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;">
+                    ${!p.locked ? `<label class="btn btn-secondary mt-1" style="width:auto;padding:5px 10px;font-size:0.8rem">Upload Logo <input type="file" hidden onchange="handleImageUpload(this, 'logo')"></label>` : ''}
                 </div>
-                <input type="file" id="upl-logo" class="hidden" ${lock?'disabled':''} onchange="handleImg(this, 'p-logo')">
+
+                <div class="input-group"><label>Business Name</label><input id="p-name" value="${p.businessName||''}" ${disabled}></div>
+                <div class="input-group"><label>Business Address / Home Address</label><textarea id="p-addr" ${disabled} rows="2">${p.address||''}</textarea></div>
+                <div class="input-group"><label>Owner Name</label><input id="p-owner" value="${p.ownerName||''}" ${disabled}></div>
+                <div class="input-group"><label>Reg No / NIC</label><input id="p-nic" value="${p.nic||''}" ${disabled}></div>
+                <div class="input-group"><label>Hotline</label><input type="tel" id="p-hot" value="${p.hotline||''}" ${disabled}></div>
+                <div class="input-group"><label>WhatsApp Number</label><input type="tel" id="p-wa" value="${p.whatsapp||''}" ${disabled}></div>
                 
-                <div class="form-group"><label>Business Name</label><input id="p-name" value="${p.businessName||''}" ${lock?'disabled':''}></div>
-                <div class="form-group"><label>Owner Name</label><input id="p-owner" value="${p.ownerName||''}" ${lock?'disabled':''}></div>
-                <div class="form-group"><label>Address</label><input id="p-addr" value="${p.address||''}" ${lock?'disabled':''}></div>
-                <div class="form-group"><label>Reg/NIC</label><input id="p-nic" value="${p.nic||''}" ${lock?'disabled':''}></div>
-                <div class="form-group"><label>Hotline</label><input id="p-hot" value="${p.hotline||''}" ${lock?'disabled':''}></div>
-                <div class="form-group"><label>WhatsApp</label><input id="p-wa" value="${p.whatsapp||''}" ${lock?'disabled':''}></div>
-                
-                ${lock ? `<button class="btn btn-secondary" onclick="toggleLock(false)">Unlock & Edit</button>` : `<button class="btn btn-primary" onclick="saveProfile()">Save & Lock</button>`}
+                ${p.locked 
+                    ? `<button class="btn btn-yellow" onclick="toggleLock(false)">Unlock to Edit</button>` 
+                    : `<button class="btn btn-primary" onclick="saveProfile()">Save & Lock Profile</button>`}
             </div>
-            
+
             <div class="card">
-                <h3>Get Verified (Rs 2500)</h3>
-                ${p.verified ? '<p class="text-green bold">You are Verified!</p>' : `
-                    <p>Bank: Commercial Bank | Acc: 8750053306</p>
-                    <div class="form-group"><label>Grama Niladhari Letter</label><input type="file" id="v-letter"></div>
-                    <div class="form-group"><label>Payment Slip</label><input type="file" id="v-slip"></div>
-                    <button class="btn btn-green" onclick="alert('Submitted to Admin')">Submit Verification</button>
+                <h3>Verification Badge (Rs 2500)</h3>
+                ${p.verified ? '<div class="text-green bold text-center" style="font-size:1.2rem; padding:20px;">✅ You are Verified!</div>' : `
+                    <p class="mb-1">Get the Green Badge to build trust. One-time payment.</p>
+                    <div style="background:#f1f2f6; padding:15px; border-radius:12px; font-size:0.9rem; margin-bottom:15px;">
+                        <b>Bank:</b> Commercial Bank, Homagama<br>
+                        <b>Acc:</b> 8750053306 (Colombage SD)<br>
+                        <b>Amount:</b> Rs. 2,500
+                    </div>
+                    <div class="input-group">
+                        <label>1. Grama Niladhari Letter</label>
+                        <input type="file" id="v-letter" onchange="handleImageUpload(this, 'letter')">
+                        <div id="stat-letter" class="text-green hidden">✔ Uploaded</div>
+                    </div>
+                    <div class="input-group">
+                        <label>2. Payment Slip</label>
+                        <input type="file" id="v-slip" onchange="handleImageUpload(this, 'slip')">
+                        <div id="stat-slip" class="text-green hidden">✔ Uploaded</div>
+                    </div>
+                    <button class="btn btn-green" onclick="requestVerification()">Submit for Verification</button>
+                    <button class="btn btn-outline" onclick="switchTab('Admin Messages')">Message Admin for Info</button>
                 `}
             </div>
         `;
+        target.innerHTML = html;
     }
 
-    function handleImg(input, key) {
-        compressImage(input.files[0], (base64) => {
-            if(key === 'p-logo') bizProfile.tempLogo = base64; // Temp store
-            document.querySelector('.img-preview').src = base64;
-            document.querySelector('.img-preview').style.display = 'block';
-        });
+    async function handleImageUpload(input, type) {
+        if (input.files && input.files[0]) {
+            showToast("Compressing Image...", "info");
+            try {
+                const base64 = await compressImage(input.files[0]);
+                if(type === 'logo') {
+                    document.getElementById('prev-logo').src = base64;
+                    bizProfile.tempLogo = base64; // Stored temporarily until save
+                } else {
+                    bizProfile['temp_' + type] = base64;
+                    document.getElementById('stat-' + type).classList.remove('hidden');
+                }
+                showToast("Image Ready", "success");
+            } catch (e) {
+                showToast("Image Error", "error");
+            }
+        }
     }
 
     function saveProfile() {
-        const name = document.getElementById('p-name').value;
-        const wa = document.getElementById('p-wa').value;
         const logo = bizProfile.tempLogo || bizProfile.logo;
+        const name = document.getElementById('p-name').value;
+        const addr = document.getElementById('p-addr').value;
+        const owner = document.getElementById('p-owner').value;
+        const nic = document.getElementById('p-nic').value;
+        const hot = document.getElementById('p-hot').value;
+        const wa = document.getElementById('p-wa').value;
 
-        if(!name || !wa || !logo) return alert("All fields including Logo are REQUIRED!");
+        if(!logo || !name || !addr || !owner || !nic || !hot || !wa) {
+            return showToast("All profile fields & Logo are REQUIRED!", "error");
+        }
 
-        db.collection('users').doc(currentUser.uid).set({
-            logo: logo,
-            businessName: name,
-            ownerName: document.getElementById('p-owner').value,
-            address: document.getElementById('p-addr').value,
-            nic: document.getElementById('p-nic').value,
-            hotline: document.getElementById('p-hot').value,
-            whatsapp: wa,
-            locked: true,
-            verified: bizProfile.verified || false
-        }, {merge:true}).then(() => alert("Profile Saved!"));
+        const updatedProfile = {
+            ...bizProfile,
+            logo, businessName: name, address: addr, ownerName: owner, 
+            nic, hotline: hot, whatsapp: wa, locked: true
+        };
+        delete updatedProfile.tempLogo; // Clean up
+
+        db.collection('users').doc(currentUser.uid).set(updatedProfile, {merge:true})
+            .then(() => { showToast("Profile Locked & Saved", "success"); switchTab('Dashboard'); })
+            .catch(e => showToast("Save Failed: " + e.message, "error"));
     }
 
     function toggleLock(state) {
         db.collection('users').doc(currentUser.uid).update({locked: state});
     }
 
-    // C) SCHEDULE
-    function renderSchedule(div) {
+    function requestVerification() {
+        if(!bizProfile.temp_letter || !bizProfile.temp_slip) return showToast("Please upload both documents.", "error");
+        // In a real app, send these to an admin collection
+        showToast("Documents Submitted! Admin will review.", "success");
+        // Simulate sending to Admin Messages
+        db.collection('admin_requests').add({
+            uid: currentUser.uid, 
+            name: bizProfile.businessName, 
+            letter: bizProfile.temp_letter, 
+            slip: bizProfile.temp_slip,
+            timestamp: new Date()
+        });
+    }
+
+    // C) OPEN / CLOSE
+    function renderSchedule(target) {
         const today = new Date().toLocaleDateString('en-US', {weekday:'long'});
-        const s = bizProfile.schedule?.[today] || {};
-        div.innerHTML = `
+        const s = bizProfile.schedule?.[today] || {open: false, start:'08:00', end:'20:00'};
+        
+        target.innerHTML = `
             <div class="card">
-                <h3>${today} Schedule</h3>
-                <div class="form-group">
-                    <label>Open Today?</label>
-                    <select id="oc-open">
-                        <option value="yes" ${s.open?'selected':''}>Yes</option>
-                        <option value="no" ${!s.open?'selected':''}>No</option>
+                <h3>📅 Schedule for ${today}</h3>
+                <div class="input-group">
+                    <label>Are you Open Today?</label>
+                    <select id="oc-stat" onchange="saveSched('${today}')" style="background:${s.open?'#eafff3':'#fff0f0'}">
+                        <option value="yes" ${s.open?'selected':''}>Yes, Open</option>
+                        <option value="no" ${!s.open?'selected':''}>No, Closed</option>
                     </select>
                 </div>
-                <div class="flex" style="gap:10px">
-                    <div class="form-group w-100"><label>Open Time</label><input type="time" id="oc-start" value="${s.start||'08:00'}"></div>
-                    <div class="form-group w-100"><label>Close Time</label><input type="time" id="oc-end" value="${s.end||'20:00'}"></div>
+                <div class="flex" style="gap:10px;">
+                    <div class="input-group w-100">
+                        <label>Open Time</label>
+                        <input type="time" id="oc-start" value="${s.start}" onchange="saveSched('${today}')">
+                    </div>
+                    <div class="input-group w-100">
+                        <label>Close Time</label>
+                        <input type="time" id="oc-end" value="${s.end}" onchange="saveSched('${today}')">
+                    </div>
                 </div>
-                <button class="btn btn-primary" onclick="saveSched('${today}')">Save Schedule</button>
+                <div class="text-center text-green" style="font-size:0.8rem">Settings auto-save for ${today}</div>
+            </div>
+            <div class="card" style="background:${s.open ? 'var(--green)' : 'var(--primary)'}; color:white;">
+                <h3 style="color:white; margin:0;">Preview</h3>
+                <p style="margin:0;">Webpage Status: ${s.open ? `WE ARE OPEN (${s.start} - ${s.end})` : 'WE ARE CLOSED TODAY'}</p>
             </div>
         `;
     }
 
     function saveSched(day) {
-        const sched = bizProfile.schedule || {};
-        sched[day] = {
-            open: document.getElementById('oc-open').value === 'yes',
-            start: document.getElementById('oc-start').value,
-            end: document.getElementById('oc-end').value
-        };
-        db.collection('users').doc(currentUser.uid).update({schedule: sched});
+        const open = document.getElementById('oc-stat').value === 'yes';
+        const start = document.getElementById('oc-start').value;
+        const end = document.getElementById('oc-end').value;
+        const schedule = bizProfile.schedule || {};
+        schedule[day] = { open, start, end };
+        
+        db.collection('users').doc(currentUser.uid).update({ schedule });
     }
 
     // D) ADD FOODS
-    function renderAddFoods(div) {
-        div.innerHTML = `
+    function renderAddFoods(target) {
+        target.innerHTML = `
             <div class="card">
-                <h3>Add Item</h3>
-                <div class="img-upload-box" onclick="document.getElementById('f-upl').click()">
-                    <img id="f-prev" class="img-preview">
-                    <span>Click to Upload Image</span>
+                <h3>Add New Item</h3>
+                <div class="input-group">
+                    <label>Food Image</label>
+                    <div class="file-upload-wrapper" onclick="document.getElementById('f-file').click()">
+                        <span id="f-file-txt">Click to Upload Image</span>
+                        <input type="file" id="f-file" hidden onchange="handleFoodImg(this)">
+                    </div>
+                    <img id="f-prev" class="hidden mt-1" style="width:100%; height:150px; object-fit:cover; border-radius:10px;">
                 </div>
-                <input type="file" id="f-upl" class="hidden" onchange="handleFoodImg(this)">
-                
-                <div class="form-group"><input id="f-cat" placeholder="Category (e.g. Rice)"></div>
-                <div class="form-group"><input id="f-name" placeholder="Name *"></div>
+                <div class="input-group"><label>Category</label><input id="f-cat" placeholder="e.g. Fried Rice"></div>
+                <div class="input-group"><label>Food Name</label><input id="f-name" placeholder="Item Name"></div>
                 <div class="flex" style="gap:10px">
-                    <div class="form-group w-100"><input id="f-half" type="number" placeholder="Half Price"></div>
-                    <div class="form-group w-100"><input id="f-full" type="number" placeholder="Full Price"></div>
+                    <div class="input-group w-100"><label>Half Price</label><input id="f-half" type="number" placeholder="Optional"></div>
+                    <div class="input-group w-100"><label>Full Price</label><input id="f-full" type="number" placeholder="Required if no half"></div>
                 </div>
-                <button class="btn btn-green" onclick="addFood()">Add to Menu</button>
+                <button class="btn btn-green mt-1" onclick="addFood()">+ Add to Menu</button>
             </div>
+            
+            <h3>Current Menu</h3>
             <div id="menu-list">
                 ${(bizProfile.foods||[]).map((f,i) => `
-                    <div class="card flex center justify-between">
+                    <div class="card flex justify-between center" style="padding:10px;">
                         <div class="flex center">
-                            <img src="${f.img}" style="width:50px;height:50px;border-radius:5px;margin-right:10px;">
-                            <div><b>${f.name}</b><br><small>${f.cat}</small></div>
+                            <img src="${f.img}" style="width:60px;height:60px;border-radius:10px;margin-right:15px;object-fit:cover;">
+                            <div>
+                                <div class="bold">${f.name}</div>
+                                <small>${f.cat}</small>
+                                <div style="font-size:0.8rem; margin-top:4px;">
+                                    ${f.half ? `H: ${f.half} ` : ''} ${f.full ? `F: ${f.full}` : ''}
+                                </div>
+                            </div>
                         </div>
-                        <button class="btn btn-secondary" style="width:auto" onclick="delFood(${i})">X</button>
+                        <button class="btn btn-secondary" style="width:auto;padding:8px 12px;" onclick="deleteFood(${i})">🗑</button>
                     </div>
                 `).join('')}
             </div>
@@ -489,285 +698,474 @@
     }
 
     let tempFoodImg = null;
-    function handleFoodImg(input) {
-        compressImage(input.files[0], (b64) => {
-            tempFoodImg = b64;
-            document.getElementById('f-prev').src = b64;
-            document.getElementById('f-prev').style.display = 'block';
-        });
+    async function handleFoodImg(input) {
+        if(input.files[0]) {
+            tempFoodImg = await compressImage(input.files[0]);
+            const img = document.getElementById('f-prev');
+            img.src = tempFoodImg;
+            img.classList.remove('hidden');
+            document.getElementById('f-file-txt').innerText = "Image Selected";
+        }
     }
 
     function addFood() {
+        const cat = document.getElementById('f-cat').value;
         const name = document.getElementById('f-name').value;
         const half = document.getElementById('f-half').value;
         const full = document.getElementById('f-full').value;
-        if(!name || !tempFoodImg || (!half && !full)) return alert("Name, Image & One Price Required!");
 
-        const foods = [...(bizProfile.foods||[]), {
-            name, img: tempFoodImg, half, full, cat: document.getElementById('f-cat').value
-        }];
+        if(!tempFoodImg) return showToast("Image is required", "error");
+        if(!name) return showToast("Name is required", "error");
+        if(!half && !full) return showToast("At least one price is required", "error");
+
+        const foods = [...(bizProfile.foods||[]), {cat, name, img: tempFoodImg, half, full}];
         
-        db.collection('users').doc(currentUser.uid).update({foods}).then(() => {
+        db.collection('users').doc(currentUser.uid).update({foods})
+        .then(() => {
+            showToast("Food Added", "success");
             tempFoodImg = null;
-            renderAddFoods(document.getElementById('dash-content'));
+            renderAddFoods(document.getElementById('dash-content')); 
         });
     }
 
-    function delFood(i) {
-        const foods = bizProfile.foods.filter((_, idx) => idx !== i);
-        db.collection('users').doc(currentUser.uid).update({foods});
+    function deleteFood(idx) {
+        if(!confirm("Delete this item?")) return;
+        const foods = bizProfile.foods.filter((_, i) => i !== idx);
+        db.collection('users').doc(currentUser.uid).update({foods})
+        .then(() => renderAddFoods(document.getElementById('dash-content')));
     }
 
-    // E) WEBPAGE INFO
-    function renderWebpageInfo(div) {
-        const link = `${location.origin}${location.pathname}?biz=${currentUser.uid}`;
-        div.innerHTML = `
+    // E) MY WEBPAGE
+    function renderWebpageInfo(target) {
+        const url = `${window.location.origin}${window.location.pathname}?biz=${currentUser.uid}`;
+        target.innerHTML = `
+            <div class="card text-center">
+                <img src="${bizProfile.logo}" style="width:80px;height:80px;border-radius:50%;margin:0 auto 10px;">
+                <h3>${bizProfile.businessName}</h3>
+                <p>Share this link with your customers:</p>
+                <input class="w-100 p-2 mb-1" value="${url}" readonly style="background:#eee;border:none;border-radius:8px;">
+                <div class="flex" style="gap:10px">
+                    <a href="${url}" target="_blank" class="btn btn-primary">Open Webpage</a>
+                    <button class="btn btn-secondary" onclick="navigator.clipboard.writeText('${url}');showToast('Copied!')">Copy Link</button>
+                </div>
+            </div>
             <div class="card">
-                <h3>Your Link</h3>
-                <input value="${link}" readonly style="background:#eee; padding:10px; width:100%; border:none; margin-bottom:10px;">
-                <a href="${link}" target="_blank" class="btn btn-primary" style="display:block; text-decoration:none; text-align:center;">Open Webpage</a>
-                <div class="form-group mt-1"><label>Hero Text</label><input id="hero-txt" value="${bizProfile.heroText||''}" onchange="updateHero(this.value)"></div>
+                <h3>Hero Settings</h3>
+                <div class="input-group">
+                    <label>Welcome Message</label>
+                    <input id="hero-txt" value="${bizProfile.heroText || 'Welcome to ' + bizProfile.businessName}" onchange="updateHero(this.value)">
+                </div>
             </div>
         `;
     }
-    function updateHero(v) { db.collection('users').doc(currentUser.uid).update({heroText:v}); }
+    
+    function updateHero(txt) {
+        db.collection('users').doc(currentUser.uid).update({heroText: txt});
+    }
 
-    // F) ORDERS LOGIC
-    function renderOrders(div, tab) {
-        const map = {'New Orders':'new', 'Confirmed Orders':'confirmed', 'Active Orders':'active', 'Ready Orders':'ready', 'Completed Orders':'completed', 'Unpaid Bills':'unpaid'};
-        const status = map[tab];
-        
+    // F) ORDERS WORKFLOW
+    function renderOrdersList(target, tabName) {
+        const map = {
+            'New Orders': 'new', 'Confirmed Orders': 'confirmed', 
+            'Active Orders': 'active', 'Ready Orders': 'ready', 
+            'Completed Orders': 'completed', 'Unpaid Bills': 'unpaid'
+        };
+        const status = map[tabName];
+        if(!status) return;
+
         const list = bizOrders.filter(o => o.status === status);
-        if(!list.length) return div.innerHTML = `<div class="p-2 text-center">No orders found.</div>`;
+        if(list.length === 0) {
+            target.innerHTML = '<div class="text-center p-2 text-gray mt-2"><h3 style="color:#ddd">No Orders Here</h3></div>';
+            return;
+        }
 
-        div.innerHTML = list.map(o => {
-            let btns = '';
-            if(status === 'new') btns = `
-                <button class="btn btn-yellow" onclick="reqConfirm('${o.id}', '${o.custWa}')">Request Confirmation</button>
-                <button class="btn btn-outline" style="color:red;border-color:red" onclick="updStatus('${o.id}', 'canceled')">Decline</button>`;
-            if(status === 'confirmed') btns = `<button class="btn btn-primary" onclick="genBill('${o.id}')">🖨 Print Bill & Cook</button>`;
-            if(status === 'active') btns = `
-                <div class="bill-paper">
-                    <div class="watermark">NOT PAID</div>
-                    <div class="text-center bold">${bizProfile.businessName}</div>
-                    <div class="text-center"><small>Order #${o.orderNum}</small></div>
-                    <hr>
-                    ${o.items.map(i => `<div class="flex justify-between"><span>${i.name}</span><span>${i.price}</span></div>`).join('')}
-                    <hr>
-                    <div class="flex justify-between bold"><span>Total</span><span>${o.total}</span></div>
-                </div>
-                <button class="btn btn-green mt-1" onclick="markReady('${o.id}', '${o.custWa}')">Mark Ready & Notify</button>`;
-            if(status === 'ready') btns = `
-                <button class="btn btn-secondary" onclick="updStatus('${o.id}', 'completed')">💰 Paid & Complete</button>
-                <button class="btn btn-outline" style="color:red;border-color:red" onclick="updStatus('${o.id}', 'unpaid')">⚠ Not Paid</button>`;
+        target.innerHTML = list.map(o => {
+            let actions = '';
+            
+            // 1. New -> Confirmed / Cancel
+            if(status === 'new') {
+                actions = `
+                    <button class="btn btn-yellow" onclick="reqConfirm('${o.id}', '${o.custWa}')">Request Confirmation (WhatsApp)</button>
+                    <button class="btn btn-outline" style="border-color:var(--primary); color:var(--primary);" onclick="setStatus('${o.id}', 'canceled')">Decline Order</button>
+                `;
+            }
+            // 2. Confirmed -> Active (Bill)
+            else if(status === 'confirmed') {
+                actions = `<button class="btn btn-primary" onclick="generateBill('${o.id}')">🖨 Print Bill & Start Cooking</button>`;
+            }
+            // 3. Active -> Ready
+            else if(status === 'active') {
+                actions = `
+                    <div class="bill-wrapper">
+                        <div class="watermark">NOT PAID</div>
+                        <div class="bill-header">
+                            <div class="bold" style="font-size:1.2em">${bizProfile.businessName}</div>
+                            <small>Order #${o.orderNum}</small><br>
+                            <small>${new Date(o.time).toLocaleString()}</small>
+                        </div>
+                        ${o.items.map(i => `<div class="bill-item"><span>${i.name} (${i.variant})</span><span>${i.price}</span></div>`).join('')}
+                        <div class="bill-total"><span>Total</span><span>${o.total}</span></div>
+                        <div class="text-center mt-2 small">Thank you!</div>
+                    </div>
+                    <button class="btn btn-green mt-1" onclick="markReady('${o.id}', '${o.custWa}')">✅ Mark Ready & Notify Customer</button>
+                `;
+            }
+            // 4. Ready -> Complete / Unpaid
+            else if(status === 'ready') {
+                actions = `
+                    <button class="btn btn-secondary" onclick="setStatus('${o.id}', 'completed')">💰 Payment Received (Complete)</button>
+                    <button class="btn btn-outline" style="border-color:var(--yellow); color:var(--yellow);" onclick="setStatus('${o.id}', 'unpaid')">⚠ Not Paid (Record as Unpaid)</button>
+                `;
+            }
 
             return `
                 <div class="card status-${status}">
-                    <div class="flex justify-between"><h4>#${o.orderNum}</h4><small>${new Date(o.time).toLocaleTimeString()}</small></div>
-                    <p class="bold">${o.custName} (<a href="tel:${o.custWa}">${o.custWa}</a>)</p>
-                    <ul>${o.items.map(i=>`<li>${i.name} (${i.variant})</li>`).join('')}</ul>
-                    <div class="text-right bold">Total: ${o.total}</div>
-                    <div class="mt-1">${btns}</div>
+                    <div class="flex justify-between center">
+                        <h4 class="text-red">#${o.orderNum}</h4>
+                        <small>${new Date(o.time).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</small>
+                    </div>
+                    <div class="mb-1">
+                        <b>${o.custName}</b> <a href="https://wa.me/${o.custWa}" class="btn btn-green" style="display:inline-block; width:auto; padding:2px 8px; font-size:12px; margin-left:10px;">✆ WhatsApp</a>
+                    </div>
+                    <div style="background:#f8f9fa; padding:10px; border-radius:10px; border:1px solid #eee;">
+                        ${o.items.map(i => `<div>• ${i.name} (${i.variant}) - ${i.price}</div>`).join('')}
+                    </div>
+                    <div class="text-right mt-1 bold" style="font-size:1.1rem">Total: ${o.total}</div>
+                    <div class="mt-1">${actions}</div>
                 </div>
             `;
         }).join('');
     }
 
-    function updStatus(id, st) { db.collection('users').doc(currentUser.uid).collection('orders').doc(id).update({status:st}); }
-    
+    // ACTIONS
     function reqConfirm(id, wa) {
-        const url = `${location.origin}${location.pathname}?biz=${currentUser.uid}&orderId=${id}`;
-        window.open(`https://wa.me/${wa}?text=${encodeURIComponent("Please confirm your order: " + url)}`);
+        const link = `${window.location.origin}${window.location.pathname}?biz=${currentUser.uid}&orderId=${id}`;
+        const msg = `Hello! Please confirm your *${bizProfile.businessName}* order by clicking here: ${link}`;
+        window.open(`https://wa.me/${wa}?text=${encodeURIComponent(msg)}`);
+        // We do NOT change status yet. Customer changes it.
     }
-    
-    function genBill(id) {
+
+    function generateBill(id) {
         const o = bizOrders.find(x => x.id === id);
-        updStatus(id, 'active');
+        setStatus(id, 'active');
+        
         let txt = `🧾 *BILL - ${bizProfile.businessName}*\nOrder #${o.orderNum}\n\n`;
-        o.items.forEach(i => txt += `${i.name}: ${i.price}\n`);
-        txt += `\n*Total: ${o.total}*`;
+        o.items.forEach(i => txt += `${i.name} (${i.variant}): ${i.price}\n`);
+        txt += `\n*Total: ${o.total}*\nStatus: Preparing...`;
+        
         window.open(`https://wa.me/${o.custWa}?text=${encodeURIComponent(txt)}`);
     }
 
     function markReady(id, wa) {
-        updStatus(id, 'ready');
-        window.open(`https://wa.me/${wa}?text=${encodeURIComponent("Your order is READY! Please come and pay.")}`);
+        const msg = `🍽 Your order is *READY*! Please come and pick it up.`;
+        window.open(`https://wa.me/${wa}?text=${encodeURIComponent(msg)}`);
+        setStatus(id, 'ready');
+    }
+
+    function setStatus(id, status) {
+        db.collection('users').doc(currentUser.uid).collection('orders').doc(id).update({status, seen: true});
     }
 
     // G) REPORTS
-    function renderReports(div) {
-        const done = bizOrders.filter(o => o.status === 'completed');
-        const rev = done.reduce((a,b)=>a+parseInt(b.total), 0);
-        const unpaid = bizOrders.filter(o => o.status === 'unpaid').length;
-        div.innerHTML = `
+    function renderReports(target) {
+        const completed = bizOrders.filter(o => o.status === 'completed');
+        const unpaid = bizOrders.filter(o => o.status === 'unpaid');
+        const revenue = completed.reduce((a,b) => a + Number(b.total), 0);
+
+        target.innerHTML = `
             <div class="card text-center">
-                <h3>Total Revenue</h3>
-                <h1 class="text-green">Rs. ${rev}</h1>
-                <div class="flex mt-1" style="gap:10px">
-                    <div class="card w-100" style="background:#f1f2f6"><b>${done.length}</b><br>Completed</div>
-                    <div class="card w-100" style="background:#fff0f0; color:red"><b>${unpaid}</b><br>Unpaid</div>
+                <h3>📊 Business Snapshot</h3>
+                <h1 class="text-green mt-2" style="font-size:2.5rem">Rs. ${revenue}</h1>
+                <small>Total Revenue</small>
+                
+                <div class="flex mt-2" style="gap:10px">
+                    <div class="w-100 p-1" style="background:#f1f2f6; border-radius:12px;">
+                        <h3>${completed.length}</h3><small>Completed Orders</small>
+                    </div>
+                    <div class="w-100 p-1" style="background:#fff0f0; border-radius:12px; color:var(--primary);">
+                        <h3>${unpaid.length}</h3><small>Unpaid Bills</small>
+                    </div>
+                </div>
+            </div>
+            
+            <h3>Unpaid List</h3>
+            ${unpaid.length === 0 ? '<p>No unpaid bills.</p>' : unpaid.map(u => `
+                <div class="card status-unpaid">
+                    <div class="flex justify-between">
+                        <b>${u.custName}</b>
+                        <b class="text-red">${u.total}</b>
+                    </div>
+                    <small>${u.custWa} - Order #${u.orderNum}</small>
+                </div>
+            `).join('')}
+        `;
+    }
+
+    // H) ADMIN CHAT
+    function renderAdminChat(target) {
+        target.innerHTML = `
+            <div class="card" style="height:60vh; display:flex; flex-direction:column;">
+                <h3 style="border-bottom:1px solid #eee; padding-bottom:10px;">Admin Support</h3>
+                <div style="flex:1; display:flex; align-items:center; justify-content:center; color:#ccc;">
+                    No messages yet.
+                </div>
+                <div class="input-group flex mt-1">
+                    <input placeholder="Type message..." style="margin-bottom:0; border-radius: 20px 0 0 20px;">
+                    <button class="btn btn-primary" style="width:auto; margin:0; border-radius: 0 20px 20px 0;">Send</button>
                 </div>
             </div>
         `;
     }
 
-    // --- SEARCH ---
-    function searchOrder(v) {
-        const o = bizOrders.find(x => x.orderNum === v);
-        document.getElementById('s-res-ord').innerHTML = o ? `<div class="p-2 card status-${o.status}">Found: <b>${o.status.toUpperCase()}</b></div>` : '';
+    // SEARCH UTILS
+    function searchOrder(val) {
+        if(!val) return document.getElementById('res-order').innerHTML = '';
+        const o = bizOrders.find(x => x.orderNum === val);
+        document.getElementById('res-order').innerHTML = o 
+            ? `<div class="p-1 border text-green" style="background:#eafff3; border-radius:8px;">Found: <b>${o.status.toUpperCase()}</b></div>`
+            : '<small>Not found</small>';
     }
-    function searchUnpaid(v) {
-        if(v.length < 5) return;
-        const list = bizOrders.filter(x => x.custWa.includes(v) && x.status === 'unpaid');
-        document.getElementById('s-res-unp').innerHTML = list.length ? `<div class="p-2 card text-red">⚠ Found ${list.length} Unpaid Bills!</div>` : '<div class="text-green">Clean Record</div>';
+
+    function searchUnpaid(val) {
+        if(val.length < 5) return;
+        const found = bizOrders.filter(x => x.custWa.includes(val) && x.status === 'unpaid');
+        document.getElementById('res-unpaid').innerHTML = found.length 
+            ? `<div class="p-1 border text-red" style="background:#fff0f0; border-radius:8px;">⚠ <b>${found.length} Unpaid Bills!</b></div>`
+            : '<div class="text-green p-1">No unpaid records found.</div>';
     }
 
 
-    // ================= PUBLIC PAGE =================
+    // ================= PUBLIC PAGE LOGIC (Customer View) =================
     let cart = [];
+    let bizIdForCart = null;
+    let bizOwnerWa = null;
 
     async function loadPublicPage(bizId) {
-        render('tpl-public');
+        bizIdForCart = bizId;
+        render('tpl-public'); // We'll create this dynamically below to keep file clean
+        
+        // Dynamic HTML injection for public page to avoid cluttering templates
+        app.innerHTML = `
+            <div id="public-view">
+                <div id="public-status" class="p-1 text-center bold text-white" style="position:sticky; top:0; z-index:900; font-size:0.9rem"></div>
+                
+                <div class="container p-2" style="background:white; border-radius:0 0 20px 20px; box-shadow:0 5px 15px rgba(0,0,0,0.05);">
+                    <div class="center flex-col">
+                        <img id="pub-logo" src="" style="width:110px; height:110px; border-radius:50%; object-fit:cover; border:5px solid var(--primary); margin-bottom:10px; margin-top:-10px;">
+                        <h2 id="pub-name" style="margin:0; text-align:center;"></h2>
+                        <div id="pub-verified-badge" class="hidden mt-1"><span class="status-badge st-new">✔ Verified Business</span></div>
+                        <p id="pub-address" style="color:#888; margin-top:5px; font-size:0.9rem; text-align:center;"></p>
+                        
+                        <div class="flex center mt-1" style="gap:10px; width:100%;">
+                            <a id="pub-hotline" class="btn btn-green" style="flex:1;">📞 Call</a>
+                            <a id="pub-wa" class="btn btn-green" style="flex:1;">💬 WhatsApp</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hero mt-2" style="border-radius:20px; padding:30px 20px; margin: 15px;">
+                    <h2 id="pub-hero-text" style="font-size:1.5rem;"></h2>
+                    <button class="btn btn-secondary mt-1" style="background:white; color:var(--primary);" onclick="document.getElementById('pub-menu').scrollIntoView({behavior:'smooth'})">ORDER NOW</button>
+                </div>
+
+                <div id="pub-menu" class="p-2 container" style="padding-bottom:100px;">
+                    <!-- Menu Items -->
+                </div>
+
+                <div class="floating-cart" onclick="showCartModal()">
+                    🛒 <div class="cart-badge" id="cart-count">0</div>
+                </div>
+            </div>
+        `;
+
         const doc = await db.collection('users').doc(bizId).get();
-        if(!doc.exists) return document.body.innerHTML = "<h1>Business Not Found</h1>";
-        const d = doc.data();
-
-        // Bind Info
-        document.getElementById('pub-name').innerText = d.businessName;
-        document.getElementById('pub-logo').src = d.logo;
-        document.getElementById('pub-address').innerText = d.address;
-        document.getElementById('pub-hero').innerText = d.heroText || "Welcome!";
-        document.getElementById('pub-call').href = `tel:${d.hotline}`;
-        document.getElementById('pub-wa').href = `https://wa.me/${d.whatsapp}`;
-        document.getElementById('foot-name').innerText = d.businessName;
-        document.getElementById('foot-details').innerText = d.address + ' | ' + d.hotline;
+        if(!doc.exists) return app.innerHTML = "<h2 class='text-center p-2'>Business Not Found</h2>";
         
-        if(d.verified) {
-            document.getElementById('pub-verified').classList.remove('hidden');
-            document.getElementById('foot-ver').classList.remove('hidden');
-            document.getElementById('foot-ver').onclick = () => alert("Verified via Grama Niladhari Letter");
-        }
+        const data = doc.data();
+        bizOwnerWa = data.whatsapp;
 
-        // Open/Close
-        const day = new Date().toLocaleDateString('en-US', {weekday:'long'});
-        const s = d.schedule?.[day];
-        const bar = document.getElementById('pub-status-bar');
+        document.getElementById('pub-name').innerText = data.businessName;
+        document.getElementById('pub-logo').src = data.logo || 'https://via.placeholder.com/100';
+        document.getElementById('pub-address').innerText = data.address;
+        document.getElementById('pub-hero-text').innerText = data.heroText || "Welcome!";
+        document.getElementById('pub-hotline').href = `tel:${data.hotline}`;
+        document.getElementById('pub-wa').href = `https://wa.me/${data.whatsapp}`;
         
-        // Time logic
-        let isOpen = false;
-        if(s && s.open) {
+        if(data.verified) document.getElementById('pub-verified-badge').classList.remove('hidden');
+
+        // Schedule Logic
+        const today = new Date().toLocaleDateString('en-US', {weekday:'long'});
+        const sched = data.schedule?.[today];
+        const statusDiv = document.getElementById('public-status');
+        
+        let isOpenNow = false;
+        if(sched && sched.open) {
             const now = new Date();
-            const cur = now.getHours()*60 + now.getMinutes();
-            const [sh, sm] = s.start.split(':').map(Number);
-            const [eh, em] = s.end.split(':').map(Number);
-            if(cur >= (sh*60+sm) && cur <= (eh*60+em)) isOpen = true;
+            const curMins = now.getHours() * 60 + now.getMinutes();
+            const [sh, sm] = sched.start.split(':').map(Number);
+            const [eh, em] = sched.end.split(':').map(Number);
+            const startMins = sh * 60 + sm;
+            const endMins = eh * 60 + em;
+            if(curMins >= startMins && curMins <= endMins) isOpenNow = true;
         }
-        
-        bar.innerText = isOpen ? `OPEN NOW (${s.start} - ${s.end})` : "CLOSED NOW";
-        bar.style.background = isOpen ? "var(--green)" : "var(--primary)";
 
-        // Menu
-        const menu = document.getElementById('pub-menu');
-        const cats = [...new Set((d.foods||[]).map(f=>f.cat))];
+        if(isOpenNow) {
+            statusDiv.innerText = `OPEN NOW (${sched.start} - ${sched.end})`;
+            statusDiv.style.background = 'var(--green)';
+        } else {
+            statusDiv.innerText = "WE ARE CLOSED NOW";
+            statusDiv.style.background = 'var(--secondary)';
+        }
+
+        // Render Menu
+        const menuDiv = document.getElementById('pub-menu');
+        const cats = [...new Set((data.foods||[]).map(f => f.cat))];
+        
         cats.forEach(c => {
-            menu.innerHTML += `<h3 class="mt-1" style="border-bottom:1px solid #ccc">${c||'Items'}</h3>`;
-            d.foods.filter(f=>f.cat===c).forEach(f => {
-                menu.innerHTML += `
-                    <div class="card flex justify-between center">
-                        <img src="${f.img}" style="width:60px;height:60px;border-radius:8px;margin-right:10px;">
-                        <div style="flex:1">
-                            <div class="bold">${f.name}</div>
-                            <div class="flex mt-1" style="gap:5px">
-                                ${f.half ? `<button class="btn btn-outline" style="padding:5px;width:auto;font-size:0.8rem" onclick="addCart('${f.name}', 'Half', ${f.half})">Half: ${f.half}</button>`:''}
-                                ${f.full ? `<button class="btn btn-outline" style="padding:5px;width:auto;font-size:0.8rem" onclick="addCart('${f.name}', 'Full', ${f.full})">Full: ${f.full}</button>`:''}
+            menuDiv.innerHTML += `<h3 class="mt-2 text-red" style="border-bottom:2px solid #eee; padding-bottom:5px;">${c||'Menu'}</h3>`;
+            data.foods.filter(f => f.cat === c).forEach(f => {
+                menuDiv.innerHTML += `
+                    <div class="card flex justify-between center" style="padding:15px; margin-bottom:15px;">
+                        <img src="${f.img}" style="width:80px;height:80px;border-radius:12px;object-fit:cover;margin-right:15px;">
+                        <div style="flex:1;">
+                            <div class="bold" style="font-size:1.1rem;">${f.name}</div>
+                            <div class="mt-1 flex" style="gap:5px; flex-wrap:wrap;">
+                                ${f.half ? `<button class="btn btn-outline" style="width:auto;padding:6px 12px;font-size:12px;margin:0" onclick="addToCart('${f.name}', 'Half', ${f.half})">Half: ${f.half}</button>` : ''}
+                                ${f.full ? `<button class="btn btn-outline" style="width:auto;padding:6px 12px;font-size:12px;margin:0" onclick="addToCart('${f.name}', 'Full', ${f.full})">Full: ${f.full}</button>` : ''}
                             </div>
                         </div>
                     </div>
                 `;
             });
         });
-
-        // Cart Icon
-        const fab = document.createElement('div');
-        fab.innerHTML = "🛒";
-        fab.style = "position:fixed;bottom:20px;right:20px;background:var(--primary);color:white;width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:0 4px 10px rgba(0,0,0,0.3);cursor:pointer;z-index:900";
-        fab.onclick = () => showCart(bizId, d.whatsapp);
-        document.body.appendChild(fab);
     }
 
-    function addCart(n, v, p) {
-        cart.push({name:n, variant:v, price:p});
-        alert("Added to Cart!");
+    function addToCart(name, variant, price) {
+        cart.push({name, variant, price});
+        document.getElementById('cart-count').innerText = cart.length;
+        showToast(`Added ${name} (${variant})`, 'success');
     }
 
-    function showCart(bizId, wa) {
-        if(!cart.length) return alert("Cart is Empty");
-        const tot = cart.reduce((a,b)=>a+parseInt(b.price),0);
+    function showCartModal() {
+        if(cart.length === 0) return showToast("Cart is empty", "error");
         
-        const html = `
-            <h3>Your Cart</h3>
-            <div style="background:#f1f2f6;padding:10px;border-radius:8px;max-height:200px;overflow-y:auto">
-                ${cart.map(i=>`<div class="flex justify-between"><span>${i.name} (${i.variant})</span><span>${i.price}</span></div>`).join('')}
+        const total = cart.reduce((a,b)=>a+Number(b.price),0);
+        
+        showModal(`
+            <h2 class="text-center">Your Order</h2>
+            <div style="background:#f8f9fa; padding:10px; border-radius:12px; max-height:250px; overflow-y:auto; margin-bottom:15px;">
+                ${cart.map(i => `<div class="flex justify-between" style="padding:8px 0; border-bottom:1px solid #eee;"><span>${i.name} (${i.variant})</span><b>${i.price}</b></div>`).join('')}
             </div>
-            <h3 class="text-right">Total: ${tot}</h3>
-            <div class="form-group"><label>Name</label><input id="c-name"></div>
-            <div class="form-group"><label>WhatsApp</label><input id="c-wa" placeholder="947..."></div>
-            <button class="btn btn-green" onclick="placeOrder('${bizId}', '${wa}', ${tot})">Confirm & Order via WhatsApp</button>
-            <button class="btn btn-secondary" onclick="document.querySelector('.modal-overlay').remove()">Close</button>
-        `;
-        
-        const m = document.createElement('div');
-        m.className = 'modal-overlay';
-        m.innerHTML = `<div class="modal-content">${html}</div>`;
-        document.body.appendChild(m);
+            <h3 class="text-right text-red">Total: ${total}</h3>
+            
+            <div class="input-group">
+                <label>Your Name *</label><input id="c-name" placeholder="John Doe">
+            </div>
+            <div class="input-group">
+                <label>WhatsApp Number *</label><input id="c-wa" type="tel" placeholder="947...">
+            </div>
+            
+            <button class="btn btn-green" onclick="placeOrder('${bizIdForCart}', ${total})">Confirm & Order via WhatsApp</button>
+            <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+        `);
     }
 
-    function placeOrder(bizId, ownerWa, total) {
+    function placeOrder(bizId, total) {
         const name = document.getElementById('c-name').value;
-        const custWa = document.getElementById('c-wa').value;
-        if(!name || !custWa) return alert("Details Required");
+        const wa = document.getElementById('c-wa').value;
+        if(!name || !wa) return showToast("Please fill name and number", "error");
 
-        const orderNum = Math.floor(10000 + Math.random() * 90000).toString();
+        const orderNum = Math.floor(10000 + Math.random() * 90000).toString(); 
         
-        db.collection('users').doc(bizId).collection('orders').add({
-            orderNum, custName: name, custWa, items: cart, total, 
-            time: new Date().toISOString(), status: 'new'
-        }).then(() => {
-            const msg = `New Order #${orderNum}\nName: ${name}\nItems: ${cart.map(i=>i.name).join(', ')}\nTotal: ${total}`;
-            window.open(`https://wa.me/${ownerWa}?text=${encodeURIComponent(msg)}`);
+        const orderData = {
+            orderNum, custName: name, custWa: wa, items: cart, total, 
+            time: new Date().toISOString(), status: 'new', seen: false
+        };
+
+        // Save to DB
+        db.collection('users').doc(bizId).collection('orders').add(orderData).then(() => {
+            // Send WA
+            const msg = `🔔 *New Order!* \nName: ${name}\nOrder #: ${orderNum}\n\nItems:\n${cart.map(i=>`- ${i.name} (${i.variant})`).join('\n')}\n\n*Total: ${total}*`;
+            window.open(`https://wa.me/${bizOwnerWa}?text=${encodeURIComponent(msg)}`);
+            
             cart = [];
-            document.querySelector('.modal-overlay').remove();
+            document.getElementById('cart-count').innerText = '0';
+            closeModal();
+            showToast("Order Sent!", "success");
         });
     }
 
-    // ================= CUSTOMER CONFIRM =================
-    async function loadCustomerConfirm(bizId, orderId) {
+    // ================= CUSTOMER CONFIRMATION PAGE =================
+    async function loadCustomerConfirmPage(bizId, orderId) {
         const doc = await db.collection('users').doc(bizId).collection('orders').doc(orderId).get();
-        if(!doc.exists) return document.body.innerHTML = "<h1>Not Found</h1>";
+        if(!doc.exists) return app.innerHTML = "<h2>Order not found</h2>";
         const o = doc.data();
 
         app.innerHTML = `
-            <div class="flex-col center p-2" style="height:100vh; background:white">
-                <h2 class="text-green">Confirm Order</h2>
-                <h1>#${o.orderNum}</h1>
-                <div class="card w-100" style="max-width:400px">
-                    ${o.items.map(i => `<div class="flex justify-between"><span>${i.name}</span><span>${i.price}</span></div>`).join('')}
-                    <hr>
-                    <div class="flex justify-between bold"><span>Total</span><span>${o.total}</span></div>
+            <div class="flex-col center p-2" style="min-height:100vh; background:white;">
+                <svg viewBox="0 0 24 24" fill="var(--green)" style="width:64px;height:64px;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                <h2 class="text-green mb-1">Confirm Order</h2>
+                <h1 style="font-size:3rem; margin:0;">${o.orderNum}</h1>
+                <small class="mb-2">EatlyHub Order Verification</small>
+                
+                <div class="card w-100" style="max-width:400px; text-align:left;">
+                    ${o.items.map(i => `<div class="flex justify-between p-1" style="border-bottom:1px solid #eee"><span>${i.name}</span><span>${i.price}</span></div>`).join('')}
+                    <div class="flex justify-between bold p-1" style="font-size:1.2rem"><span>Total</span><span>${o.total}</span></div>
                 </div>
+
                 <div class="w-100" style="max-width:400px">
-                    <button class="btn btn-green" onclick="doConfirm('${bizId}', '${orderId}', 'confirmed')">✅ CONFIRM</button>
-                    <button class="btn btn-secondary" onclick="doConfirm('${bizId}', '${orderId}', 'canceled')">❌ CANCEL</button>
+                    <button class="btn btn-green" onclick="confirmAction('${bizId}', '${orderId}', 'confirmed')">✅ YES, CONFIRM ORDER</button>
+                    <button class="btn btn-secondary mt-1" style="background:#ff6b81" onclick="confirmAction('${bizId}', '${orderId}', 'canceled')">❌ CANCEL ORDER</button>
                 </div>
             </div>
         `;
     }
 
-    function doConfirm(bid, oid, st) {
-        db.collection('users').doc(bid).collection('orders').doc(oid).update({status:st})
-        .then(() => document.body.innerHTML = `<div class="text-center p-2"><h1>${st=='confirmed'?'Confirmed!':'Canceled'}</h1></div>`);
+    function confirmAction(bizId, orderId, status) {
+        db.collection('users').doc(bizId).collection('orders').doc(orderId).update({status, seen: true})
+        .then(() => {
+            document.body.innerHTML = `<div style="height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;">
+                <h1 style="color:${status === 'confirmed' ? 'var(--green)' : 'red'}">${status === 'confirmed' ? '✅ Confirmed' : '❌ Canceled'}</h1>
+                <p>Thank you. You can close this window.</p>
+            </div>`;
+        });
     }
 
+    // ================= UTILITIES =================
+    function showModal(content) {
+        const el = document.createElement('div');
+        el.className = 'modal-overlay';
+        el.innerHTML = `<div class="modal-box">${content}</div>`;
+        document.body.appendChild(el);
+    }
+    
+    function closeModal() {
+        const el = document.querySelector('.modal-overlay');
+        if(el) el.remove();
+    }
+
+    function showToast(msg, type='success') {
+        const t = document.createElement('div');
+        t.innerText = msg;
+        t.style = `
+            position: fixed; top: 20px; right: 20px; z-index: 2000;
+            background: ${type==='error'?'#ff4757':(type==='info'?'#2f3542':'#2ed573')}; 
+            color: white; padding: 12px 20px; border-radius: 50px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2); font-weight:600; font-size:0.9rem;
+            animation: slideIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        `;
+        document.body.appendChild(t);
+        setTimeout(() => {
+            t.style.animation = 'fadeOut 0.3s forwards';
+            setTimeout(() => t.remove(), 300);
+        }, 3000);
+    }
 </script>
+
+<style> 
+    @keyframes slideIn { from{opacity:0; transform:translateX(20px);} to{opacity:1; transform:translateX(0);} } 
+    @keyframes fadeOut { from{opacity:1; transform:translateY(0);} to{opacity:0; transform:translateY(-20px);} } 
+</style>
+
 </body>
 </html>

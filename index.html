@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>EatlyHub | Food Delivery Platform</title>
     
-    <!-- Meta Tags -->
+    <!-- Meta Tags & PWA -->
     <meta name="description" content="Order food online from top local kitchens.">
     <meta name="theme-color" content="#ff4757">
     <meta name="mobile-web-app-capable" content="yes">
@@ -19,7 +19,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script>
 
-    <!-- External Libraries (Charts & QR) -->
+    <!-- External Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
@@ -60,13 +60,10 @@
         .text-red { color: var(--primary); }
         .text-green { color: var(--green); }
         .text-white { color: white !important; }
+        .text-gray { color: #747d8c; }
         .bold { font-weight: 700; }
-        .relative { position: relative; }
+        .pointer { cursor: pointer; }
         
-        /* --- TYPOGRAPHY --- */
-        h1, h2, h3, h4 { margin: 0 0 8px 0; color: var(--secondary); font-weight: 800; }
-        small { color: #747d8c; font-size: 0.8rem; }
-
         /* --- COMPONENTS --- */
         .btn { 
             padding: 14px 20px; border: none; border-radius: 12px; cursor: pointer; 
@@ -142,27 +139,29 @@
         .card.status-completed { border-left: 5px solid #2f3542; }
         .card.status-unpaid { border-left: 5px solid #ffa502; }
 
-        /* --- SKELETON LOADING --- */
+        /* --- SKELETON LOADING (Visual Delight) --- */
         .skeleton { background: #eee; background: linear-gradient(110deg, #ececec 8%, #f5f5f5 18%, #ececec 33%); border-radius: 5px; background-size: 200% 100%; animation: shine 1.5s linear infinite; }
         @keyframes shine { to { background-position-x: -200%; } }
         .sk-card { height: 120px; width: 100%; border-radius: 16px; margin-bottom: 15px; }
         .sk-text { height: 20px; width: 60%; margin-bottom: 10px; }
 
-        /* --- STICKY NAV (Phase 1) --- */
+        /* --- STICKY NAV (Category Scroll) --- */
         .sticky-cat-nav {
-            position: sticky; top: 35px; z-index: 89; background: white; 
-            padding: 10px 0; overflow-x: auto; white-space: nowrap; 
+            position: sticky; top: 0; z-index: 89; background: white; 
+            padding: 15px 0 15px 15px; overflow-x: auto; white-space: nowrap; 
             box-shadow: 0 4px 10px rgba(0,0,0,0.05); display: flex; gap: 10px;
-            padding-left: 15px; -webkit-overflow-scrolling: touch;
+            -webkit-overflow-scrolling: touch; scrollbar-width: none;
         }
+        .sticky-cat-nav::-webkit-scrollbar { display: none; }
         .cat-chip {
             padding: 8px 16px; background: #f1f2f6; border-radius: 20px; 
             color: var(--secondary); font-weight: 600; text-decoration: none; font-size: 0.9rem;
+            transition: all 0.2s;
         }
-        .cat-chip.active { background: var(--secondary); color: white; }
+        .cat-chip.active { background: var(--secondary); color: white; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
 
-        /* --- BOTTOM SHEET MODAL (Phase 1) --- */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; display: flex; justify-content: center; align-items: flex-end; backdrop-filter: blur(4px); opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+        /* --- BOTTOM SHEET MODAL --- */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; display: flex; justify-content: center; align-items: flex-end; backdrop-filter: blur(4px); opacity: 0; pointer-events: none; transition: opacity 0.3s; }
         .modal-overlay.open { opacity: 1; pointer-events: all; }
         .modal-box { 
             background: white; width: 100%; max-width: 500px; padding: 25px; 
@@ -175,10 +174,10 @@
             .modal-box { border-radius: 20px; }
         }
 
-        /* --- STICKY CART BAR (Phase 1) --- */
+        /* --- STICKY CART BAR --- */
         .sticky-cart {
             position: fixed; bottom: 0; left: 0; width: 100%; background: white;
-            padding: 15px; box-shadow: 0 -5px 20px rgba(0,0,0,0.1); z-index: 900;
+            padding: 20px; box-shadow: 0 -5px 20px rgba(0,0,0,0.1); z-index: 1500;
             display: flex; justify-content: space-between; align-items: center;
             transform: translateY(100%); transition: transform 0.3s;
         }
@@ -262,6 +261,9 @@
 <!-- ================= JAVASCRIPT LOGIC ================= -->
 
 <script>
+    // ============================================
+    // IMPORTANT: REPLACE WITH YOUR ADMIN EMAIL
+    // ============================================
     const ADMIN_EMAIL = "admin@eatlyhub.com"; 
 
     // --- 1. CONFIGURATION ---
@@ -283,7 +285,7 @@
     const db = firebase.firestore();
     const storage = firebase.storage();
 
-    // --- 3. STATE MANAGEMENT ---
+    // --- 2. STATE MANAGEMENT ---
     const app = document.getElementById('app');
     let currentUser = null;
     let bizProfile = {};
@@ -296,20 +298,20 @@
     const TABS = ['Dashboard', 'Profile', 'Open/Close', 'Add Foods', 'My Webpage', 'Reviews', 'New Orders', 'Confirmed Orders', 'Active Orders', 'Ready Orders', 'Completed Orders', 'Unpaid Bills', 'Reports', 'Admin Messages'];
     const ADMIN_TABS = ['Verification Requests', 'Admin Messages'];
 
-    // Sound Notification (Base64 Ding)
+    // Sound Notification
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playDing() {
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.connect(gain);
         gain.connect(audioCtx.destination);
-        osc.frequency.value = 800;
+        osc.frequency.value = 800; // High pitch ding
         gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.5);
         osc.start();
         osc.stop(audioCtx.currentTime + 0.5);
     }
 
-    // --- 4. IMAGE UTILITIES ---
+    // --- 3. IMAGE UTILITIES (Storage & Compression) ---
     function compressImage(file) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -342,7 +344,7 @@
         });
     }
 
-    // --- 5. PWA & ROUTING ---
+    // --- 4. PWA & ROUTING ---
     window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
         deferredPrompt = e;
@@ -394,7 +396,7 @@
         auth.signOut().then(() => window.location.reload()); 
     }
 
-    // --- 6. USER DASHBOARD ---
+    // --- 5. USER DASHBOARD LOGIC ---
     async function loadDashboard() {
         render('tpl-dashboard');
         const tabsContainer = document.getElementById('dash-tabs');
@@ -409,13 +411,13 @@
             refreshTabContent(); 
         });
 
-        // Real-time Orders with Sound
+        // Real-time Orders with Sound Notification
         let firstLoad = true;
         db.collection('users').doc(currentUser.uid).collection('orders').orderBy('time', 'desc').limit(50).onSnapshot(snap => {
             const oldSize = bizOrders.length;
             bizOrders = snap.docs.map(d => ({id: d.id, ...d.data()}));
             
-            // Play sound if new order comes in (skip first load)
+            // Play sound if new order (not on first load)
             if(!firstLoad && bizOrders.length > oldSize) {
                 const latest = bizOrders[0];
                 if(latest.status === 'new') {
@@ -442,6 +444,10 @@
         }
         currentTab = name;
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.innerText === name));
+        
+        // Resume audio context on user interaction
+        if(audioCtx.state === 'suspended') audioCtx.resume();
+        
         refreshTabContent();
     }
 
@@ -490,13 +496,168 @@
         `;
     }
 
-    // REPORTS with Chart.js (Phase 2)
+    // --- PROFILE TAB ---
+    function renderProfile(target) {
+        const p = bizProfile;
+        const disabled = p.locked ? 'disabled' : '';
+        
+        let logoHtml = p.logo ? 
+            `<img src="${p.logo}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;">` : 
+            `<label class="btn btn-secondary">Upload Logo <input type="file" hidden onchange="handleImageUpload(this, 'logo')"></label>`;
+
+        target.innerHTML = `
+            <div class="card">
+                <h3>Business Profile</h3>
+                <div class="center flex-col mb-1">${logoHtml}</div>
+                <div class="input-group"><label>Business Name</label><input id="p-name" value="${p.businessName||''}" ${disabled}></div>
+                <div class="input-group"><label>Address</label><textarea id="p-addr" ${disabled}>${p.address||''}</textarea></div>
+                <div class="input-group"><label>Owner Name</label><input id="p-owner" value="${p.ownerName||''}" ${disabled}></div>
+                <div class="input-group"><label>Hotline</label><input id="p-hot" type="tel" value="${p.hotline||''}" ${disabled}></div>
+                <div class="input-group"><label>WhatsApp</label><input id="p-wa" type="tel" value="${p.whatsapp||''}" ${disabled}></div>
+                ${p.locked ? `<button class="btn btn-yellow" onclick="toggleLock(false)">Unlock to Edit</button>` : `<button class="btn btn-primary" onclick="saveProfile()">Save & Lock</button>`}
+            </div>
+        `;
+    }
+
+    async function handleImageUpload(input, type) {
+        if (input.files[0]) {
+            showToast("Uploading...", "info");
+            const base64 = await compressImage(input.files[0]);
+            const url = await uploadImageToStorage(base64, `images/${currentUser.uid}/${type}_${Date.now()}.jpg`);
+            if(type === 'logo') {
+                bizProfile.logo = url;
+                renderProfile(document.getElementById('dash-content')); // Refresh UI
+            } else {
+                // For verification docs
+                bizProfile['temp_' + type] = url;
+                showToast("Document Uploaded");
+            }
+        }
+    }
+
+    function saveProfile() {
+        const name = document.getElementById('p-name').value;
+        const addr = document.getElementById('p-addr').value;
+        const owner = document.getElementById('p-owner').value;
+        const hot = document.getElementById('p-hot').value;
+        const wa = document.getElementById('p-wa').value;
+
+        if(!bizProfile.logo || !name || !wa) return showToast("Logo, Name & WhatsApp required!", "error");
+
+        db.collection('users').doc(currentUser.uid).update({
+            businessName: name, address: addr, ownerName: owner, 
+            hotline: hot, whatsapp: wa, logo: bizProfile.logo, locked: true
+        }).then(() => { showToast("Saved"); switchTab('Dashboard'); });
+    }
+
+    function toggleLock(state) {
+        db.collection('users').doc(currentUser.uid).update({locked: state});
+    }
+
+    // --- SCHEDULE TAB ---
+    function renderSchedule(target) {
+        const today = new Date().toLocaleDateString('en-US', {weekday:'long'});
+        const s = bizProfile.schedule?.[today] || {open: false, start:'08:00', end:'20:00'};
+        
+        target.innerHTML = `
+            <div class="card">
+                <h3>📅 ${today} Schedule</h3>
+                <div class="input-group">
+                    <label>Status</label>
+                    <select id="oc-stat" onchange="saveSched('${today}')">
+                        <option value="yes" ${s.open?'selected':''}>Open</option>
+                        <option value="no" ${!s.open?'selected':''}>Closed</option>
+                    </select>
+                </div>
+                <div class="flex" style="gap:10px;">
+                    <div class="input-group w-100"><label>Open</label><input type="time" id="oc-start" value="${s.start}" onchange="saveSched('${today}')"></div>
+                    <div class="input-group w-100"><label>Close</label><input type="time" id="oc-end" value="${s.end}" onchange="saveSched('${today}')"></div>
+                </div>
+            </div>
+        `;
+    }
+
+    function saveSched(day) {
+        const open = document.getElementById('oc-stat').value === 'yes';
+        const start = document.getElementById('oc-start').value;
+        const end = document.getElementById('oc-end').value;
+        const schedule = bizProfile.schedule || {};
+        schedule[day] = { open, start, end };
+        db.collection('users').doc(currentUser.uid).update({ schedule }).then(()=>showToast("Schedule Saved"));
+    }
+
+    // --- ADD FOODS TAB (Full Implementation) ---
+    let tempFoodImg = null;
+    function renderAddFoods(target) {
+        target.innerHTML = `
+            <div class="card">
+                <h3>Add New Item</h3>
+                <div class="file-upload-wrapper" onclick="document.getElementById('f-file').click()">
+                    <span id="f-file-txt">${tempFoodImg ? 'Image Selected' : 'Click to Upload Image'}</span>
+                    <input type="file" id="f-file" hidden onchange="handleFoodImg(this)">
+                </div>
+                <img id="f-prev" src="${tempFoodImg || ''}" class="${tempFoodImg?'':'hidden'} mt-1" style="width:100%;height:150px;object-fit:cover;border-radius:10px;">
+                <div class="input-group mt-1"><label>Category</label><input id="f-cat" placeholder="e.g. Pizza"></div>
+                <div class="input-group"><label>Name</label><input id="f-name" placeholder="Item Name"></div>
+                <div class="flex" style="gap:10px">
+                    <div class="input-group w-100"><label>Half Price</label><input id="f-half" type="number"></div>
+                    <div class="input-group w-100"><label>Full Price</label><input id="f-full" type="number"></div>
+                </div>
+                <button class="btn btn-green" onclick="addFood()">+ Add to Menu</button>
+            </div>
+            <h3>Menu</h3>
+            <div id="menu-list">
+                ${(bizProfile.foods||[]).map((f,i) => `
+                    <div class="card flex justify-between center" style="padding:10px;">
+                        <div class="flex center">
+                            <img src="${f.img}" style="width:50px;height:50px;border-radius:8px;object-fit:cover;margin-right:10px;">
+                            <div><b>${f.name}</b><br><small>${f.cat}</small></div>
+                        </div>
+                        <button class="btn btn-secondary" style="width:auto;padding:5px 10px;" onclick="deleteFood(${i})">🗑</button>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+
+    async function handleFoodImg(input) {
+        if(input.files[0]) {
+            showToast("Uploading...", "info");
+            const base64 = await compressImage(input.files[0]);
+            tempFoodImg = await uploadImageToStorage(base64, `food_images/${currentUser.uid}/${Date.now()}.jpg`);
+            renderAddFoods(document.getElementById('dash-content')); // Refresh to show preview
+        }
+    }
+
+    function addFood() {
+        const cat = document.getElementById('f-cat').value;
+        const name = document.getElementById('f-name').value;
+        const half = document.getElementById('f-half').value;
+        const full = document.getElementById('f-full').value;
+
+        if(!tempFoodImg || !name) return showToast("Image & Name required", "error");
+
+        const foods = [...(bizProfile.foods||[]), {cat, name, img: tempFoodImg, half, full}];
+        db.collection('users').doc(currentUser.uid).update({foods}).then(() => {
+            tempFoodImg = null;
+            renderAddFoods(document.getElementById('dash-content'));
+            showToast("Added!");
+        });
+    }
+
+    function deleteFood(idx) {
+        if(!confirm("Delete?")) return;
+        const foods = bizProfile.foods.filter((_, i) => i !== idx);
+        db.collection('users').doc(currentUser.uid).update({foods}).then(() => renderAddFoods(document.getElementById('dash-content')));
+    }
+
+    // --- REPORTS TAB (Chart.js) ---
     function renderReports(target) {
         const canvasId = 'revChart';
         const completed = bizOrders.filter(o => o.status === 'completed');
         const revenue = completed.reduce((a,b) => a + Number(b.total), 0);
 
-        // Group by Date for Chart
+        // Group by Date
         const salesData = {};
         completed.forEach(o => {
             const date = new Date(o.time).toLocaleDateString();
@@ -512,7 +673,6 @@
             </div>
         `;
 
-        // Render Chart after DOM update
         setTimeout(() => {
             const ctx = document.getElementById(canvasId);
             if(ctx) {
@@ -527,10 +687,9 @@
         }, 100);
     }
 
-    // QR CODE GENERATOR (Phase 2)
+    // --- QR CODE & WEBPAGE ---
     function renderWebpageInfo(target) {
         const url = `${window.location.origin}${window.location.pathname}?biz=${currentUser.uid}`;
-        const links = bizProfile.socialLinks || {};
         
         target.innerHTML = `
             <div class="card text-center">
@@ -546,48 +705,42 @@
                     <p>${bizProfile.businessName}</p>
                 </div>
             </div>
-            <!-- Other settings (Hero, Socials) omitted for brevity but preserved in structure -->
             <div class="card">
-                <h3>Hero Settings</h3>
+                <h3>Settings</h3>
                 <div class="input-group"><label>Welcome Message</label><input id="hero-txt" value="${bizProfile.heroText||''}" onchange="updateWebSettings()"></div>
+                <div class="input-group"><label>YouTube Link</label><input id="s-yt" value="${bizProfile.socialLinks?.yt||''}" placeholder="Paste URL" onchange="updateWebSettings()"></div>
             </div>
         `;
     }
 
     function generateQR(url) {
-        const container = document.getElementById('qr-container');
-        const qrDiv = document.getElementById('qrcode');
-        container.classList.remove('hidden');
-        qrDiv.innerHTML = '';
-        new QRCode(qrDiv, { text: url, width: 128, height: 128 });
+        document.getElementById('qr-container').classList.remove('hidden');
+        document.getElementById('qrcode').innerHTML = '';
+        new QRCode(document.getElementById('qrcode'), { text: url, width: 128, height: 128 });
     }
 
     function updateWebSettings() {
         const heroText = document.getElementById('hero-txt').value;
-        db.collection('users').doc(currentUser.uid).update({heroText}).then(()=>showToast("Saved"));
+        const yt = document.getElementById('s-yt').value;
+        db.collection('users').doc(currentUser.uid).update({heroText, socialLinks: {yt}}).then(()=>showToast("Saved"));
     }
 
-    // ... (Existing Profile, Schedule, Add Foods functions preserved but hidden to save space. Logic remains same as previous steps using uploadImageToStorage) ...
-    // Re-implementing simplified Profile/AddFood for complete runnable code:
+    // --- REVIEWS & CHAT ---
+    function renderReviews(t) {
+        t.innerHTML = bizReviews.map(r => `
+            <div class="card">
+                <b>${r.name}</b> <span class="text-yellow">${'★'.repeat(r.stars)}</span>
+                <p>${r.text}</p>
+                <div class="flex" style="gap:5px">${r.status==='pending' ? `<button class="btn btn-green" onclick="updateReview('${r.id}','published')">Approve</button>` : ''}<button class="btn btn-outline" onclick="deleteReview('${r.id}')">Delete</button></div>
+            </div>
+        `).join('') || '<div class="card">No reviews</div>';
+    }
+    function updateReview(id, s) { db.collection('users').doc(currentUser.uid).collection('reviews').doc(id).update({status:s}); }
+    function deleteReview(id) { if(confirm("Delete?")) db.collection('users').doc(currentUser.uid).collection('reviews').doc(id).delete(); }
     
-    function renderProfile(target) {
-        // (Similar to previous code, using uploadImageToStorage)
-        const p = bizProfile;
-        target.innerHTML = `<div class="card"><h3>Profile</h3><div class="input-group"><label>Name</label><input id="p-name" value="${p.businessName||''}"></div><button class="btn btn-primary" onclick="saveProfile()">Save</button></div>`;
-    }
-    function saveProfile() {
-        const name = document.getElementById('p-name').value;
-        db.collection('users').doc(currentUser.uid).update({businessName:name, locked:true}).then(()=>showToast("Saved"));
-    }
-    function renderAddFoods(target) {
-        // ... (Standard Add Food UI)
-        target.innerHTML = `<div class="card"><h3>Add Food</h3><p>Use existing features...</p></div>`;
-    }
-    function renderSchedule(t) { t.innerHTML = `<div class="card"><h3>Schedule</h3></div>`; }
-    function renderAdminChat(t) { t.innerHTML = `<div class="card"><h3>Messages</h3></div>`; }
-    function renderReviews(t) { t.innerHTML = `<div class="card"><h3>Reviews</h3></div>`; }
-    
-    // ORDERS LIST
+    function renderAdminChat(t) { t.innerHTML = `<div class="card"><h3>Support</h3><p>Chat feature coming soon.</p></div>`; }
+
+    // --- ORDERS LIST ---
     function renderOrdersList(target, tabName) {
         const map = {'New Orders':'new','Confirmed Orders':'confirmed','Active Orders':'active','Ready Orders':'ready','Completed Orders':'completed'};
         const status = map[tabName];
@@ -610,12 +763,46 @@
     }
 
     function setStatus(id, s) { db.collection('users').doc(currentUser.uid).collection('orders').doc(id).update({status:s}); }
-    function reqConfirm(id, wa) { window.open(`https://wa.me/${wa}?text=Confirm order please`); }
+    function reqConfirm(id, wa) { window.open(`https://wa.me/${wa}?text=Please confirm your order`); }
+
+    // --- ADMIN DASHBOARD ---
+    function loadAdminDashboard() {
+        render('tpl-dashboard');
+        document.getElementById('admin-tag').classList.remove('hidden');
+        document.getElementById('dash-tabs').innerHTML = ADMIN_TABS.map(t => `<div class="tab-btn" onclick="switchAdminTab('${t}')">${t}</div>`).join('');
+        
+        db.collection('admin_requests').onSnapshot(snap => {
+            adminRequests = snap.docs.map(d => ({id: d.id, ...d.data()}));
+            refreshAdminContent();
+        });
+        switchAdminTab('Verification Requests');
+    }
+    
+    function switchAdminTab(name) { currentTab = name; refreshAdminContent(); }
+    
+    function refreshAdminContent() {
+        const c = document.getElementById('dash-content');
+        if(currentTab === 'Verification Requests') {
+            c.innerHTML = adminRequests.map(r => `
+                <div class="card">
+                    <h4>${r.name}</h4>
+                    <button class="btn btn-green" onclick="approveUser('${r.uid}','${r.id}')">Approve</button>
+                </div>
+            `).join('') || '<div class="card">No requests</div>';
+        } else c.innerHTML = '<div class="card">Messages</div>';
+    }
+
+    function approveUser(uid, rid) {
+        db.collection('users').doc(uid).update({verified:true}).then(() => {
+            db.collection('admin_requests').doc(rid).delete();
+            showToast("Verified");
+        });
+    }
 
     // ================= PUBLIC PAGE (CUSTOMER VIEW) =================
     let cart = [];
     let bizOwnerWa = null;
-    let selectedOrderType = 'Delivery'; // Default
+    let selectedOrderType = 'Delivery'; 
 
     async function loadPublicPage(bizId) {
         app.innerHTML = renderSkeleton(); // Visual Delight: Skeleton
@@ -626,43 +813,29 @@
             const data = doc.data();
             bizOwnerWa = data.whatsapp;
 
-            // Phase 3: Dynamic Meta
             document.title = `${data.businessName} | Order Online`;
             
-            // Build UI
             app.innerHTML = `
-                <div class="sticky-cat-nav" id="cat-nav">
-                    <!-- Chips injected here -->
-                </div>
-                
+                <div class="sticky-cat-nav" id="cat-nav"></div>
                 <div class="hero" style="border-radius:0 0 20px 20px; padding:30px 20px;">
                     <img src="${data.logo}" style="width:80px;height:80px;border-radius:50%;border:3px solid white;">
                     <h2>${data.businessName}</h2>
                     <p>${data.heroText}</p>
                 </div>
-
                 <div class="container p-2">
-                    <!-- Order Type Toggle (Phase 2) -->
                     <div class="order-toggle">
                         <div class="toggle-opt active" onclick="setOrderType(this, 'Delivery')">Delivery</div>
                         <div class="toggle-opt" onclick="setOrderType(this, 'Pick-up')">Pick-up</div>
                         <div class="toggle-opt" onclick="setOrderType(this, 'Dine-in')">Dine-in</div>
                     </div>
-
                     <div id="menu-area"></div>
                 </div>
-
-                <!-- Sticky Cart (Phase 1) -->
                 <div class="sticky-cart" id="sticky-cart" onclick="showCartModal()">
-                    <div>
-                        <div class="bold" style="font-size:1.1rem" id="cart-total">Rs. 0</div>
-                        <small id="cart-count">0 Items</small>
-                    </div>
+                    <div><div class="bold" style="font-size:1.1rem" id="cart-total">Rs. 0</div><small id="cart-count">0 Items</small></div>
                     <div class="bold text-red">View Cart ></div>
                 </div>
             `;
 
-            // Render Menu with Categories
             const menuDiv = document.getElementById('menu-area');
             const navDiv = document.getElementById('cat-nav');
             const cats = [...new Set((data.foods||[]).map(f => f.cat))];
@@ -671,36 +844,21 @@
                 navDiv.innerHTML += `<a href="#cat-${c}" class="cat-chip">${c}</a>`;
                 menuDiv.innerHTML += `<h3 id="cat-${c}" class="mt-2 text-red">${c}</h3>`;
                 data.foods.filter(f => f.cat === c).forEach(f => {
-                    // Stringify for onclick
                     const fStr = JSON.stringify(f).replace(/"/g, '&quot;');
                     menuDiv.innerHTML += `
                         <div class="card flex justify-between center" onclick="openFoodModal(${fStr})">
-                            <div style="flex:1">
-                                <div class="bold">${f.name}</div>
-                                <div class="text-green bold">Rs. ${f.full || f.half}</div>
-                            </div>
+                            <div style="flex:1"><div class="bold">${f.name}</div><div class="text-green bold">Rs. ${f.full || f.half}</div></div>
                             <img src="${f.img}" style="width:80px;height:80px;border-radius:12px;object-fit:cover;">
                         </div>
                     `;
                 });
             });
 
-        } catch (e) {
-            console.log(e);
-            app.innerHTML = "Error loading.";
-        }
+        } catch (e) { console.log(e); app.innerHTML = "Error loading."; }
     }
 
     function renderSkeleton() {
-        return `
-            <div class="p-2">
-                <div class="skeleton" style="height:200px; border-radius:20px; margin-bottom:20px;"></div>
-                <div class="skeleton sk-text"></div>
-                <div class="skeleton sk-card"></div>
-                <div class="skeleton sk-card"></div>
-                <div class="skeleton sk-card"></div>
-            </div>
-        `;
+        return `<div class="p-2"><div class="skeleton" style="height:200px; border-radius:20px; margin-bottom:20px;"></div><div class="skeleton sk-text"></div><div class="skeleton sk-card"></div><div class="skeleton sk-card"></div></div>`;
     }
 
     function setOrderType(el, type) {
@@ -710,7 +868,7 @@
         showToast(`Switched to ${type}`, 'info');
     }
 
-    // --- FOOD MODAL (Phase 1) ---
+    // --- FOOD MODAL ---
     let currentFood = null;
     function openFoodModal(food) {
         currentFood = food;
@@ -721,18 +879,15 @@
             </div>
             <div class="mt-2">
                 <label class="bold">Size</label>
-                ${food.half ? `<div class="p-1 border flex justify-between"><label><input type="radio" name="size" value="Half" data-price="${food.half}"> Half</label> <b>${food.half}</b></div>` : ''}
-                ${food.full ? `<div class="p-1 border flex justify-between"><label><input type="radio" name="size" value="Full" data-price="${food.full}" checked> Full</label> <b>${food.full}</b></div>` : ''}
+                ${food.half ? `<div class="p-1 flex justify-between"><label><input type="radio" name="size" value="Half" data-price="${food.half}"> Half</label> <b>${food.half}</b></div>` : ''}
+                ${food.full ? `<div class="p-1 flex justify-between"><label><input type="radio" name="size" value="Full" data-price="${food.full}" checked> Full</label> <b>${food.full}</b></div>` : ''}
             </div>
             <div class="mt-2">
                 <label class="bold">Add-ons</label>
-                <div class="p-1 border flex justify-between"><label><input type="checkbox" class="addon" value="Cheese" data-price="50"> Extra Cheese</label> <b>+50</b></div>
-                <div class="p-1 border flex justify-between"><label><input type="checkbox" class="addon" value="Spicy" data-price="20"> Spicy Sauce</label> <b>+20</b></div>
+                <div class="p-1 flex justify-between"><label><input type="checkbox" class="addon" value="Cheese" data-price="50"> Extra Cheese</label> <b>+50</b></div>
+                <div class="p-1 flex justify-between"><label><input type="checkbox" class="addon" value="Spicy" data-price="20"> Spicy Sauce</label> <b>+20</b></div>
             </div>
-            <div class="input-group mt-2">
-                <label>Notes</label>
-                <textarea id="f-note" placeholder="No onions please..." rows="2"></textarea>
-            </div>
+            <div class="input-group mt-2"><label>Notes</label><textarea id="f-note" placeholder="No onions..." rows="2"></textarea></div>
             <button class="btn btn-primary mt-2" onclick="addToCartFromModal()">Add to Cart</button>
             <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
         `;
@@ -744,22 +899,18 @@
         if(!sizeEl) return showToast("Select Size", "error");
         
         let price = Number(sizeEl.getAttribute('data-price'));
-        let variant = sizeEl.value;
         let addons = [];
-        
         document.querySelectorAll('.addon:checked').forEach(el => {
             price += Number(el.getAttribute('data-price'));
             addons.push(el.value);
         });
 
-        const note = document.getElementById('f-note').value;
-
         cart.push({
             name: currentFood.name,
-            variant: variant,
+            variant: sizeEl.value,
             price: price,
             addons: addons,
-            note: note,
+            note: document.getElementById('f-note').value,
             count: 1
         });
 
@@ -801,42 +952,65 @@
         `);
     }
 
-    function removeFromCart(idx) {
-        cart.splice(idx, 1);
-        updateCartUI();
-        closeModal();
-        if(cart.length) showCartModal();
-    }
+    function removeFromCart(idx) { cart.splice(idx, 1); updateCartUI(); closeModal(); if(cart.length) showCartModal(); }
 
     function submitOrder() {
         const name = document.getElementById('c-name').value;
+        const wa = document.getElementById('c-wa').value;
+        const extra = document.getElementById('c-extra') ? document.getElementById('c-extra').value : '';
         const total = cart.reduce((a,b) => a + b.price, 0);
         
-        if(!name) return showToast("Name required", "error");
+        if(!name || !wa) return showToast("Name & WhatsApp required", "error");
 
         const orderData = {
             orderNum: Math.floor(10000 + Math.random() * 90000).toString(),
-            custName: name,
-            custWa: document.getElementById('c-wa').value,
-            items: cart,
-            total: total,
-            status: 'new',
-            orderType: selectedOrderType,
-            time: new Date().toISOString()
+            custName: name, custWa: wa, items: cart, total: total,
+            status: 'new', orderType: selectedOrderType, time: new Date().toISOString()
         };
 
         const bizId = new URLSearchParams(window.location.search).get('biz');
         
         db.collection('users').doc(bizId).collection('orders').add(orderData).then(() => {
-            const msg = `New Order (${selectedOrderType})%0A%0AName: ${name}%0ATotal: Rs. ${total}`;
+            const msg = `New Order (${selectedOrderType})%0A%0AName: ${name}%0AExtra: ${extra}%0ATotal: Rs. ${total}`;
             window.open(`https://wa.me/${bizOwnerWa}?text=${msg}`);
-            cart = [];
-            updateCartUI();
-            closeModal();
+            cart = []; updateCartUI(); closeModal();
         });
     }
 
-    // --- UTILS ---
+    // ================= CUSTOMER CONFIRMATION PAGE =================
+    async function loadCustomerConfirmPage(bizId, orderId) {
+        const docRef = db.collection('users').doc(bizId).collection('orders').doc(orderId);
+        const doc = await docRef.get();
+        if(!doc.exists) return app.innerHTML = "<div class='text-center p-2'><h2>Order not found</h2></div>";
+        const o = doc.data();
+
+        let buttonHtml = `<button class="btn btn-secondary mt-1" onclick="window.close()">Close</button>`;
+        if (o.status === 'new') {
+            buttonHtml = `
+                <button class="btn btn-green" onclick="confirmAction('${bizId}', '${orderId}', 'confirmed')">✅ CONFIRM</button>
+                <button class="btn btn-secondary mt-1" style="background:#ff6b81" onclick="confirmAction('${bizId}', '${orderId}', 'canceled')">❌ CANCEL</button>
+            `;
+        }
+
+        app.innerHTML = `
+            <div class="flex-col center p-2" style="min-height:100vh; background:white;">
+                <h2 class="text-green mb-1">Confirm Order</h2>
+                <h1 style="font-size:3rem; margin:0;">${o.orderNum}</h1>
+                <div class="card w-100" style="max-width:400px; text-align:left;">
+                    ${o.items.map(i => `<div class="flex justify-between p-1" style="border-bottom:1px solid #eee"><span>${i.name}</span><span>Rs. ${i.price}</span></div>`).join('')}
+                    <div class="flex justify-between bold p-1" style="font-size:1.2rem"><span>Total</span><span>Rs. ${o.total}</span></div>
+                </div>
+                <div class="w-100 mt-2" style="max-width:400px">${buttonHtml}</div>
+            </div>
+        `;
+    }
+
+    function confirmAction(bizId, orderId, status) {
+        db.collection('users').doc(bizId).collection('orders').doc(orderId).update({status, seen: true})
+        .then(() => { app.innerHTML = `<div style="height:100vh;display:flex;align-items:center;justify-content:center;"><h1>${status}</h1></div>`; });
+    }
+
+    // ================= UTILITIES =================
     function showModal(content) {
         let ol = document.querySelector('.modal-overlay');
         if(!ol) {

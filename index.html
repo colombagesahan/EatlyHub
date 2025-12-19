@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>EatlyHub | Premium Food Platform</title>
     
-    <!-- PWA Configuration -->
+    <!-- PWA Configuration (Fixed) -->
     <meta name="theme-color" content="#ffffff">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3075/3075977.png">
@@ -266,6 +267,7 @@
     /**
      * EatlyHub v4.0 - Production Grade MVP
      * 100% Modular, Local Storage Caching, Skeleton Loading, Validation
+     * FIXED: Initialization Order & Meta Tags
      */
 
     // --- 1. CONFIGURATION & CONSTANTS ---
@@ -273,12 +275,11 @@
         ADMIN_EMAIL: "admin@eatlyhub.com", // CHANGE THIS TO YOUR REAL EMAIL
         FIREBASE: {
             apiKey: "AIzaSyA4mlpgLA8l1N8VHqwpVLbPXvDvPxGPcSI",
-  authDomain: "eatlyhub.firebaseapp.com",
-  projectId: "eatlyhub",
-  storageBucket: "eatlyhub.firebasestorage.app",
-  messagingSenderId: "1094045089044",
-  appId: "1:1094045089044:web:397e0fd73412a07c3ad601",
-  measurementId: "G-V3K3QB1715"
+            authDomain: "eatlyhub.firebaseapp.com",
+            projectId: "eatlyhub",
+            storageBucket: "eatlyhub.firebasestorage.app",
+            messagingSenderId: "1094045089044",
+            appId: "1:1094045089044:web:397e0fd73412a07c3ad601"
         }
     };
 
@@ -298,7 +299,14 @@
 
         init: function() {
             try {
+                // 1. Initialize Firebase FIRST
                 if (!firebase.apps.length) firebase.initializeApp(CONFIG.FIREBASE);
+                
+                // 2. Assign References AFTER Init
+                App.Auth.obj = firebase.auth();
+                App.DB.db = firebase.firestore();
+
+                // 3. Start Listeners
                 App.Auth.listen();
                 App.Router.check();
             } catch(e) {
@@ -312,7 +320,7 @@
 
     // === AUTH MODULE ===
     App.Auth = {
-        obj: firebase.auth(),
+        obj: null, // Placeholder
         
         login: () => {
             const provider = new firebase.auth.GoogleAuthProvider();
@@ -343,7 +351,7 @@
 
     // === DATABASE MODULE ===
     App.DB = {
-        db: firebase.firestore(),
+        db: null, // Placeholder
 
         // User Profile
         listenProfile: (uid) => {

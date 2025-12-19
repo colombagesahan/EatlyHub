@@ -1,4 +1,4 @@
-const CACHE_NAME = 'eatlyhub-v1';
+const CACHE_NAME = 'eatlyhub-pro-v2';
 const ASSETS = [
   './index.html',
   './manifest.json',

@@ -7,6 +7,8 @@
     
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#ff4757">
+    <!-- FIX: Added standard mobile-web-app-capable tag -->
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3075/3075977.png">
@@ -1195,8 +1197,13 @@
             bizOwnerWa = data.whatsapp;
 
             // Load Reviews
-            const reviewSnap = await db.collection('users').doc(bizId).collection('reviews').where('status', '==', 'published').orderBy('time', 'desc').limit(10).get();
-            const reviews = reviewSnap.docs.map(d => d.data());
+            // FIX: Removed .orderBy('time', 'desc') to prevent "Index Required" error. Sorting done in JS.
+            const reviewSnap = await db.collection('users').doc(bizId).collection('reviews').where('status', '==', 'published').limit(50).get();
+            let reviews = reviewSnap.docs.map(d => d.data());
+            // Sort reviews client-side (Newest first)
+            reviews.sort((a, b) => new Date(b.time) - new Date(a.time));
+            // Limit to 10
+            reviews = reviews.slice(0, 10);
 
             // Parse YouTube Links
             const social = data.socialLinks || {};

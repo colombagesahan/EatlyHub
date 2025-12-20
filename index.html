@@ -1544,7 +1544,7 @@
                 ytGalleryHtml = urls.map(u => {
                     const id = getYoutubeId(u.trim());
                     // FIX: Corrected the missing src URL for the iframe
-                    return id ? `<iframe src=" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="width:100%; height:200px; border-radius:12px; margin-bottom:10px; border:none;"></iframe>` : '';
+                    return id ? `<iframe src="https://www.youtube.com/embed/${id}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="width:100%; height:200px; border-radius:12px; margin-bottom:10px; border:none;"></iframe>` : '';
                 }).join('');
             }
 
@@ -1865,7 +1865,8 @@
                     customerMarker = L.marker([customerLocation.lat, customerLocation.lng], {draggable: true}).addTo(customerMap);
                     
                     customerMarker.on('dragend', function(e) {
-                        customerLocation = e.target.getLatLng();
+                        const ll = e.target.getLatLng();
+                        customerLocation = { lat: ll.lat, lng: ll.lng }; // Force plain object
                         checkDeliveryZone();
                     });
 
@@ -1984,7 +1985,8 @@
                 deliveryType: delOpt, // 'pickup' or 'delivery'
                 deliveryAddress: deliveryAddress,
                 deliveryFee: deliveryFee,
-                deliveryLocation: delOpt === 'delivery' ? customerLocation : null,
+                // FIX: Ensure plain object for Firestore
+                deliveryLocation: (delOpt === 'delivery' && customerLocation) ? { lat: Number(customerLocation.lat), lng: Number(customerLocation.lng) } : null,
                 time: new Date().toISOString(), 
                 status: 'new', 
                 seen: false

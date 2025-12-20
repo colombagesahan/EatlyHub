@@ -16,10 +16,10 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-    <!-- ADDED: Firebase Storage SDK -->
+    <!-- Firebase Storage SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script>
 
-    <!-- ADDED: Leaflet Maps (Free Map Provider) -->
+    <!-- Leaflet Maps (Free Map Provider) -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -1504,7 +1504,7 @@
     let bizIdForCart = null;
     let bizOwnerWa = null;
     let publicBizData = null; // Store fetched data for cart logic
-    let customerLocation = null;
+    // FIXED: REMOVED DUPLICATE DECLARATION OF customerLocation FROM HERE
 
     async function loadPublicPage(bizId) {
         bizIdForCart = bizId;

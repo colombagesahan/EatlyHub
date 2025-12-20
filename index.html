@@ -1382,7 +1382,7 @@
                 ytGalleryHtml = urls.map(u => {
                     const id = getYoutubeId(u.trim());
                     // FIX: Corrected the missing src URL for the iframe
-                    return id ? `<iframe src="https://www.youtube.com/embed/${id}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="width:100%; height:200px; border-radius:12px; margin-bottom:10px; border:none;"></iframe>` : '';
+                    return id ? `<iframe src=" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="width:100%; height:200px; border-radius:12px; margin-bottom:10px; border:none;"></iframe>` : '';
                 }).join('');
             }
 
@@ -1578,6 +1578,8 @@
     }
 
     // UPDATED (Task D): Sequential Order Number Logic
+    // FIX APPLIED: Removed server-side sorting (orderBy) to avoid 'Index Required' error.
+    // Sorting and finding max ID is now done in JavaScript.
     async function placeOrder(bizId, total) {
         const name = document.getElementById('c-name').value.trim();
         const phone = document.getElementById('c-phone').value.trim();
@@ -1594,23 +1596,25 @@
             // Task D: Generate Sequential Order Number (#000001 per day)
             const todayStr = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
             
-            // Query for the last order of today to increment sequence
-            // Note: This requires an index in Firestore: orders -> dateString ASC, orderSeq DESC
-            // If index is missing, it might throw an error in console, but for low volume it might work or fail.
-            // Fallback strategy: Read all orders of today (limited by logic or volume) if query fails, but best effort query here:
-            
+            // OLD QUERY (Caused Error): 
+            // .where('dateString', '==', todayStr).orderBy('dailySeq', 'desc').limit(1)
+
+            // NEW QUERY (Fix): Get all orders for today, then calculate max ID in JS
             const snapshot = await db.collection('users').doc(bizId).collection('orders')
                 .where('dateString', '==', todayStr)
-                .orderBy('dailySeq', 'desc')
-                .limit(1)
                 .get();
 
             let nextSeq = 1;
             if (!snapshot.empty) {
-                const lastOrder = snapshot.docs[0].data();
-                if(lastOrder.dailySeq) {
-                    nextSeq = lastOrder.dailySeq + 1;
-                }
+                // Find max manually
+                let maxSeq = 0;
+                snapshot.docs.forEach(doc => {
+                    const data = doc.data();
+                    if (data.dailySeq && data.dailySeq > maxSeq) {
+                        maxSeq = data.dailySeq;
+                    }
+                });
+                nextSeq = maxSeq + 1;
             }
 
             // Format: #000001

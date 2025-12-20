@@ -19,6 +19,10 @@
     <!-- ADDED: Firebase Storage SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script>
 
+    <!-- ADDED: Leaflet Maps (Free Map Provider) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
     <style>
         :root {
             --primary: #ff4757; 
@@ -153,7 +157,9 @@
         .status-badge { padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; display: inline-block; cursor: pointer; }
         .st-new { background: #eafff3; color: #00b894; border: 1px solid #00b894; }
         .st-unverified { background: #fff0f0; color: var(--primary); border: 1px solid var(--primary); }
-        
+        .st-must-delivery { background: #ff4757; color: white; border: 1px solid #ff4757; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(255, 71, 87, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0); } }
+
         /* Order Card Status Colors */
         .card.status-new { border-left: 5px solid var(--green); }
         .card.status-confirm { border-left: 5px solid var(--yellow); }
@@ -266,6 +272,17 @@
         .stat-card h2 { margin: 0; font-size: 1.8rem; color: var(--primary); }
         .stat-card small { font-weight: 600; display: block; margin-top: 5px; }
 
+        /* Maps */
+        .map-container {
+            width: 100%;
+            height: 300px;
+            border-radius: 12px;
+            margin-top: 10px;
+            border: 2px solid #dfe4ea;
+            z-index: 1;
+        }
+        .leaflet-control-attribution { font-size: 8px !important; }
+
     </style>
 </head>
 <body>
@@ -368,6 +385,10 @@
     let bizReviews = [];
     let adminRequests = []; // For Admin
     let currentTab = 'Dashboard';
+    let profileMap = null;
+    let profileMarker = null;
+    let profileCircle = null;
+    let publicMap = null;
 
     // Tabs List (User) - Swipeable manually
     const TABS = [
@@ -571,11 +592,18 @@
                     foods: [], 
                     schedule: {}, 
                     heroText: 'Welcome to our Kitchen!',
-                    socialLinks: {}
+                    socialLinks: {},
+                    serviceLocation: { lat: 6.9271, lng: 79.8612 }, // Default Colombo
+                    serviceRadius: 5,
+                    canDeliver: false,
+                    deliveryCost: 0,
+                    nearbyTowns: ""
                 };
                 db.collection('users').doc(currentUser.uid).set(bizProfile);
             }
-            refreshTabContent(); 
+            // If currently on Profile tab, re-render to update map if needed, 
+            // but carefully to not break editing. For now, simple refresh.
+            if(currentTab === 'Profile' && !profileMap) refreshTabContent();
         });
 
         // Real-time Listener Orders
@@ -587,7 +615,7 @@
               if(newOrders.length > 0) {
                   showToast(`🔔 ${newOrders.length} New Order(s) Received!`, 'success');
               }
-              refreshTabContent();
+              if(currentTab !== 'Profile') refreshTabContent(); // Avoid re-rendering profile map on order update
           });
           
         // Real-time Listener Reviews
@@ -595,7 +623,7 @@
           .orderBy('time', 'desc').limit(20)
           .onSnapshot(snap => {
               bizReviews = snap.docs.map(d => ({id: d.id, ...d.data()}));
-              refreshTabContent();
+              if(currentTab !== 'Profile') refreshTabContent();
           });
 
         switchTab('Dashboard');
@@ -627,7 +655,7 @@
         container.innerHTML = ''; 
 
         if(currentTab === 'Dashboard') renderDashHome(container);
-        else if(currentTab === 'Profile') renderProfile(container);
+        else if(currentTab === 'Profile') { renderProfile(container); setTimeout(initProfileMap, 500); }
         else if(currentTab === 'Open/Close') renderSchedule(container);
         else if(currentTab === 'Add Foods') renderAddFoods(container);
         else if(currentTab === 'My Webpage') renderWebpageInfo(container);
@@ -768,6 +796,37 @@
                 <div class="input-group"><label>Hotline</label><input type="tel" id="p-hot" value="${p.hotline||''}" ${disabled}></div>
                 <div class="input-group"><label>WhatsApp Number</label><input type="tel" id="p-wa" value="${p.whatsapp||''}" ${disabled}></div>
                 
+                <!-- MAP & DELIVERY AREA SETTINGS -->
+                <div class="input-group mt-2" style="border-top:1px solid #eee; paddingTop:15px;">
+                    <h3>📍 Service Area & Delivery</h3>
+                    <p class="text-gray" style="font-size:0.85rem">Click on map to set your location. Use slider to set service radius.</p>
+                    
+                    <div id="map" class="map-container"></div>
+                    
+                    <div class="input-group mt-1">
+                        <label>Service Radius: <span id="rad-val">${p.serviceRadius || 5}</span> km</label>
+                        <input type="range" id="p-radius" min="1" max="20" value="${p.serviceRadius || 5}" oninput="updateCircle(this.value)" ${disabled}>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Nearby Towns (Auto-Detected or Edit)</label>
+                        <input id="p-towns" value="${p.nearbyTowns||''}" ${disabled}>
+                    </div>
+
+                    <div class="input-group flex center justify-between" style="background:#f8f9fa; padding:10px; border-radius:10px;">
+                        <label style="margin:0">Are you delivering food to customers?</label>
+                        <select id="p-deliver" style="width:auto; padding:5px;" ${disabled} onchange="toggleDeliveryCost(this.value)">
+                            <option value="yes" ${p.canDeliver ? 'selected':''}>Yes</option>
+                            <option value="no" ${!p.canDeliver ? 'selected':''}>No</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group ${p.canDeliver ? '':'hidden'}" id="cost-group">
+                        <label>Delivery Cost (Rs.) - Added to all delivery bills</label>
+                        <input type="number" id="p-cost" value="${p.deliveryCost||0}" ${disabled}>
+                    </div>
+                </div>
+
                 ${p.locked 
                     ? `<button class="btn btn-yellow" onclick="toggleLock(false)">Unlock to Edit</button>` 
                     : `<button class="btn btn-primary" onclick="saveProfile()">Save & Lock Profile</button>`}
@@ -804,6 +863,74 @@
         if(p.temp_slip) document.getElementById('stat-slip').classList.remove('hidden');
     }
 
+    // MAP LOGIC
+    function initProfileMap() {
+        if(profileMap) profileMap.remove(); // Reset map if exists
+        
+        const center = bizProfile.serviceLocation || { lat: 6.9271, lng: 79.8612 };
+        profileMap = L.map('map').setView([center.lat, center.lng], 12);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap'
+        }).addTo(profileMap);
+
+        // Marker
+        profileMarker = L.marker([center.lat, center.lng], {draggable: !bizProfile.locked}).addTo(profileMap);
+        
+        // Circle
+        profileCircle = L.circle([center.lat, center.lng], {
+            color: 'red',
+            fillColor: '#f03',
+            fillOpacity: 0.2,
+            radius: (bizProfile.serviceRadius || 5) * 1000
+        }).addTo(profileMap);
+
+        // Click Event (Only if not locked)
+        if(!bizProfile.locked) {
+            profileMap.on('click', function(e) {
+                const { lat, lng } = e.latlng;
+                profileMarker.setLatLng([lat, lng]);
+                profileCircle.setLatLng([lat, lng]);
+                bizProfile.serviceLocation = { lat, lng };
+                fetchLocationName(lat, lng);
+            });
+            
+            profileMarker.on('dragend', function(e) {
+               const { lat, lng } = e.target.getLatLng();
+               profileCircle.setLatLng([lat, lng]);
+               bizProfile.serviceLocation = { lat, lng };
+               fetchLocationName(lat, lng);
+            });
+        }
+        
+        // Fix for map rendering in hidden tabs
+        setTimeout(() => { profileMap.invalidateSize(); }, 100);
+    }
+
+    function updateCircle(val) {
+        document.getElementById('rad-val').innerText = val;
+        if(profileCircle) profileCircle.setRadius(val * 1000);
+        bizProfile.serviceRadius = Number(val);
+    }
+
+    function toggleDeliveryCost(val) {
+        const costGroup = document.getElementById('cost-group');
+        if(val === 'yes') costGroup.classList.remove('hidden');
+        else costGroup.classList.add('hidden');
+    }
+
+    function fetchLocationName(lat, lng) {
+        // Use OpenStreetMap Nominatim API (Free) to get town name
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+            .then(res => res.json())
+            .then(data => {
+                const town = data.address.city || data.address.town || data.address.village || data.address.suburb || "Unknown Area";
+                document.getElementById('p-towns').value = town;
+            })
+            .catch(err => console.log("Geocoding failed", err));
+    }
+
+
     async function handleImageUpload(input, type) {
         if (input.files && input.files[0]) {
             showToast("Compressing & Uploading...", "info");
@@ -820,6 +947,7 @@
                 if(type === 'logo') {
                     bizProfile.tempLogo = downloadUrl;
                     renderProfile(document.getElementById('dash-content')); 
+                    setTimeout(initProfileMap, 500); // Re-init map after render
                 } else {
                     bizProfile['temp_' + type] = downloadUrl;
                     document.getElementById('stat-' + type).classList.remove('hidden');
@@ -841,6 +969,7 @@
             delete bizProfile.logo;
             delete bizProfile.tempLogo; // Clear temp logo as well
             renderProfile(document.getElementById('dash-content'));
+            setTimeout(initProfileMap, 500);
             showToast("Logo removed from preview. Save to confirm.", "info");
         }
     }
@@ -853,6 +982,12 @@
         const nic = document.getElementById('p-nic').value;
         const hot = document.getElementById('p-hot').value;
         const wa = document.getElementById('p-wa').value;
+        const towns = document.getElementById('p-towns').value;
+        const canDeliver = document.getElementById('p-deliver').value === 'yes';
+        const deliveryCost = canDeliver ? document.getElementById('p-cost').value : 0;
+        
+        // Map data is already updated in bizProfile via events, but ensuring Radius
+        const radius = document.getElementById('p-radius').value;
 
         if(!logo || !name || !addr || !owner || !nic || !hot || !wa) {
             return showToast("All profile fields and a Logo are REQUIRED before locking!", "error");
@@ -861,7 +996,11 @@
         const updatedProfile = {
             ...bizProfile,
             logo, businessName: name, address: addr, ownerName: owner, 
-            nic, hotline: hot, whatsapp: wa, locked: true
+            nic, hotline: hot, whatsapp: wa, locked: true,
+            serviceRadius: Number(radius),
+            nearbyTowns: towns,
+            canDeliver: canDeliver,
+            deliveryCost: Number(deliveryCost)
         };
         delete updatedProfile.tempLogo; // Clean up temp logo after saving
 
@@ -1169,6 +1308,7 @@
                             <small>${new Date(o.time).toLocaleString()}</small>
                         </div>
                         ${o.items.map(i => `<div class="bill-item"><span>${i.name} (${i.variant})</span><span>Rs. ${i.price}</span></div>`).join('')}
+                        ${o.deliveryType === 'delivery' ? `<div class="bill-item text-red"><span>Delivery Charge</span><span>Rs. ${o.deliveryFee}</span></div>` : ''}
                         <div class="bill-total"><span>Total</span><span>Rs. ${o.total}</span></div>
                         <div class="text-center mt-2 small">Thank you for your order!</div>
                     </div>
@@ -1182,8 +1322,13 @@
                 `;
             }
 
+            // RED BADGE FOR DELIVERY
+            const badge = o.deliveryType === 'delivery' ? `<div class="status-badge st-must-delivery mb-1" style="width:100%; text-align:center;">🛵 MUST DELIVERY</div>` : '';
+            const address = o.deliveryType === 'delivery' ? `<div class="mt-1 p-1" style="background:#fff0f0; border-radius:8px; font-size:0.9rem;"><b>Delivery To:</b><br>${o.deliveryAddress}</div>` : '';
+
             return `
                 <div class="card status-${status}">
+                    ${badge}
                     <div class="flex justify-between center">
                         <h4 class="text-red">Order #${o.orderNum}</h4>
                         <small>${new Date(o.time).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</small>
@@ -1191,8 +1336,10 @@
                     <div class="mb-1">
                         <b>${o.custName}</b> <a href="https://wa.me/${o.custWa}" target="_blank" class="btn btn-green" style="display:inline-block; width:auto; padding:2px 8px; font-size:12px; margin-left:10px;">✆ WhatsApp</a>
                     </div>
-                    <div style="background:#f8f9fa; padding:10px; border-radius:10px; border:1px solid #eee;">
+                    ${address}
+                    <div style="background:#f8f9fa; padding:10px; border-radius:10px; border:1px solid #eee; margin-top:5px;">
                         ${o.items.map(i => `<div>• ${i.name} (${i.variant}) - Rs. ${i.price}</div>`).join('')}
+                        ${o.deliveryType === 'delivery' ? `<div class="text-red mt-1">• Delivery Fee - Rs. ${o.deliveryFee}</div>` : ''}
                     </div>
                     <div class="text-right mt-1 bold" style="font-size:1.1rem">Total: Rs. ${o.total}</div>
                     <div class="mt-1">${actions}</div>
@@ -1215,6 +1362,7 @@
 
         let txt = `🧾 *BILL - ${bizProfile.businessName}*\nOrder #${o.orderNum}\n\n`;
         o.items.forEach(i => txt += `${i.name} (${i.variant}): Rs. ${i.price}\n`);
+        if(o.deliveryType === 'delivery') txt += `Delivery Fee: Rs. ${o.deliveryFee}\n`;
         txt += `\n*Total: Rs. ${o.total}*\nStatus: Preparing...`;
         
         window.open(`https://wa.me/${o.custWa}?text=${encodeURIComponent(txt)}`, '_blank');
@@ -1222,7 +1370,9 @@
     }
 
     function markReady(id, wa) {
-        const msg = `🍽 Your order from *${bizProfile.businessName}* is *READY*! Please come and pick it up.`;
+        const o = bizOrders.find(x => x.id === id);
+        const typeMsg = o.deliveryType === 'delivery' ? "is *READY for DELIVERY*! Our rider will arrive soon." : "is *READY*! Please come and pick it up.";
+        const msg = `🍽 Your order from *${bizProfile.businessName}* ${typeMsg}`;
         window.open(`https://wa.me/${wa}?text=${encodeURIComponent(msg)}`, '_blank');
         setStatus(id, 'ready'); // Move to ready status
         showToast("Order status updated to 'Ready' and customer notified.", "success");
@@ -1259,6 +1409,7 @@
                         <tr>
                             <th>Order #</th>
                             <th>Customer Info</th>
+                            <th>Type</th>
                             <th>Details</th>
                             <th>Status</th>
                         </tr>
@@ -1272,8 +1423,13 @@
                                     📞 ${o.custPhone || 'N/A'}<br>
                                     💬 ${o.custWa}
                                 </td>
+                                <td data-label="Type">
+                                    ${o.deliveryType === 'delivery' ? '<b class="text-red">Delivery</b>' : 'Pick Up'}
+                                    ${o.deliveryType === 'delivery' ? `<br><small>${o.deliveryAddress}</small>` : ''}
+                                </td>
                                 <td data-label="Details">
                                     ${o.items.map(i => `${i.name} (${i.variant})`).join(', ')}<br>
+                                    ${o.deliveryType === 'delivery' ? `<small>+ Delivery: ${o.deliveryFee}</small><br>`:''}
                                     <b>Total: Rs. ${o.total}</b>
                                 </td>
                                 <td data-label="Status">
@@ -1343,6 +1499,8 @@
     let cart = [];
     let bizIdForCart = null;
     let bizOwnerWa = null;
+    let publicBizData = null; // Store fetched data for cart logic
+    let customerLocation = null;
 
     async function loadPublicPage(bizId) {
         bizIdForCart = bizId;
@@ -1363,10 +1521,10 @@
                 return app.innerHTML = "<div class='text-center p-2'><h2>Business Not Found or Not Public</h2><p>This business may not have completed their profile setup.</p></div>";
             }
             const data = doc.data();
+            publicBizData = data; // Save for later use in cart
             bizOwnerWa = data.whatsapp;
 
             // Load Reviews
-            // FIX: Removed .orderBy('time', 'desc') to prevent "Index Required" error. Sorting done in JS.
             const reviewSnap = await db.collection('users').doc(bizId).collection('reviews').where('status', '==', 'published').limit(50).get();
             let reviews = reviewSnap.docs.map(d => d.data());
             // Sort reviews client-side (Newest first)
@@ -1382,9 +1540,14 @@
                 ytGalleryHtml = urls.map(u => {
                     const id = getYoutubeId(u.trim());
                     // FIX: Corrected the missing src URL for the iframe
-                    return id ? `<iframe src=" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="width:100%; height:200px; border-radius:12px; margin-bottom:10px; border:none;"></iframe>` : '';
+                    return id ? `<iframe src="https://www.youtube.com/embed/${id}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="width:100%; height:200px; border-radius:12px; margin-bottom:10px; border:none;"></iframe>` : '';
                 }).join('');
             }
+
+            // DELIVERY STATUS BANNER
+            const deliveryBanner = data.canDeliver 
+                ? `<div class="status-badge st-new mt-1" style="font-size:0.8rem">🛵 WE DELIVER TO YOUR DOORSTEP</div>`
+                : `<div class="status-badge st-unverified mt-1" style="font-size:0.8rem">🚶 PICKUP ONLY - NO DELIVERY</div>`;
 
             // Generate HTML
             app.innerHTML = `
@@ -1396,6 +1559,7 @@
                             <img id="pub-logo" src="${data.logo || 'https://via.placeholder.com/100'}" style="width:110px; height:110px; border-radius:50%; object-fit:cover; border:5px solid var(--primary); margin-bottom:10px; margin-top:-10px;">
                             <h2 id="pub-name" style="margin:0;">${data.businessName}</h2>
                             ${data.verified ? `<div class="mt-1"><span class="status-badge st-new">✔ Verified Business</span></div>` : ''}
+                            ${deliveryBanner}
                             <p style="color:#888; margin-top:5px; font-size:0.9rem;">${data.address}</p>
                             
                             <!-- Social Icons -->
@@ -1414,6 +1578,14 @@
                     <div class="hero mt-2" style="border-radius:20px; padding:30px 20px; margin: 15px;">
                         <h2 style="font-size:1.5rem;">${data.heroText || "Welcome!"}</h2>
                         <button class="btn btn-secondary mt-1" style="background:white; color:var(--primary);" onclick="document.getElementById('pub-menu').scrollIntoView({behavior:'smooth'})">ORDER NOW</button>
+                    </div>
+
+                    <!-- OUR SERVICE AREA SECTION -->
+                    <div class="p-2 container">
+                        <h3>Our Service Area</h3>
+                        <p class="text-gray" style="font-size:0.9rem">${data.nearbyTowns ? `Serving: ${data.nearbyTowns}` : 'Check the map below for delivery zones.'}</p>
+                        <div id="public-map" class="map-container" style="pointer-events:none;"></div>
+                        ${!data.canDeliver ? '<p class="text-red mt-1 text-center bold">Note: We do not provide delivery. You must come and pick up.</p>' : ''}
                     </div>
 
                     <!-- Video Gallery -->
@@ -1454,6 +1626,9 @@
                     </div>
                 </div>
             `;
+
+            // Initialize Public Map
+            initPublicMap(data);
 
             // Render Menu with Beautiful Cards
             const menuDiv = document.getElementById('pub-menu');
@@ -1528,6 +1703,23 @@
         }
     }
 
+    function initPublicMap(data) {
+        if(publicMap) publicMap.remove();
+        const loc = data.serviceLocation || { lat: 6.9271, lng: 79.8612 };
+        publicMap = L.map('public-map', {zoomControl: false, dragging: false, scrollWheelZoom: false}).setView([loc.lat, loc.lng], 12);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(publicMap);
+        
+        L.marker([loc.lat, loc.lng]).addTo(publicMap);
+        L.circle([loc.lat, loc.lng], {
+            color: 'red',
+            fillColor: '#f03',
+            fillOpacity: 0.2,
+            radius: (data.serviceRadius || 5) * 1000
+        }).addTo(publicMap);
+        
+        setTimeout(() => { publicMap.invalidateSize(); }, 500);
+    }
+
     function addToCart(name, variant, price) {
         cart.push({name, variant, price: Number(price)}); // Ensure price is number
         document.getElementById('cart-count').innerText = cart.length;
@@ -1551,22 +1743,157 @@
         }).catch(e => showToast("Failed to submit review: " + e.message, 'error'));
     }
 
-    // UPDATED (Task E): Show Cart Modal with Phone Number
+    // UPDATED (Task E): Show Cart Modal with DELIVERY OPTIONS and LOGIC
     function showCartModal() {
         if(cart.length === 0) return showToast("Your cart is empty. Add some items first!", "error");
         const total = cart.reduce((a,b)=>a+b.price,0); // Use numeric price
+        
         showModal(`
             <h2 class="text-center">Your Order Summary</h2>
             <div style="background:#f8f9fa; padding:10px; border-radius:12px; max-height:250px; overflow-y:auto; margin-bottom:15px;">
                 ${cart.map((i,idx) => `<div class="flex justify-between" style="padding:8px 0; border-bottom:1px solid #eee;"><span>${i.name} (${i.variant})</span><b>Rs. ${i.price}</b> <button onclick="removeFromCart(${idx})" style="background:none; border:none; color:var(--primary); font-size:1.2rem; cursor:pointer;">&times;</button></div>`).join('')}
             </div>
-            <h3 class="text-right text-red">Total: Rs. ${total}</h3>
+            
+            <h3 class="text-right text-red">Total: Rs. ${total} <span id="cart-del-fee" class="text-gray small hidden"></span></h3>
+            
+            <hr class="mb-1" style="border:0; border-top:1px dashed #ccc;">
+            
+            <!-- Delivery Options -->
+            <label class="bold mb-1 block">Select Option:</label>
+            <div class="flex center" style="gap:10px; margin-bottom:15px;">
+                <label class="btn btn-outline" style="flex:1; cursor:pointer">
+                    <input type="radio" name="del-opt" value="pickup" checked onchange="toggleDeliveryUI('pickup')"> I come to pick
+                </label>
+                <label class="btn btn-outline" style="flex:1; cursor:pointer">
+                    <input type="radio" name="del-opt" value="delivery" onchange="toggleDeliveryUI('delivery')"> Please Deliver
+                </label>
+            </div>
+            
+            <!-- Alert Box -->
+            <div id="del-alert" class="hidden p-1 mb-1 text-center" style="border-radius:8px;"></div>
+
+            <div id="del-fields" class="hidden">
+                 <div class="input-group">
+                    <label>Your Delivery Address *</label>
+                    <textarea id="c-address" rows="2" placeholder="House No, Street, Landmark..."></textarea>
+                </div>
+                <div class="input-group">
+                    <label>Confirm Location (Required for Check) *</label>
+                    <button class="btn btn-secondary" onclick="getLocationForCheck()" style="font-size:0.9rem">📍 Get My Current Location</button>
+                    <div id="loc-status" class="mt-1 small text-green hidden">✔ Location Captured</div>
+                </div>
+            </div>
+
             <div class="input-group"><label>Your Name *</label><input id="c-name" placeholder="John Doe"></div>
             <div class="input-group"><label>Phone Number (for Call) *</label><input id="c-phone" type="tel" placeholder="e.g. 0771234567"></div>
             <div class="input-group"><label>WhatsApp Number (for Confirmation) *</label><input id="c-wa" type="tel" placeholder="e.g. 94771234567 (with country code)"></div>
+            
             <button id="btn-order" class="btn btn-green" onclick="placeOrder('${bizIdForCart}', ${total})">Confirm & Order via WhatsApp</button>
             <button class="btn btn-secondary mt-1" onclick="closeModal()">Continue Browsing</button>
         `);
+    }
+
+    // Toggle UI logic for Delivery selection
+    function toggleDeliveryUI(type) {
+        const delFields = document.getElementById('del-fields');
+        const alertBox = document.getElementById('del-alert');
+        const orderBtn = document.getElementById('btn-order');
+        const feeSpan = document.getElementById('cart-del-fee');
+
+        alertBox.className = 'hidden p-1 mb-1 text-center'; 
+        alertBox.innerHTML = '';
+        feeSpan.innerText = '';
+        orderBtn.disabled = false;
+
+        if (type === 'delivery') {
+            // Check if business delivers
+            if (!publicBizData.canDeliver) {
+                alertBox.classList.remove('hidden');
+                alertBox.style.background = '#fff0f0';
+                alertBox.style.color = 'var(--primary)';
+                alertBox.innerHTML = '<b>Sorry, we do not deliver.</b><br>You must come and pick up.';
+                // Disable confirm button if they select delivery but biz doesn't deliver
+                orderBtn.disabled = true;
+                // Force uncheck or reset (optional, user UX)
+            } else {
+                delFields.classList.remove('hidden');
+                // Show Delivery Cost hint
+                if(publicBizData.deliveryCost > 0) {
+                     alertBox.classList.remove('hidden');
+                     alertBox.style.background = '#e7f1ff';
+                     alertBox.style.color = '#2f3542';
+                     alertBox.innerHTML = `Note: Delivery Cost of <b>Rs. ${publicBizData.deliveryCost}</b> will be added to your bill.`;
+                     feeSpan.classList.remove('hidden');
+                     feeSpan.innerHTML = `+ Rs. ${publicBizData.deliveryCost} (Del)`;
+                }
+            }
+        } else {
+            delFields.classList.add('hidden');
+        }
+    }
+
+    // Get Customer Location using Browser API
+    function getLocationForCheck() {
+        if (navigator.geolocation) {
+            document.getElementById('loc-status').innerHTML = "⏳ Detecting location...";
+            document.getElementById('loc-status').classList.remove('hidden');
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    customerLocation = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+                    // Check Geofence
+                    checkDeliveryZone();
+                },
+                (error) => {
+                    document.getElementById('loc-status').innerHTML = "❌ Failed to get location. Enable GPS.";
+                    document.getElementById('loc-status').style.color = 'red';
+                }
+            );
+        } else {
+            alert("Geolocation is not supported by this browser.");
+        }
+    }
+
+    // Calculate Distance and Validate Zone
+    function checkDeliveryZone() {
+        if(!customerLocation || !publicBizData.serviceLocation) return;
+        
+        const bizLoc = publicBizData.serviceLocation;
+        const dist = getDistanceFromLatLonInKm(bizLoc.lat, bizLoc.lng, customerLocation.lat, customerLocation.lng);
+        
+        const statusDiv = document.getElementById('loc-status');
+        const btn = document.getElementById('btn-order');
+        
+        if (dist <= (publicBizData.serviceRadius || 5)) {
+            statusDiv.innerHTML = "✔ Location Verified: Inside Delivery Zone";
+            statusDiv.style.color = "var(--green)";
+            btn.disabled = false;
+        } else {
+            statusDiv.innerHTML = `❌ Sorry, we do not deliver to your current location.<br>(Dist: ${dist.toFixed(1)}km, Limit: ${publicBizData.serviceRadius}km)`;
+            statusDiv.style.color = "red";
+            btn.disabled = true; // Block order
+        }
+    }
+
+    // Haversine Formula for distance
+    function getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2) {
+      var R = 6371; // Radius of the earth in km
+      var dLat = deg2rad(lat2-lat1);  // deg2rad below
+      var dLon = deg2rad(lon2-lon1); 
+      var a = 
+        Math.sin(dLat/2) * Math.sin(dLat/2) +
+        Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
+        Math.sin(dLon/2) * Math.sin(dLon/2)
+        ; 
+      var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+      var d = R * c; // Distance in km
+      return d;
+    }
+
+    function deg2rad(deg) {
+      return deg * (Math.PI/180)
     }
 
     function removeFromCart(index) {
@@ -1584,9 +1911,34 @@
         const name = document.getElementById('c-name').value.trim();
         const phone = document.getElementById('c-phone').value.trim();
         const wa = document.getElementById('c-wa').value.trim();
+        const delOpt = document.querySelector('input[name="del-opt"]:checked').value;
         
         if(!name || !phone || !wa) return showToast("All fields (Name, Phone, WhatsApp) are required!", "error");
         if (cart.length === 0) return showToast("Your cart is empty!", "error");
+
+        let deliveryFee = 0;
+        let deliveryAddress = "";
+        let finalTotal = total;
+
+        // Delivery Validation logic
+        if (delOpt === 'delivery') {
+            if (!publicBizData.canDeliver) {
+                return showToast("Delivery is not available. Please select Pick Up.", "error");
+            }
+            deliveryAddress = document.getElementById('c-address').value.trim();
+            if (!deliveryAddress) return showToast("Delivery Address is required.", "error");
+            if (!customerLocation) return showToast("Please confirm your location using the button.", "error");
+            
+            // Re-check zone just in case
+            const bizLoc = publicBizData.serviceLocation;
+            const dist = getDistanceFromLatLonInKm(bizLoc.lat, bizLoc.lng, customerLocation.lat, customerLocation.lng);
+            if(dist > (publicBizData.serviceRadius || 5)) {
+                 return showToast("Your location is outside the service area.", "error");
+            }
+
+            deliveryFee = publicBizData.deliveryCost || 0;
+            finalTotal += deliveryFee;
+        }
 
         // Disable button to prevent double clicks
         document.getElementById('btn-order').disabled = true;
@@ -1596,9 +1948,6 @@
             // Task D: Generate Sequential Order Number (#000001 per day)
             const todayStr = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
             
-            // OLD QUERY (Caused Error): 
-            // .where('dateString', '==', todayStr).orderBy('dailySeq', 'desc').limit(1)
-
             // NEW QUERY (Fix): Get all orders for today, then calculate max ID in JS
             const snapshot = await db.collection('users').doc(bizId).collection('orders')
                 .where('dateString', '==', todayStr)
@@ -1628,7 +1977,11 @@
                 custPhone: phone, // Saved for Reports
                 custWa: wa, 
                 items: cart, 
-                total, 
+                total: finalTotal, // Includes Delivery Fee
+                deliveryType: delOpt, // 'pickup' or 'delivery'
+                deliveryAddress: deliveryAddress,
+                deliveryFee: deliveryFee,
+                deliveryLocation: delOpt === 'delivery' ? customerLocation : null,
                 time: new Date().toISOString(), 
                 status: 'new', 
                 seen: false
@@ -1636,7 +1989,12 @@
 
             await db.collection('users').doc(bizId).collection('orders').add(orderData);
 
-            const msg = `🔔 *New Order from EatlyHub!* \n\nCustomer: ${name}\nPhone: ${phone}\nOrder #: ${orderNum}\n\n*Items Ordered:*\n${cart.map(i=>`- ${i.name} (${i.variant})`).join('\n')}\n\n*Total Amount: Rs. ${total}*\n\n_Please check your EatlyHub dashboard for details._`;
+            let msg = `🔔 *New Order from EatlyHub!* \n\nCustomer: ${name}\nPhone: ${phone}\nOrder #: ${orderNum}\nType: *${delOpt.toUpperCase()}*\n`;
+            if(delOpt === 'delivery') msg += `Address: ${deliveryAddress}\n`;
+            msg += `\n*Items Ordered:*\n${cart.map(i=>`- ${i.name} (${i.variant})`).join('\n')}\n`;
+            if(delOpt === 'delivery') msg += `Delivery Fee: Rs. ${deliveryFee}\n`;
+            msg += `\n*Total Amount: Rs. ${finalTotal}*\n\n_Please check your EatlyHub dashboard for details._`;
+            
             window.open(`https://wa.me/${bizOwnerWa}?text=${encodeURIComponent(msg)}`, '_blank');
             
             cart = []; // Clear cart after order is placed
@@ -1688,6 +2046,7 @@
                 
                 <div class="card w-100" style="max-width:400px; text-align:left;">
                     ${o.items.map(i => `<div class="flex justify-between p-1" style="border-bottom:1px solid #eee"><span>${i.name}</span><span>Rs. ${i.price}</span></div>`).join('')}
+                    ${o.deliveryType === 'delivery' ? `<div class="flex justify-between p-1 text-red"><span>Delivery Fee</span><span>Rs. ${o.deliveryFee}</span></div>` : ''}
                     <div class="flex justify-between bold p-1" style="font-size:1.2rem"><span>Total</span><span>Rs. ${o.total}</span></div>
                 </div>
 

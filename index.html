@@ -3,11 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>EatlyHub SuperApp | Food Delivery Platform</title>
+    <title>EatlyHub | Food Delivery Platform</title>
     
-    <!-- Google Fonts for Modern App Look -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;900&display=swap" rel="stylesheet">
-
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#ff4757">
     <meta name="mobile-web-app-capable" content="yes">
@@ -26,35 +23,26 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-    <!-- Canvas Confetti for Super App Effects -->
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-
     <style>
         :root {
             --primary: #ff4757; 
             --primary-dark: #e84118;
             --secondary: #2f3542;
-            --bg: #f8f9fe;
+            --bg: #f1f2f6;
             --surface: #ffffff;
             --green: #2ed573;
             --red: #ff6b81;
             --yellow: #ffa502;
             --gray: #ced6e0;
-            --shadow: 0 10px 30px rgba(149, 157, 165, 0.15);
-            --font: 'Poppins', sans-serif; /* Super App Font */
-            --radius: 20px;
-            --glass: rgba(255, 255, 255, 0.9);
+            --shadow: 0 8px 24px rgba(149, 157, 165, 0.2);
+            --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            --radius: 16px;
         }
 
         /* --- RESET & BASE --- */
         * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
-        body { margin: 0; padding: 0; font-family: var(--font); background: var(--bg); color: var(--secondary); font-size: 14px; line-height: 1.5; overflow-x: hidden; padding-bottom: 80px; }
+        body { margin: 0; padding: 0; font-family: var(--font); background: var(--bg); color: var(--secondary); font-size: 14px; line-height: 1.5; overflow-x: hidden; padding-bottom: 20px; }
         
-        /* --- SUPER APP ANIMATIONS --- */
-        @keyframes popIn { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-5px); } 100% { transform: translateY(0px); } }
-        @keyframes shimmer { 0% { background-position: -1000px 0; } 100% { background-position: 1000px 0; } }
-
         /* --- UTILITY CLASSES --- */
         .flex { display: flex; }
         .flex-col { flex-direction: column; }
@@ -76,7 +64,7 @@
         .relative { position: relative; }
         
         /* --- TYPOGRAPHY --- */
-        h1, h2, h3, h4 { margin: 0 0 8px 0; color: var(--secondary); font-weight: 800; letter-spacing: -0.5px; }
+        h1, h2, h3, h4 { margin: 0 0 8px 0; color: var(--secondary); font-weight: 800; }
         small { color: #747d8c; font-size: 0.8rem; }
 
         /* --- 300px SCREEN OPTIMIZATION --- */
@@ -92,38 +80,36 @@
 
         /* --- COMPONENTS --- */
         
-        /* Buttons - Modernized */
+        /* Buttons */
         .btn { 
-            padding: 16px 20px; border: none; border-radius: 16px; cursor: pointer; 
-            font-weight: 700; font-size: 1rem; transition: transform 0.1s, box-shadow 0.2s; 
+            padding: 14px 20px; border: none; border-radius: 12px; cursor: pointer; 
+            font-weight: 600; font-size: 1rem; transition: transform 0.1s; 
             width: 100%; text-align: center; display: block; text-decoration: none; 
-            margin-bottom: 8px; box-shadow: 0 4px 15px rgba(255, 71, 87, 0.2);
+            margin-bottom: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
             position: relative; overflow: hidden;
         }
         .btn:active { transform: scale(0.97); }
-        .btn-primary { background: linear-gradient(135deg, var(--primary), #ff6b81); color: white; border: none;}
-        .btn-secondary { background: var(--secondary); color: white; box-shadow: 0 4px 10px rgba(47, 53, 66, 0.2); }
-        .btn-green { background: linear-gradient(135deg, #2ed573, #7bed9f); color: white; box-shadow: 0 4px 10px rgba(46, 213, 115, 0.2); }
-        .btn-yellow { background: linear-gradient(135deg, #ffa502, #ffda79); color: white; }
+        .btn-primary { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; }
+        .btn-secondary { background: var(--secondary); color: white; }
+        .btn-green { background: var(--green); color: white; }
+        .btn-yellow { background: var(--yellow); color: white; }
         .btn-outline { border: 2px solid var(--primary); color: var(--primary); background: transparent; box-shadow: none; }
         
-        /* Cards - Glassmorphism Support */
+        /* Cards */
         .card { 
             background: var(--surface); padding: 20px; border-radius: var(--radius); 
             box-shadow: var(--shadow); margin-bottom: 20px; border: 1px solid rgba(0,0,0,0.03);
-            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            backdrop-filter: blur(10px);
+            animation: slideUp 0.3s ease-out;
         }
         
         /* Inputs */
         .input-group { margin-bottom: 16px; position: relative; }
         .input-group label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.9rem; color: var(--secondary); }
         .input-group input, .input-group select, .input-group textarea { 
-            width: 100%; padding: 14px; border: 2px solid #f1f2f6; border-radius: 14px; 
-            font-size: 1rem; background: #fdfdfd; transition: all 0.2s; -webkit-appearance: none;
-            font-family: var(--font);
+            width: 100%; padding: 14px; border: 2px solid #dfe4ea; border-radius: 12px; 
+            font-size: 1rem; background: #ffffff; transition: all 0.2s; -webkit-appearance: none;
         }
-        .input-group input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(255, 71, 87, 0.1); background: white; }
+        .input-group input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(255, 71, 87, 0.1); }
         
         /* Image Upload Wrapper */
         .file-upload-wrapper {
@@ -134,11 +120,10 @@
 
         /* Navigation */
         nav { 
-            background: rgba(255,255,255,0.95); padding: 15px; position: sticky; top: 0; z-index: 100; 
-            box-shadow: 0 4px 20px rgba(0,0,0,0.03); display: flex; align-items: center; justify-content: space-between; 
-            backdrop-filter: blur(10px);
+            background: var(--surface); padding: 15px; position: sticky; top: 0; z-index: 100; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: space-between; 
         }
-        .nav-brand { display: flex; align-items: center; gap: 8px; font-size: 1.4rem; font-weight: 900; color: var(--primary); letter-spacing: -1px; }
+        .nav-brand { display: flex; align-items: center; gap: 8px; font-size: 1.4rem; font-weight: 900; color: var(--primary); }
         .nav-logo-svg { width: 32px; height: 32px; fill: var(--primary); }
 
         /* Dashboard Tabs (Fixed Horizontal Slide) */
@@ -148,34 +133,28 @@
             width: 100%; overflow: hidden; 
         }
         .tabs-container { 
-            display: flex; flex-wrap: nowrap; overflow-x: auto; padding: 12px 15px; 
-            -webkit-overflow-scrolling: touch; scrollbar-width: none; gap: 12px;
+            display: flex; flex-wrap: nowrap; overflow-x: auto; padding: 10px 15px; 
+            -webkit-overflow-scrolling: touch; scrollbar-width: none; gap: 10px;
             width: 100%;
         }
         .tabs-container::-webkit-scrollbar { display: none; }
         .tab-btn { 
-            padding: 10px 20px; white-space: nowrap; cursor: pointer; color: #747d8c; 
-            font-weight: 600; border-radius: 25px; background: #f1f2f6; transition: all 0.3s; 
+            padding: 10px 18px; white-space: nowrap; cursor: pointer; color: #747d8c; 
+            font-weight: 600; border-radius: 20px; background: #f1f2f6; transition: all 0.2s; 
             font-size: 0.9rem; flex-shrink: 0;
         }
-        .tab-btn.active { background: var(--primary); color: white; box-shadow: 0 4px 15px rgba(255, 71, 87, 0.4); transform: scale(1.05); }
+        .tab-btn.active { background: var(--primary); color: white; box-shadow: 0 4px 10px rgba(255, 71, 87, 0.3); }
 
         /* Hero Section */
         .hero { 
             background: linear-gradient(135deg, var(--primary), var(--primary-dark)); 
-            color: white; padding: 60px 20px 50px; text-align: center; 
-            border-radius: 0 0 40px 40px; box-shadow: var(--shadow); 
+            color: white; padding: 60px 20px 40px; text-align: center; 
+            border-radius: 0 0 30px 30px; box-shadow: var(--shadow); 
             margin-bottom: 20px;
-            position: relative; overflow: hidden;
-        }
-        .hero::before {
-            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 10%, transparent 10.5%);
-            background-size: 20px 20px; opacity: 0.5;
         }
 
         /* Status Badges */
-        .status-badge { padding: 5px 15px; border-radius: 20px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; display: inline-block; cursor: pointer; letter-spacing: 0.5px; }
+        .status-badge { padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; display: inline-block; cursor: pointer; }
         .st-new { background: #eafff3; color: #00b894; border: 1px solid #00b894; }
         .st-unverified { background: #fff0f0; color: var(--primary); border: 1px solid var(--primary); }
         .st-must-delivery { background: #ff4757; color: white; border: 1px solid #ff4757; animation: pulse 2s infinite; }
@@ -209,15 +188,14 @@
         }
 
         /* Modals */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; display: flex; justify-content: center; align-items: flex-end; backdrop-filter: blur(8px); }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; display: flex; justify-content: center; align-items: flex-end; backdrop-filter: blur(4px); }
         @media(min-width: 600px) { .modal-overlay { align-items: center; } }
         .modal-box { 
-            background: white; width: 100%; max-width: 500px; padding: 30px; 
-            border-radius: 30px 30px 0 0; max-height: 90vh; overflow-y: auto; 
+            background: white; width: 100%; max-width: 500px; padding: 25px; 
+            border-radius: 25px 25px 0 0; max-height: 90vh; overflow-y: auto; 
             animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            box-shadow: 0 -10px 40px rgba(0,0,0,0.2);
         }
-        @media(min-width: 600px) { .modal-box { border-radius: 30px; } }
+        @media(min-width: 600px) { .modal-box { border-radius: 20px; } }
         
         /* Loading & Animations */
         @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -228,85 +206,91 @@
         @keyframes slideIn { from{opacity:0; transform:translateX(20px);} to{opacity:1; transform:translateX(0);} } 
         @keyframes fadeOut { from{opacity:1; transform:translateY(0);} to{opacity:0; transform:translateY(-20px);} } 
 
-        /* Floating Cart (Super App Style) */
+        /* Floating Cart */
         .floating-cart {
-            position: fixed; bottom: 20px; right: 20px; background: #2f3542; 
-            color: white; width: 70px; height: 70px; border-radius: 25px; 
+            position: fixed; bottom: 20px; right: 20px; background: var(--primary); 
+            color: white; width: 65px; height: 65px; border-radius: 50%; 
             display: flex; align-items: center; justify-content: center; 
-            font-size: 30px; box-shadow: 0 15px 35px rgba(47, 53, 66, 0.4); 
-            cursor: pointer; z-index: 1900; transition: all 0.2s;
-            border: 2px solid rgba(255,255,255,0.1);
+            font-size: 28px; box-shadow: 0 10px 25px rgba(255,71,87,0.4); 
+            cursor: pointer; z-index: 900; transition: transform 0.2s;
         }
         .floating-cart:active { transform: scale(0.9); }
         .cart-badge { 
-            position: absolute; top: -8px; right: -8px; background: var(--primary); 
-            color: white; width: 28px; height: 28px; border-radius: 50%; font-size: 14px; 
-            font-weight: bold; display: flex; align-items: center; justify-content: center; 
-            border: 3px solid #f8f9fe; box-shadow: 0 4px 10px rgba(255, 71, 87, 0.4);
+            position: absolute; top: -5px; right: -5px; background: var(--secondary); 
+            color: white; width: 24px; height: 24px; border-radius: 50%; font-size: 12px; 
+            display: flex; align-items: center; justify-content: center; border: 2px solid white; 
         }
 
         /* Responsive Table for Reports */
-        .report-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-        .report-table th, .report-table td { text-align: left; padding: 12px; border-bottom: 1px solid #eee; }
-        .report-table th { background-color: #f8f9fa; font-weight: 800; color: var(--secondary); }
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        .report-table th, .report-table td {
+            text-align: left;
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+        }
+        .report-table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
         @media (max-width: 400px) {
-            .report-table, .report-table thead, .report-table tbody, .report-table th, .report-table td, .report-table tr { display: block; }
-            .report-table thead tr { position: absolute; top: -9999px; left: -9999px; }
-            .report-table tr { margin-bottom: 15px; border: 1px solid #eee; border-radius: 15px; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
-            .report-table td { border: none; position: relative; padding-left: 50%; margin-bottom: 5px; }
-            .report-table td:before { position: absolute; top: 12px; left: 0; width: 45%; padding-right: 10px; white-space: nowrap; font-weight: bold; content: attr(data-label); color: #747d8c; }
+            .report-table, .report-table thead, .report-table tbody, .report-table th, .report-table td, .report-table tr { 
+                display: block; 
+            }
+            .report-table thead tr { 
+                position: absolute; top: -9999px; left: -9999px; 
+            }
+            .report-table tr { margin-bottom: 15px; border: 1px solid #eee; border-radius: 10px; padding: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+            .report-table td { 
+                border: none; position: relative; padding-left: 50%; margin-bottom: 5px; 
+            }
+            .report-table td:before { 
+                position: absolute; top: 6px; left: 6px; width: 45%; padding-right: 10px; white-space: nowrap; font-weight: bold; content: attr(data-label); color: #747d8c;
+            }
         }
 
         /* Stat Grid */
         .stat-grid {
-            display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 25px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
         }
         .stat-card {
-            background: white; padding: 20px; border-radius: 20px; text-align: center;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.03); cursor: pointer; transition: transform 0.2s;
-            border: 1px solid transparent;
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+            cursor: pointer;
+            transition: transform 0.2s;
         }
-        .stat-card:active { transform: scale(0.96); }
-        .stat-card h2 { margin: 0; font-size: 2rem; color: var(--primary); line-height: 1; }
-        .stat-card small { font-weight: 600; display: block; margin-top: 8px; font-size: 0.85rem; }
+        .stat-card:active { transform: scale(0.98); }
+        .stat-card h2 { margin: 0; font-size: 1.8rem; color: var(--primary); }
+        .stat-card small { font-weight: 600; display: block; margin-top: 5px; }
 
         /* Maps */
         .map-container {
-            width: 100%; height: 300px; border-radius: 20px; margin-top: 15px;
-            border: 2px solid #dfe4ea; z-index: 1; overflow: hidden;
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.05);
+            width: 100%;
+            height: 300px;
+            border-radius: 12px;
+            margin-top: 10px;
+            border: 2px solid #dfe4ea;
+            z-index: 1;
         }
         .leaflet-control-attribution { font-size: 8px !important; }
-
-        /* --- SUPER APP: STORIES COMPONENT --- */
-        .stories-wrapper {
-            display: flex; gap: 15px; overflow-x: auto; padding: 15px 5px;
-            scrollbar-width: none; -webkit-overflow-scrolling: touch;
-        }
-        .stories-wrapper::-webkit-scrollbar { display: none; }
-        .story-item {
-            display: flex; flex-direction: column; align-items: center; flex-shrink: 0; cursor: pointer;
-        }
-        .story-ring {
-            width: 74px; height: 74px; border-radius: 50%; padding: 3px;
-            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
-            margin-bottom: 5px; transition: transform 0.2s;
-        }
-        .story-img {
-            width: 100%; height: 100%; border-radius: 50%; border: 3px solid white; object-fit: cover;
-        }
-        .story-item:active .story-ring { transform: scale(0.95); }
-        .story-name { font-size: 0.75rem; max-width: 70px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
     </style>
 </head>
 <body>
 
 <div id="app">
-    <div style="height:100vh; display:flex; align-items:center; justify-content:center; flex-direction:column; background: linear-gradient(135deg, #ff9ff3, #feca57);">
-        <img src="https://cdn-icons-png.flaticon.com/512/3075/3075977.png" width="80" class="mb-2" style="animation: float 2s infinite ease-in-out;">
+    <div style="height:100vh; display:flex; align-items:center; justify-content:center; flex-direction:column;">
         <div class="loader"></div>
-        <p class="mt-2 bold text-white" style="text-shadow: 0 2px 4px rgba(0,0,0,0.2); font-size: 1.2rem;">EatlyHub SuperApp</p>
+        <p class="mt-2 bold text-red">EatlyHub</p>
     </div>
 </div>
 
@@ -315,29 +299,29 @@
 <!-- 1. LANDING PAGE -->
 <template id="tpl-landing">
     <div class="hero">
-        <svg class="nav-logo-svg" viewBox="0 0 24 24" fill="white" style="width:80px;height:80px;margin-bottom:15px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2)); animation: popIn 0.8s;">
+        <svg class="nav-logo-svg" viewBox="0 0 24 24" fill="white" style="width:80px;height:80px;margin-bottom:15px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));">
             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
         </svg>
-        <h1 style="color:white; font-size:2.8rem; margin-bottom: 5px;">EatlyHub</h1>
-        <p style="opacity:0.9; margin-bottom:25px; font-weight:300;">Super App for Hotels, Restaurants & Home Kitchens</p>
-        <button class="btn" onclick="authLogin()" style="background:white; color:var(--primary); font-weight:800; border-radius:30px; box-shadow: 0 10px 20px rgba(0,0,0,0.15);">
+        <h1 style="color:white; font-size:2.5rem;">EatlyHub</h1>
+        <p style="opacity:0.9; margin-bottom:20px;">All-in-One Platform for Hotels, Restaurants & Home Kitchens</p>
+        <button class="btn" onclick="authLogin()" style="background:white; color:var(--primary); font-weight:800; border-radius:30px;">
             <svg style="width:20px;height:20px;vertical-align:middle;margin-right:8px;" viewBox="0 0 24 24"><path d="M12.545 10.239v3.821h5.445c-.712 2.315-2.647 3.972-5.445 3.972-3.332 0-6.033-2.531-6.033-5.97 0-3.438 2.701-5.97 6.033-5.97 1.414 0 2.675.525 3.636 1.35l2.802-2.818C17.396 2.922 15.115 1.761 12.545 1.761 6.615 1.761 1.76 6.345 1.76 12s4.855 10.239 10.785 10.239c6.234 0 10.39-4.313 10.39-10.239 0-.693-.061-1.373-.18-2.025l-10.21.264z"/></svg>
             Continue with Gmail
         </button>
     </div>
 
     <div class="container p-2">
-        <h3 class="text-center mb-2">Grow Your Food Business 🚀</h3>
+        <h3 class="text-center mb-1">Why EatlyHub?</h3>
         
-        <div class="card" style="border-left: 5px solid var(--primary);">
+        <div class="card">
             <h4>🏨 Hotels & Restaurants</h4>
-            <p>Digital QR menus for room service. Zero hardware.</p>
+            <p>Digital menus for room service. No hardware needed.</p>
         </div>
 
-        <div class="card" style="border-left:5px solid var(--green); background: linear-gradient(to right, #fff, #eafff3);">
+        <div class="card" style="border-left:5px solid var(--green);">
             <h4>🏠 Home Based Kitchens</h4>
-            <p>Start selling today! Get a stunning webpage link and accept orders via WhatsApp.</p>
-            <div class="text-green bold text-center mt-1">Start Home Production Now!</div>
+            <p>Start your food business today! Create a menu, get a link, and accept orders via WhatsApp.</p>
+            <div class="text-green bold text-center mt-1">Start Home Production!</div>
         </div>
     </div>
     <div class="text-center p-2 text-red" style="font-size:0.8rem">Powered by EatlyHub</div>
@@ -359,7 +343,7 @@
         </div>
     </div>
 
-    <div id="dash-content" class="p-2" style="padding-bottom: 100px; max-width:800px; margin:0 auto;">
+    <div id="dash-content" class="p-2" style="padding-bottom: 80px; max-width:800px; margin:0 auto;">
         <!-- Content Injected by JS -->
     </div>
 </template>
@@ -391,7 +375,7 @@
     }
     const auth = firebase.auth();
     const db = firebase.firestore();
-    const storage = firebase.storage(); 
+    const storage = firebase.storage(); // Init Storage
 
     // --- 3. STATE MANAGEMENT ---
     const app = document.getElementById('app');
@@ -399,7 +383,7 @@
     let bizProfile = {};
     let bizOrders = [];
     let bizReviews = [];
-    let adminRequests = []; 
+    let adminRequests = []; // For Admin
     let currentTab = 'Dashboard';
     let profileMap = null;
     let profileMarker = null;
@@ -411,7 +395,7 @@
     let customerMarker = null;
     let customerLocation = null;
 
-    // Tabs List (User)
+    // Tabs List (User) - Swipeable manually
     const TABS = [
         'Dashboard', 'Profile', 'Open/Close', 'Add Foods', 'My Webpage', 'Reviews',
         'New Orders', 'Confirmed Orders', 'Active Orders', 'Ready Orders', 
@@ -422,6 +406,8 @@
     const ADMIN_TABS = ['Verification Requests', 'Admin Messages'];
 
     // --- 4. IMAGE UTILITIES (COMPRESSION & UPLOAD) ---
+    
+    // Compress image to Base64 (used as intermediate step)
     function compressImage(file) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -437,6 +423,7 @@
                     canvas.height = img.height * scaleSize;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    // Return Base64
                     resolve(canvas.toDataURL('image/jpeg', 0.7)); 
                 };
                 img.onerror = (err) => reject(err);
@@ -445,13 +432,17 @@
         });
     }
 
+    // NEW: Upload Base64 Data URL to Firebase Storage
     function uploadImageToStorage(base64DataUrl, path) {
         return new Promise((resolve, reject) => {
             const ref = storage.ref(path);
             const task = ref.putString(base64DataUrl, 'data_url');
             
             task.on('state_changed', 
-                (snapshot) => {}, 
+                (snapshot) => {
+                    // Optional: You could update a progress bar here
+                    // const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                }, 
                 (error) => reject(error), 
                 () => {
                     task.snapshot.ref.getDownloadURL().then(resolve);
@@ -474,6 +465,7 @@
             auth.onAuthStateChanged(user => {
                 if (user) {
                     currentUser = user;
+                    // Check if Admin
                     if(user.email === ADMIN_EMAIL) {
                         loadAdminDashboard();
                     } else {
@@ -507,11 +499,13 @@
         render('tpl-dashboard');
         document.getElementById('admin-tag').classList.remove('hidden');
         
+        // Setup Admin Tabs
         const tabsContainer = document.getElementById('dash-tabs');
         tabsContainer.innerHTML = ADMIN_TABS.map(t => 
             `<div class="tab-btn" onclick="switchAdminTab('${t}')">${t}</div>`
         ).join('');
 
+        // Listen for Verification Requests
         db.collection('admin_requests').onSnapshot(snap => {
             adminRequests = snap.docs.map(d => ({id: d.id, ...d.data()}));
             refreshAdminContent();
@@ -563,54 +557,72 @@
     }
 
     function approveUser(uid, reqId) {
-        if(confirm("Confirm Verification?")) {
+        if(confirm("Confirm Verification for this user? This action cannot be undone.")) {
+            // Update User Profile
             db.collection('users').doc(uid).update({verified: true}).then(() => {
+                // Delete Request
                 db.collection('admin_requests').doc(reqId).delete();
                 showToast("User Verified Successfully!", 'success');
-            }).catch(e => showToast("Failed: " + e.message, 'error'));
+            }).catch(e => showToast("Failed to approve user: " + e.message, 'error'));
         }
     }
 
     function rejectRequest(reqId) {
-        if(confirm("Reject this request?")) {
+        if(confirm("Reject this request? This will remove it from the list.")) {
             db.collection('admin_requests').doc(reqId).delete();
             showToast("Request Rejected", 'info');
         }
     }
 
+
     // --- 8. USER DASHBOARD LOGIC ---
     async function loadDashboard() {
         render('tpl-dashboard');
         
+        // Setup Tabs
         const tabsContainer = document.getElementById('dash-tabs');
         tabsContainer.innerHTML = TABS.map(t => 
             `<div class="tab-btn" onclick="switchTab('${t}')">${t}</div>`
         ).join('');
 
+        // Real-time Listener User Profile
         db.collection('users').doc(currentUser.uid).onSnapshot(doc => {
             if(doc.exists) {
                 bizProfile = doc.data();
             } else {
+                // Initialize new business profile if it doesn't exist
                 bizProfile = { 
-                    locked: false, verified: false, foods: [], schedule: {}, 
-                    heroText: 'Welcome to our Kitchen!', socialLinks: {},
-                    serviceLocation: { lat: 6.9271, lng: 79.8612 }, serviceRadius: 5,
-                    canDeliver: false, deliveryCost: 0, nearbyTowns: ""
+                    locked: false, 
+                    verified: false, 
+                    foods: [], 
+                    schedule: {}, 
+                    heroText: 'Welcome to our Kitchen!',
+                    socialLinks: {},
+                    serviceLocation: { lat: 6.9271, lng: 79.8612 }, // Default Colombo
+                    serviceRadius: 5,
+                    canDeliver: false,
+                    deliveryCost: 0,
+                    nearbyTowns: ""
                 };
                 db.collection('users').doc(currentUser.uid).set(bizProfile);
             }
+            // FIXED: Removed && !profileMap to allow refreshing when lock status changes
             if(currentTab === 'Profile') refreshTabContent();
         });
 
+        // Real-time Listener Orders
         db.collection('users').doc(currentUser.uid).collection('orders')
           .orderBy('time', 'desc').limit(50)
           .onSnapshot(snap => {
               bizOrders = snap.docs.map(d => ({id: d.id, ...d.data()}));
               const newOrders = bizOrders.filter(o => o.status === 'new' && !o.seen);
-              if(newOrders.length > 0) showToast(`🔔 ${newOrders.length} New Order(s)!`, 'success');
-              if(currentTab !== 'Profile') refreshTabContent(); 
+              if(newOrders.length > 0) {
+                  showToast(`🔔 ${newOrders.length} New Order(s) Received!`, 'success');
+              }
+              if(currentTab !== 'Profile') refreshTabContent(); // Avoid re-rendering profile map on order update
           });
           
+        // Real-time Listener Reviews
         db.collection('users').doc(currentUser.uid).collection('reviews')
           .orderBy('time', 'desc').limit(20)
           .onSnapshot(snap => {
@@ -622,9 +634,10 @@
     }
 
     function switchTab(name) {
+        // Prevent access to certain tabs if profile is not locked
         if (name !== 'Dashboard' && name !== 'Profile' && name !== 'Admin Messages' && (!bizProfile.locked)) {
-            showToast("⚠ Please complete and LOCK your Profile first.", "error");
-            name = 'Profile'; 
+            showToast("⚠ Please complete and LOCK your Profile first to enable other features.", "error");
+            name = 'Profile'; // Redirect to Profile tab
         }
 
         currentTab = name;
@@ -632,6 +645,7 @@
             b.classList.toggle('active', b.innerText === name);
         });
         
+        // Scroll active tab into view
         const activeBtn = document.querySelector('.tab-btn.active');
         if(activeBtn) activeBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
 
@@ -640,7 +654,7 @@
 
     function refreshTabContent() {
         const container = document.getElementById('dash-content');
-        if (!container || !currentUser) return; 
+        if (!container || !currentUser) return; // Ensure container and user exist
 
         container.innerHTML = ''; 
 
@@ -655,40 +669,49 @@
         else renderOrdersList(container, currentTab);
     }
 
+    // --- TAB IMPLEMENTATIONS ---
+
     // A) DASHBOARD HOME
     function renderDashHome(target) {
         const now = new Date();
         const todayStr = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
         const timeStr = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
         
-        const todayISO = now.toISOString().split('T')[0];
+        // Filter orders for TODAY only
+        const todayISO = now.toISOString().split('T')[0]; // YYYY-MM-DD
         const todayOrders = bizOrders.filter(o => {
             const orderDate = new Date(o.time).toISOString().split('T')[0];
             return orderDate === todayISO;
         });
 
+        // Calculate counts for today
         const newCount = todayOrders.filter(o => o.status === 'new').length;
         const confirmCount = todayOrders.filter(o => o.status === 'confirmed').length;
         const activeCount = todayOrders.filter(o => o.status === 'active').length;
         const readyCount = todayOrders.filter(o => o.status === 'ready').length;
         const completedCount = todayOrders.filter(o => o.status === 'completed').length;
         const unpaidCount = todayOrders.filter(o => o.status === 'unpaid').length;
+        
+        // Calculate Revenue for today (completed orders)
         const dailyRev = todayOrders.filter(o => o.status === 'completed').reduce((a,b) => a + Number(b.total), 0);
 
+        // Not Verified Click Action
         const verifyAction = `onclick="switchTab('Profile'); setTimeout(() => document.getElementById('verify-section').scrollIntoView({behavior:'smooth'}), 500)"`;
 
         target.innerHTML = `
-            <div class="card center flex-col text-center" style="background: linear-gradient(135deg, #fff, #f8f9fe);">
-                <img src="${bizProfile.logo || 'https://cdn-icons-png.flaticon.com/512/847/847969.png'}" style="width:100px;height:100px;border-radius:50%;object-fit:cover;margin-bottom:10px;border:4px solid var(--primary); box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+            <!-- CENTERED HEADER (Task B) -->
+            <div class="card center flex-col text-center">
+                <img src="${bizProfile.logo || 'https://cdn-icons-png.flaticon.com/512/847/847969.png'}" style="width:100px;height:100px;border-radius:50%;object-fit:cover;margin-bottom:10px;border:4px solid var(--primary);">
                 <h3>${bizProfile.businessName || 'Setup Your Business Profile'}</h3>
                 ${bizProfile.verified 
                     ? '<div class="status-badge st-new">✔ Verified Business</div>' 
                     : `<div class="status-badge st-unverified" ${verifyAction}>❌ Not Verified (Click to Fix)</div>`}
             </div>
 
+            <!-- CURRENT DAY STATS (Task C) -->
             <div class="mb-2">
                 <div class="flex justify-between center mb-1">
-                    <h4 style="margin:0">📅 Today's Overview</h4>
+                    <h4 style="margin:0">📅 Today's Stats</h4>
                     <div style="text-align:right; font-size:0.8rem; color:var(--secondary);">
                         <div>${todayStr}</div>
                         <div class="bold text-red">${timeStr}</div>
@@ -696,40 +719,40 @@
                 </div>
 
                 <div class="stat-grid">
-                    <div class="stat-card" style="border-bottom: 4px solid var(--primary);" onclick="switchTab('New Orders')">
+                    <div class="stat-card" style="background:#fff0f0; border:1px solid var(--primary);" onclick="switchTab('New Orders')">
                         <h2>${newCount}</h2>
-                        <small class="text-red">New Requests</small>
+                        <small class="text-red">New Orders</small>
                     </div>
-                    <div class="stat-card" style="border-bottom: 4px solid var(--yellow);" onclick="switchTab('Confirmed Orders')">
+                    <div class="stat-card" style="background:#fffae6; border:1px solid var(--yellow);" onclick="switchTab('Confirmed Orders')">
                         <h2>${confirmCount}</h2>
                         <small style="color:#ffa502">Confirmed</small>
                     </div>
-                    <div class="stat-card" style="border-bottom: 4px solid #70a1ff;" onclick="switchTab('Active Orders')">
+                    <div class="stat-card" style="background:#e7f1ff; border:1px solid #70a1ff;" onclick="switchTab('Active Orders')">
                         <h2>${activeCount}</h2>
-                        <small style="color:#2f3542">Cooking Now</small>
+                        <small style="color:#2f3542">Active (Cooking)</small>
                     </div>
-                    <div class="stat-card" style="border-bottom: 4px solid #ff6b81;" onclick="switchTab('Ready Orders')">
+                    <div class="stat-card" style="background:#fff5f6; border:1px solid #ff6b81;" onclick="switchTab('Ready Orders')">
                         <h2>${readyCount}</h2>
-                        <small style="color:#ff6b81">Ready to Go</small>
+                        <small style="color:#ff6b81">Ready to Pickup</small>
                     </div>
-                    <div class="stat-card" style="border-bottom: 4px solid #00b894;" onclick="switchTab('Completed Orders')">
+                    <div class="stat-card" style="background:#eafff3; border:1px solid #00b894;" onclick="switchTab('Completed Orders')">
                         <h2>${completedCount}</h2>
-                        <small class="text-green">Done & Paid</small>
+                        <small class="text-green">Completed</small>
                     </div>
-                     <div class="stat-card" style="border-bottom: 4px solid var(--primary);" onclick="switchTab('Unpaid Bills')">
+                     <div class="stat-card" style="background:#fff0f0; border:1px solid var(--primary);" onclick="switchTab('Unpaid Bills')">
                         <h2>${unpaidCount}</h2>
-                        <small class="text-red">Unpaid</small>
+                        <small class="text-red">Unpaid Bills</small>
                     </div>
                 </div>
 
-                <div class="card text-center" style="background:linear-gradient(135deg, var(--secondary), #1e272e); color:white;">
+                <div class="card text-center" style="background:var(--secondary); color:white;">
                     <h1 style="color:white; margin-bottom:5px;">Rs. ${dailyRev.toLocaleString()}</h1>
                     <small style="color:#ccc;">Total Revenue Today</small>
                 </div>
             </div>
             
             <div class="card">
-                <h4>🔍 Quick Tools</h4>
+                <h4>🔍 Quick Search</h4>
                 <div class="input-group">
                     <label>Track Order Number</label>
                     <input type="text" placeholder="e.g. 12345" onkeyup="searchOrder(this.value)">
@@ -752,7 +775,7 @@
         let logoHtml = '';
         if(p.logo && p.locked) {
             logoHtml = `<img src="${p.logo}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;">`;
-        } else if(p.logo || p.tempLogo) { 
+        } else if(p.logo || p.tempLogo) { // Display tempLogo if available
              logoHtml = `
                 <img src="${p.tempLogo || p.logo}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;">
                 <button class="btn btn-outline mt-1" style="padding:5px 10px; font-size:0.8rem; width:auto;" onclick="removeLogo()">Remove Logo</button>
@@ -761,10 +784,10 @@
             logoHtml = `<label class="btn btn-secondary mt-1" style="width:auto;padding:5px 10px;font-size:0.8rem">Upload Logo <input type="file" hidden onchange="handleImageUpload(this, 'logo')"></label>`;
         }
         
-        target.innerHTML = `
+        let html = `
             <div class="card">
                 <h3>Business Profile</h3>
-                <p class="text-red" style="font-size:0.85rem">Lock profile to enable menu & orders.</p>
+                <p class="text-red" style="font-size:0.85rem">All fields required. Lock profile to enable other tabs.</p>
                 
                 <div class="center flex-col mb-1" id="logo-section">
                     ${logoHtml}
@@ -777,23 +800,33 @@
                 <div class="input-group"><label>Hotline</label><input type="tel" id="p-hot" value="${p.hotline||''}" ${disabled}></div>
                 <div class="input-group"><label>WhatsApp Number</label><input type="tel" id="p-wa" value="${p.whatsapp||''}" ${disabled}></div>
                 
+                <!-- MAP & DELIVERY AREA SETTINGS -->
                 <div class="input-group mt-2" style="border-top:1px solid #eee; paddingTop:15px;">
                     <h3>📍 Service Area & Delivery</h3>
+                    <p class="text-gray" style="font-size:0.85rem">Click on map to set your location. Use slider to set service radius.</p>
+                    
                     <div id="map" class="map-container"></div>
+                    
                     <div class="input-group mt-1">
                         <label>Service Radius: <span id="rad-val">${p.serviceRadius || 5}</span> km</label>
                         <input type="range" id="p-radius" min="1" max="20" value="${p.serviceRadius || 5}" oninput="updateCircle(this.value)" ${disabled}>
                     </div>
-                    <div class="input-group"><label>Nearby Towns</label><input id="p-towns" value="${p.nearbyTowns||''}" ${disabled}></div>
+
+                    <div class="input-group">
+                        <label>Nearby Towns (Auto-Detected or Edit)</label>
+                        <input id="p-towns" value="${p.nearbyTowns||''}" ${disabled}>
+                    </div>
+
                     <div class="input-group flex center justify-between" style="background:#f8f9fa; padding:10px; border-radius:10px;">
-                        <label style="margin:0">Delivery Service?</label>
+                        <label style="margin:0">Are you delivering food to customers?</label>
                         <select id="p-deliver" style="width:auto; padding:5px;" ${disabled} onchange="toggleDeliveryCost(this.value)">
                             <option value="yes" ${p.canDeliver ? 'selected':''}>Yes</option>
                             <option value="no" ${!p.canDeliver ? 'selected':''}>No</option>
                         </select>
                     </div>
+
                     <div class="input-group ${p.canDeliver ? '':'hidden'}" id="cost-group">
-                        <label>Delivery Cost (Rs.)</label>
+                        <label>Delivery Cost (Rs.) - Added to all delivery bills</label>
                         <input type="number" id="p-cost" value="${p.deliveryCost||0}" ${disabled}>
                     </div>
                 </div>
@@ -806,28 +839,57 @@
             <div class="card" id="verify-section">
                 <h3>Verification Badge (Rs 2500)</h3>
                 ${p.verified ? '<div class="text-green bold text-center" style="font-size:1.2rem; padding:20px;">✅ You are Verified!</div>' : `
+                    <p class="mb-1">Get the Green Badge to build trust. One-time payment.</p>
                     <div style="background:#f1f2f6; padding:15px; border-radius:12px; font-size:0.9rem; margin-bottom:15px;">
-                        <b>Bank:</b> Commercial Bank, Homagama<br><b>Acc:</b> 8750053306 (Colombage SD)<br><b>Amount:</b> Rs. 2,500
+                        <b>Bank:</b> Commercial Bank, Homagama<br>
+                        <b>Acc:</b> 8750053306 (Colombage SD)<br>
+                        <b>Amount:</b> Rs. 2,500
                     </div>
-                    <div class="input-group"><label>1. Grama Niladhari Letter</label><input type="file" id="v-letter" onchange="handleImageUpload(this, 'letter')"><div id="stat-letter" class="text-green hidden">✔ Uploaded</div></div>
-                    <div class="input-group"><label>2. Payment Slip</label><input type="file" id="v-slip" onchange="handleImageUpload(this, 'slip')"><div id="stat-slip" class="text-green hidden">✔ Uploaded</div></div>
+                    <div class="input-group">
+                        <label>1. Grama Niladhari Letter</label>
+                        <input type="file" id="v-letter" onchange="handleImageUpload(this, 'letter')">
+                        <div id="stat-letter" class="text-green hidden">✔ Uploaded</div>
+                    </div>
+                    <div class="input-group">
+                        <label>2. Payment Slip</label>
+                        <input type="file" id="v-slip" onchange="handleImageUpload(this, 'slip')">
+                        <div id="stat-slip" class="text-green hidden">✔ Uploaded</div>
+                    </div>
                     <button class="btn btn-green" onclick="requestVerification()">Submit for Verification</button>
+                    <button class="btn btn-outline" onclick="switchTab('Admin Messages')">Message Admin for Info</button>
                 `}
             </div>
         `;
+        target.innerHTML = html;
+
+        // Display upload status after re-render if temp images exist
         if(p.temp_letter) document.getElementById('stat-letter').classList.remove('hidden');
         if(p.temp_slip) document.getElementById('stat-slip').classList.remove('hidden');
     }
 
     // MAP LOGIC
     function initProfileMap() {
-        if(profileMap) profileMap.remove();
+        if(profileMap) profileMap.remove(); // Reset map if exists
+        
         const center = bizProfile.serviceLocation || { lat: 6.9271, lng: 79.8612 };
         profileMap = L.map('map').setView([center.lat, center.lng], 12);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(profileMap);
-        profileMarker = L.marker([center.lat, center.lng], {draggable: !bizProfile.locked}).addTo(profileMap);
-        profileCircle = L.circle([center.lat, center.lng], {color: 'red', fillColor: '#f03', fillOpacity: 0.2, radius: (bizProfile.serviceRadius || 5) * 1000}).addTo(profileMap);
 
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap'
+        }).addTo(profileMap);
+
+        // Marker
+        profileMarker = L.marker([center.lat, center.lng], {draggable: !bizProfile.locked}).addTo(profileMap);
+        
+        // Circle
+        profileCircle = L.circle([center.lat, center.lng], {
+            color: 'red',
+            fillColor: '#f03',
+            fillOpacity: 0.2,
+            radius: (bizProfile.serviceRadius || 5) * 1000
+        }).addTo(profileMap);
+
+        // Click Event (Only if not locked)
         if(!bizProfile.locked) {
             profileMap.on('click', function(e) {
                 const { lat, lng } = e.latlng;
@@ -836,6 +898,7 @@
                 bizProfile.serviceLocation = { lat, lng };
                 fetchLocationName(lat, lng);
             });
+            
             profileMarker.on('dragend', function(e) {
                const { lat, lng } = e.target.getLatLng();
                profileCircle.setLatLng([lat, lng]);
@@ -843,6 +906,8 @@
                fetchLocationName(lat, lng);
             });
         }
+        
+        // Fix for map rendering in hidden tabs
         setTimeout(() => { profileMap.invalidateSize(); }, 100);
     }
 
@@ -859,6 +924,7 @@
     }
 
     function fetchLocationName(lat, lng) {
+        // Use OpenStreetMap Nominatim API (Free) to get town name
         fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
             .then(res => res.json())
             .then(data => {
@@ -868,19 +934,24 @@
             .catch(err => console.log("Geocoding failed", err));
     }
 
+
     async function handleImageUpload(input, type) {
         if (input.files && input.files[0]) {
             showToast("Compressing & Uploading...", "info");
             try {
+                // 1. Compress
                 const base64 = await compressImage(input.files[0]);
+                
+                // 2. Upload to Storage
                 const timestamp = Date.now();
                 const path = `images/${currentUser.uid}/${type}_${timestamp}.jpg`;
                 const downloadUrl = await uploadImageToStorage(base64, path);
 
+                // 3. Save URL to local state (not DB yet, except via saving profile)
                 if(type === 'logo') {
                     bizProfile.tempLogo = downloadUrl;
                     renderProfile(document.getElementById('dash-content')); 
-                    setTimeout(initProfileMap, 500);
+                    setTimeout(initProfileMap, 500); // Re-init map after render
                 } else {
                     bizProfile['temp_' + type] = downloadUrl;
                     document.getElementById('stat-' + type).classList.remove('hidden');
@@ -894,13 +965,16 @@
     }
     
     function removeLogo() {
-        if(confirm("Remove current logo?")) {
-            if(bizProfile.logo) db.collection('users').doc(currentUser.uid).update({ logo: firebase.firestore.FieldValue.delete() });
+        if(confirm("Remove current logo? This will be saved after 'Save & Lock Profile'.")) {
+            // Only update Firestore if it's the saved logo
+            if(bizProfile.logo) {
+                db.collection('users').doc(currentUser.uid).update({ logo: firebase.firestore.FieldValue.delete() });
+            }
             delete bizProfile.logo;
-            delete bizProfile.tempLogo;
+            delete bizProfile.tempLogo; // Clear temp logo as well
             renderProfile(document.getElementById('dash-content'));
             setTimeout(initProfileMap, 500);
-            showToast("Logo removed from preview.", "info");
+            showToast("Logo removed from preview. Save to confirm.", "info");
         }
     }
 
@@ -915,34 +989,50 @@
         const towns = document.getElementById('p-towns').value;
         const canDeliver = document.getElementById('p-deliver').value === 'yes';
         const deliveryCost = canDeliver ? document.getElementById('p-cost').value : 0;
+        
+        // Map data is already updated in bizProfile via events, but ensuring Radius
         const radius = document.getElementById('p-radius').value;
 
-        if(!logo || !name || !addr || !owner || !nic || !hot || !wa) return showToast("All fields and Logo required!", "error");
+        if(!logo || !name || !addr || !owner || !nic || !hot || !wa) {
+            return showToast("All profile fields and a Logo are REQUIRED before locking!", "error");
+        }
 
         const updatedProfile = {
-            ...bizProfile, logo, businessName: name, address: addr, ownerName: owner, nic, hotline: hot, whatsapp: wa, locked: true,
-            serviceRadius: Number(radius), nearbyTowns: towns, canDeliver: canDeliver, deliveryCost: Number(deliveryCost)
+            ...bizProfile,
+            logo, businessName: name, address: addr, ownerName: owner, 
+            nic, hotline: hot, whatsapp: wa, locked: true,
+            serviceRadius: Number(radius),
+            nearbyTowns: towns,
+            canDeliver: canDeliver,
+            deliveryCost: Number(deliveryCost)
         };
-        delete updatedProfile.tempLogo;
+        delete updatedProfile.tempLogo; // Clean up temp logo after saving
 
         db.collection('users').doc(currentUser.uid).set(updatedProfile, {merge:true})
-            .then(() => { showToast("Profile Locked & Saved!", "success"); switchTab('Dashboard'); })
-            .catch(e => showToast("Save Failed: " + e.message, "error"));
+            .then(() => { showToast("Profile Locked & Saved Successfully!", "success"); switchTab('Dashboard'); })
+            .catch(e => showToast("Profile Save Failed: " + e.message, "error"));
     }
 
     function toggleLock(state) {
-        if (!state && !confirm("Unlock profile for editing?")) return;
+        // Confirm unlock if trying to unlock
+        if (!state && !confirm("Are you sure you want to unlock your profile for editing?")) return;
+
         db.collection('users').doc(currentUser.uid).update({locked: state})
             .then(() => showToast(`Profile ${state ? 'Locked' : 'Unlocked'}`, 'success'))
-            .catch(e => showToast("Failed: " + e.message, 'error'));
+            .catch(e => showToast("Failed to change lock status: " + e.message, 'error'));
     }
 
     function requestVerification() {
-        if(!bizProfile.temp_letter || !bizProfile.temp_slip) return showToast("Please upload both documents.", "error");
-        showToast("Documents Submitted!", "success");
+        if(!bizProfile.temp_letter || !bizProfile.temp_slip) return showToast("Please upload both the Grama Niladhari Letter and Payment Slip.", "error");
+        
+        showToast("Documents Submitted! Admin will review your request shortly.", "success");
         db.collection('admin_requests').add({
-            uid: currentUser.uid, name: bizProfile.businessName, letter: bizProfile.temp_letter, slip: bizProfile.temp_slip, timestamp: new Date().toISOString()
-        }).catch(e => showToast("Failed: " + e.message, 'error'));
+            uid: currentUser.uid, 
+            name: bizProfile.businessName, 
+            letter: bizProfile.temp_letter, 
+            slip: bizProfile.temp_slip,
+            timestamp: new Date().toISOString() // Store ISO string for consistent sorting
+        }).catch(e => showToast("Failed to submit verification request: " + e.message, 'error'));
     }
 
     // C) OPEN / CLOSE
@@ -961,13 +1051,21 @@
                     </select>
                 </div>
                 <div class="flex" style="gap:10px;">
-                    <div class="input-group w-100"><label>Open</label><input type="time" id="oc-start" value="${s.start}" onchange="saveSched('${today}')"></div>
-                    <div class="input-group w-100"><label>Close</label><input type="time" id="oc-end" value="${s.end}" onchange="saveSched('${today}')"></div>
+                    <div class="input-group w-100">
+                        <label>Open Time</label>
+                        <input type="time" id="oc-start" value="${s.start}" onchange="saveSched('${today}')">
+                    </div>
+                    <div class="input-group w-100">
+                        <label>Close Time</label>
+                        <input type="time" id="oc-end" value="${s.end}" onchange="saveSched('${today}')">
+                    </div>
                 </div>
+                <div class="text-center text-green" style="font-size:0.8rem">Settings auto-save for ${today}</div>
             </div>
             
+            <!-- Fixed Preview Card Contrast -->
             <div class="card text-white" style="background:${s.open ? 'var(--green)' : 'var(--secondary)'};">
-                <h3 class="text-white" style="margin:0;">Preview:</h3>
+                <h3 class="text-white" style="margin:0;">Webpage Status Preview:</h3>
                 <p class="text-white" style="margin:0;">${s.open ? `WE ARE OPEN (${s.start} - ${s.end})` : 'WE ARE CLOSED TODAY'}</p>
             </div>
         `;
@@ -981,15 +1079,15 @@
         schedule[day] = { open, start, end };
         
         db.collection('users').doc(currentUser.uid).update({ schedule })
-            .then(() => showToast(`Schedule saved!`, 'success'))
-            .catch(e => showToast("Failed: " + e.message, 'error'));
+            .then(() => showToast(`Schedule for ${day} saved!`, 'success'))
+            .catch(e => showToast("Failed to save schedule: " + e.message, 'error'));
     }
 
     // D) ADD FOODS
     function renderAddFoods(target) {
         target.innerHTML = `
             <div class="card">
-                <h3>Add Menu Item</h3>
+                <h3>Add New Menu Item</h3>
                 <div class="input-group">
                     <label>Food Image</label>
                     <div class="file-upload-wrapper" onclick="document.getElementById('f-file').click()">
@@ -998,11 +1096,11 @@
                     </div>
                     <img id="f-prev" class="${tempFoodImg ? '' : 'hidden'} mt-1" src="${tempFoodImg || ''}" style="width:100%; height:150px; object-fit:cover; border-radius:10px;">
                 </div>
-                <div class="input-group"><label>Category</label><input id="f-cat" placeholder="e.g. Fried Rice"></div>
-                <div class="input-group"><label>Food Name</label><input id="f-name" placeholder="Delicious Chicken"></div>
+                <div class="input-group"><label>Category</label><input id="f-cat" placeholder="e.g. Fried Rice, Dessert"></div>
+                <div class="input-group"><label>Food Name</label><input id="f-name" placeholder="Delicious Chicken Fried Rice"></div>
                 <div class="flex" style="gap:10px">
-                    <div class="input-group w-100"><label>Half (Rs)</label><input id="f-half" type="number" placeholder="Optional"></div>
-                    <div class="input-group w-100"><label>Full (Rs)</label><input id="f-full" type="number" placeholder="Required if no half"></div>
+                    <div class="input-group w-100"><label>Half Price (Rs.)</label><input id="f-half" type="number" placeholder="Optional"></div>
+                    <div class="input-group w-100"><label>Full Price (Rs.)</label><input id="f-full" type="number" placeholder="Required if no half"></div>
                 </div>
                 <button class="btn btn-green mt-1" onclick="addFood()">+ Add to Menu</button>
             </div>
@@ -1017,13 +1115,13 @@
                                 <div class="bold">${f.name}</div>
                                 <small>${f.cat}</small>
                                 <div style="font-size:0.8rem; margin-top:4px;">
-                                    ${f.half ? `H: ${f.half} ` : ''} ${f.full ? `F: ${f.full}` : ''}
+                                    ${f.half ? `H: Rs. ${f.half} ` : ''} ${f.full ? `F: Rs. ${f.full}` : ''}
                                 </div>
                             </div>
                         </div>
-                        <button class="btn btn-secondary" style="width:auto;padding:8px 12px; border-radius:8px;" onclick="deleteFood(${i})">🗑</button>
+                        <button class="btn btn-secondary" style="width:auto;padding:8px 12px; border-radius:8px;" onclick="deleteFood(${i})">🗑 Delete</button>
                     </div>
-                `).join('') : '<div class="card text-center text-gray"><h3>Menu empty!</h3></div>'}
+                `).join('') : '<div class="card text-center text-gray"><h3>Your menu is empty!</h3><p>Add some delicious items above.</p></div>'}
             </div>
         `;
     }
@@ -1031,21 +1129,28 @@
     let tempFoodImg = null;
     async function handleFoodImg(input) {
         if(input.files[0]) {
-            showToast("Uploading Image...", "info");
+            showToast("Compressing & Uploading Food Image...", "info");
             try {
+                // 1. Compress
                 const base64 = await compressImage(input.files[0]);
+                
+                // 2. Upload to Storage
                 const timestamp = Date.now();
                 const path = `food_images/${currentUser.uid}/${timestamp}.jpg`;
                 const downloadUrl = await uploadImageToStorage(base64, path);
+
+                // 3. Update State
                 tempFoodImg = downloadUrl;
+                
                 const img = document.getElementById('f-prev');
                 img.src = tempFoodImg;
                 img.classList.remove('hidden');
-                document.getElementById('f-file-txt').innerText = "Image Selected";
-                showToast("Image Ready", "success");
+                document.getElementById('f-file-txt').innerText = "Image Selected (Ready to add)";
+                showToast("Food Image Ready", "success");
+
             } catch (e) {
                 console.error(e);
-                showToast("Failed: " + e.message, "error");
+                showToast("Upload Failed: " + e.message, "error");
             }
         }
     }
@@ -1056,31 +1161,33 @@
         const half = document.getElementById('f-half').value.trim();
         const full = document.getElementById('f-full').value.trim();
 
-        if(!tempFoodImg) return showToast("Image required.", "error");
-        if(!name) return showToast("Name required.", "error");
-        if(!half && !full) return showToast("One price required.", "error");
+        if(!tempFoodImg) return showToast("Food Image is required.", "error");
+        if(!name) return showToast("Food Name is required.", "error");
+        if(!half && !full) return showToast("At least one price (Half or Full) is required.", "error");
 
         const foods = [...(bizProfile.foods||[]), {cat, name, img: tempFoodImg, half: half || null, full: full || null}];
         
         db.collection('users').doc(currentUser.uid).update({foods})
         .then(() => {
-            showToast("Item Added!", "success");
-            tempFoodImg = null; 
-            renderAddFoods(document.getElementById('dash-content')); 
+            showToast("Food Item Added to Menu!", "success");
+            tempFoodImg = null; // Clear temp image after successful add
+            renderAddFoods(document.getElementById('dash-content')); // Re-render to clear form and update list
         })
-        .catch(e => showToast("Failed: " + e.message, "error"));
+        .catch(e => showToast("Failed to add food item: " + e.message, "error"));
     }
 
     function deleteFood(idx) {
-        if(!confirm("Delete this item?")) return;
+        if(!confirm("Are you sure you want to delete this menu item?")) return;
         const foods = bizProfile.foods.filter((_, i) => i !== idx);
         db.collection('users').doc(currentUser.uid).update({foods})
         .then(() => {
+            showToast("Food Item Deleted", "info");
             renderAddFoods(document.getElementById('dash-content'));
-        });
+        })
+        .catch(e => showToast("Failed to delete food item: " + e.message, "error"));
     }
 
-    // E) MY WEBPAGE
+    // E) MY WEBPAGE (Social & YouTube)
     function renderWebpageInfo(target) {
         const url = `${window.location.origin}${window.location.pathname}?biz=${currentUser.uid}`;
         const links = bizProfile.socialLinks || {};
@@ -1089,21 +1196,30 @@
             <div class="card text-center">
                 <img src="${bizProfile.logo || 'https://via.placeholder.com/100'}" style="width:80px;height:80px;border-radius:50%;margin:0 auto 10px;">
                 <h3>${bizProfile.businessName || 'Your Business Name'}</h3>
+                <p>Share this link with your customers:</p>
                 <input class="w-100 p-2 mb-1" value="${url}" readonly style="background:#eee;border:none;border-radius:8px;">
                 <div class="flex" style="gap:10px">
                     <a href="${url}" target="_blank" class="btn btn-primary">Open Webpage</a>
-                    <button class="btn btn-secondary" onclick="navigator.clipboard.writeText('${url}');showToast('Link copied!', 'info')">Copy Link</button>
+                    <button class="btn btn-secondary" onclick="navigator.clipboard.writeText('${url}');showToast('Webpage link copied to clipboard!', 'info')">Copy Link</button>
                 </div>
             </div>
             <div class="card">
                 <h3>Hero Settings</h3>
-                <div class="input-group"><label>Welcome Msg</label><input id="hero-txt" value="${bizProfile.heroText || 'Welcome!'}" onchange="updateWebSettings()"></div>
+                <div class="input-group">
+                    <label>Welcome Message</label>
+                    <input id="hero-txt" value="${bizProfile.heroText || 'Welcome to ' + (bizProfile.businessName || 'our Kitchen')}" onchange="updateWebSettings()">
+                </div>
             </div>
+            
             <div class="card">
-                <h3>Social & Gallery</h3>
-                <div class="input-group"><label>Facebook</label><input id="s-fb" value="${links.fb||''}" onchange="updateWebSettings()"></div>
-                <div class="input-group"><label>Instagram</label><input id="s-ig" value="${links.ig||''}" onchange="updateWebSettings()"></div>
-                <div class="input-group"><label>YouTube Links (Comma separated)</label><textarea id="s-yt" rows="3" onchange="updateWebSettings()">${links.yt||''}</textarea></div>
+                <h3>Social Media & Gallery</h3>
+                <div class="input-group"><label>Facebook Link</label><input id="s-fb" value="${links.fb||''}" onchange="updateWebSettings()" placeholder="e.g. https://facebook.com/yourpage"></div>
+                <div class="input-group"><label>Instagram Link</label><input id="s-ig" value="${links.ig||''}" onchange="updateWebSettings()" placeholder="e.g. https://instagram.com/yourprofile"></div>
+                <div class="input-group">
+                    <label>YouTube Video Links (Comma separated URLs)</label>
+                    <textarea id="s-yt" rows="3" placeholder="e.g. ,  onchange="updateWebSettings()">${links.yt||''}</textarea>
+                    <small class="text-gray">Customers will see these videos in a gallery.</small>
+                </div>
             </div>
         `;
     }
@@ -1115,22 +1231,29 @@
         const yt = document.getElementById('s-yt').value.trim();
         
         db.collection('users').doc(currentUser.uid).update({
-            heroText, socialLinks: { fb, ig, yt }
-        }).then(() => showToast("Saved", 'success'));
+            heroText,
+            socialLinks: { fb, ig, yt }
+        }).then(() => showToast("Webpage Settings Saved", 'success'))
+        .catch(e => showToast("Failed to save webpage settings: " + e.message, 'error'));
     }
 
-    // REVIEWS TAB
+    // NEW: REVIEWS TAB
     function renderReviews(target) {
         if(bizReviews.length === 0) {
-            target.innerHTML = `<div class="card text-center text-gray"><h3>No reviews yet.</h3></div>`;
+            target.innerHTML = `<div class="card text-center text-gray"><h3>No reviews yet.</h3><p>Customers can leave reviews on your public webpage.</p></div>`;
             return;
         }
+
         target.innerHTML = bizReviews.map(r => `
             <div class="card">
-                <div class="flex justify-between"><b>${r.name || 'Anonymous'}</b><span class="text-yellow">${'★'.repeat(r.stars)}</span></div>
+                <div class="flex justify-between">
+                    <b>${r.name || 'Anonymous'}</b>
+                    <span class="text-yellow">${'★'.repeat(r.stars)}</span>
+                </div>
                 <p class="mt-1">${r.text}</p>
+                <small>${new Date(r.time).toLocaleDateString()}</small>
                 <div class="mt-1 flex" style="gap:10px;">
-                    ${r.status === 'pending' ? `<button class="btn btn-green" style="width:auto; padding:5px 10px;" onclick="updateReview('${r.id}', 'published')">Post</button>` : '<span class="status-badge st-new">Published</span>'}
+                    ${r.status === 'pending' ? `<button class="btn btn-green" style="width:auto; padding:5px 10px;" onclick="updateReview('${r.id}', 'published')">Post to Webpage</button>` : '<span class="status-badge st-new">Published</span>'}
                     <button class="btn btn-outline" style="width:auto; padding:5px 10px; border-color:red; color:red;" onclick="deleteReview('${r.id}')">Delete</button>
                 </div>
             </div>
@@ -1138,48 +1261,90 @@
     }
 
     function updateReview(id, status) {
-        db.collection('users').doc(currentUser.uid).collection('reviews').doc(id).update({status}).then(()=>showToast("Updated", "success"));
+        db.collection('users').doc(currentUser.uid).collection('reviews').doc(id).update({status})
+            .then(() => showToast(`Review status updated to ${status}.`, 'success'))
+            .catch(e => showToast("Failed to update review: " + e.message, 'error'));
     }
+
     function deleteReview(id) {
-        if(confirm("Delete?")) db.collection('users').doc(currentUser.uid).collection('reviews').doc(id).delete();
+        if(confirm("Are you sure you want to delete this review? This action cannot be undone.")) {
+            db.collection('users').doc(currentUser.uid).collection('reviews').doc(id).delete()
+                .then(() => showToast("Review deleted.", 'info'))
+                .catch(e => showToast("Failed to delete review: " + e.message, 'error'));
+        }
     }
 
     // F) ORDERS WORKFLOW
     function renderOrdersList(target, tabName) {
         const map = {
-            'New Orders': 'new', 'Confirmed Orders': 'confirmed', 'Active Orders': 'active', 'Ready Orders': 'ready', 'Completed Orders': 'completed', 'Unpaid Bills': 'unpaid'
+            'New Orders': 'new', 'Confirmed Orders': 'confirmed', 
+            'Active Orders': 'active', 'Ready Orders': 'ready', 
+            'Completed Orders': 'completed', 'Unpaid Bills': 'unpaid'
         };
         const status = map[tabName];
         if(!status) return;
 
         const list = bizOrders.filter(o => o.status === status);
         if(list.length === 0) {
-            target.innerHTML = `<div class="text-center p-2 text-gray mt-2"><h3 style="color:#ccc">No ${tabName}</h3></div>`;
+            target.innerHTML = `<div class="text-center p-2 text-gray mt-2"><h3 style="color:#ccc">No ${tabName} Found</h3><p>Check other tabs or wait for new orders!</p></div>`;
             return;
         }
 
         target.innerHTML = list.map(o => {
             let actions = '';
+            
             if(status === 'new') {
-                actions = `<button class="btn btn-yellow" onclick="reqConfirm('${o.id}', '${o.custWa}')">Request Confirm (WhatsApp)</button><button class="btn btn-outline" style="border-color:var(--primary); color:var(--primary);" onclick="setStatus('${o.id}', 'canceled')">Decline</button>`;
-            } else if(status === 'confirmed') {
-                actions = `<button class="btn btn-primary" onclick="generateBill('${o.id}')">🖨 Bill & Cook</button>`;
-            } else if(status === 'active') {
-                actions = `<div class="bill-wrapper"><div class="watermark">NOT PAID</div><div class="bill-header"><div class="bold">${bizProfile.businessName}</div><small>#${o.orderNum}</small></div>${o.items.map(i => `<div class="bill-item"><span>${i.name} (${i.variant})</span><span>Rs. ${i.price}</span></div>`).join('')}${o.deliveryType === 'delivery' ? `<div class="bill-item text-red"><span>Delivery</span><span>Rs. ${o.deliveryFee}</span></div>` : ''}<div class="bill-total"><span>Total</span><span>Rs. ${o.total}</span></div></div><button class="btn btn-green mt-1" onclick="markReady('${o.id}', '${o.custWa}')">✅ Ready & Notify</button>`;
-            } else if(status === 'ready') {
-                actions = `<button class="btn btn-secondary" onclick="setStatus('${o.id}', 'completed')">💰 Paid & Complete</button><button class="btn btn-outline" style="border-color:var(--yellow); color:var(--yellow);" onclick="setStatus('${o.id}', 'unpaid')">Mark Unpaid</button>`;
+                actions = `
+                    <button class="btn btn-yellow" onclick="reqConfirm('${o.id}', '${o.custWa}')">Request Confirmation (WhatsApp)</button>
+                    <button class="btn btn-outline" style="border-color:var(--primary); color:var(--primary);" onclick="setStatus('${o.id}', 'canceled')">Decline Order</button>
+                `;
+            }
+            else if(status === 'confirmed') {
+                actions = `<button class="btn btn-primary" onclick="generateBill('${o.id}')">🖨 Generate Bill & Start Cooking</button>`;
+            }
+            else if(status === 'active') {
+                actions = `
+                    <div class="bill-wrapper">
+                        <div class="watermark">NOT PAID</div>
+                        <div class="bill-header">
+                            <div class="bold" style="font-size:1.2em">${bizProfile.businessName}</div>
+                            <small>Order #${o.orderNum}</small><br>
+                            <small>${new Date(o.time).toLocaleString()}</small>
+                        </div>
+                        ${o.items.map(i => `<div class="bill-item"><span>${i.name} (${i.variant})</span><span>Rs. ${i.price}</span></div>`).join('')}
+                        ${o.deliveryType === 'delivery' ? `<div class="bill-item text-red"><span>Delivery Charge</span><span>Rs. ${o.deliveryFee}</span></div>` : ''}
+                        <div class="bill-total"><span>Total</span><span>Rs. ${o.total}</span></div>
+                        <div class="text-center mt-2 small">Thank you for your order!</div>
+                    </div>
+                    <button class="btn btn-green mt-1" onclick="markReady('${o.id}', '${o.custWa}')">✅ Mark Ready & Notify Customer</button>
+                `;
+            }
+            else if(status === 'ready') {
+                actions = `
+                    <button class="btn btn-secondary" onclick="setStatus('${o.id}', 'completed')">💰 Payment Received (Complete Order)</button>
+                    <button class="btn btn-outline" style="border-color:var(--yellow); color:var(--yellow);" onclick="setStatus('${o.id}', 'unpaid')">⚠ Mark as Unpaid (Record Debt)</button>
+                `;
             }
 
-            const badge = o.deliveryType === 'delivery' ? `<div class="status-badge st-must-delivery mb-1" style="width:100%; text-align:center;">🛵 DELIVERY</div>` : '';
-            const address = o.deliveryType === 'delivery' ? `<div class="mt-1 p-1" style="background:#fff0f0; border-radius:8px;"><b>To:</b> ${o.deliveryAddress}</div>` : '';
+            // RED BADGE FOR DELIVERY
+            const badge = o.deliveryType === 'delivery' ? `<div class="status-badge st-must-delivery mb-1" style="width:100%; text-align:center;">🛵 MUST DELIVERY</div>` : '';
+            const address = o.deliveryType === 'delivery' ? `<div class="mt-1 p-1" style="background:#fff0f0; border-radius:8px; font-size:0.9rem;"><b>Delivery To:</b><br>${o.deliveryAddress}</div>` : '';
 
             return `
                 <div class="card status-${status}">
                     ${badge}
-                    <div class="flex justify-between center"><h4 class="text-red">#${o.orderNum}</h4><small>${new Date(o.time).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</small></div>
-                    <div class="mb-1"><b>${o.custName}</b> <a href="https://wa.me/${o.custWa}" target="_blank" class="btn btn-green" style="display:inline-block; width:auto; padding:2px 8px; font-size:12px; margin-left:10px;">✆ WhatsApp</a></div>
+                    <div class="flex justify-between center">
+                        <h4 class="text-red">Order #${o.orderNum}</h4>
+                        <small>${new Date(o.time).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</small>
+                    </div>
+                    <div class="mb-1">
+                        <b>${o.custName}</b> <a href="https://wa.me/${o.custWa}" target="_blank" class="btn btn-green" style="display:inline-block; width:auto; padding:2px 8px; font-size:12px; margin-left:10px;">✆ WhatsApp</a>
+                    </div>
                     ${address}
-                    <div style="background:#f8f9fa; padding:10px; border-radius:10px; border:1px solid #eee; margin-top:5px;">${o.items.map(i => `<div>• ${i.name} (${i.variant}) - Rs. ${i.price}</div>`).join('')}</div>
+                    <div style="background:#f8f9fa; padding:10px; border-radius:10px; border:1px solid #eee; margin-top:5px;">
+                        ${o.items.map(i => `<div>• ${i.name} (${i.variant}) - Rs. ${i.price}</div>`).join('')}
+                        ${o.deliveryType === 'delivery' ? `<div class="text-red mt-1">• Delivery Fee - Rs. ${o.deliveryFee}</div>` : ''}
+                    </div>
                     <div class="text-right mt-1 bold" style="font-size:1.1rem">Total: Rs. ${o.total}</div>
                     <div class="mt-1">${actions}</div>
                 </div>
@@ -1187,39 +1352,48 @@
         }).join('');
     }
 
+    // ACTIONS
     function reqConfirm(id, wa) {
         const link = `${window.location.origin}${window.location.pathname}?biz=${currentUser.uid}&orderId=${id}`;
-        const msg = `Hello! Please confirm your *${bizProfile.businessName}* order: ${link}`;
+        const msg = `Hello! Please confirm your *${bizProfile.businessName}* order by clicking here: ${link}`;
         window.open(`https://wa.me/${wa}?text=${encodeURIComponent(msg)}`, '_blank');
-        showToast("Link sent.", "info");
+        showToast("WhatsApp confirmation link sent.", "info");
     }
 
     function generateBill(id) {
         const o = bizOrders.find(x => x.id === id);
-        setStatus(id, 'active'); 
-        let txt = `🧾 *BILL - ${bizProfile.businessName}*\n#${o.orderNum}\n\n`;
+        setStatus(id, 'active'); // Move to active status
+
+        let txt = `🧾 *BILL - ${bizProfile.businessName}*\nOrder #${o.orderNum}\n\n`;
         o.items.forEach(i => txt += `${i.name} (${i.variant}): Rs. ${i.price}\n`);
-        if(o.deliveryType === 'delivery') txt += `Delivery: Rs. ${o.deliveryFee}\n`;
+        if(o.deliveryType === 'delivery') txt += `Delivery Fee: Rs. ${o.deliveryFee}\n`;
         txt += `\n*Total: Rs. ${o.total}*\nStatus: Preparing...`;
+        
         window.open(`https://wa.me/${o.custWa}?text=${encodeURIComponent(txt)}`, '_blank');
+        showToast("Order status updated to 'Active' and bill sent to customer.", "success");
     }
 
     function markReady(id, wa) {
         const o = bizOrders.find(x => x.id === id);
-        const typeMsg = o.deliveryType === 'delivery' ? "is *READY for DELIVERY*!" : "is *READY*! Please pickup.";
+        const typeMsg = o.deliveryType === 'delivery' ? "is *READY for DELIVERY*! Our rider will arrive soon." : "is *READY*! Please come and pick it up.";
         const msg = `🍽 Your order from *${bizProfile.businessName}* ${typeMsg}`;
         window.open(`https://wa.me/${wa}?text=${encodeURIComponent(msg)}`, '_blank');
-        setStatus(id, 'ready'); 
+        setStatus(id, 'ready'); // Move to ready status
+        showToast("Order status updated to 'Ready' and customer notified.", "success");
     }
 
     function setStatus(id, status) {
-        db.collection('users').doc(currentUser.uid).collection('orders').doc(id).update({status, seen: true});
-        showToast("Status Updated", "success");
+        db.collection('users').doc(currentUser.uid).collection('orders').doc(id).update({status, seen: true})
+            .then(() => showToast(`Order #${bizOrders.find(o => o.id === id).orderNum} status updated to '${status.toUpperCase()}'.`, 'success'))
+            .catch(e => showToast("Failed to update order status: " + e.message, 'error'));
     }
 
-    // G) REPORTS
+    // G) REPORTS (Task F: Detailed Table)
     function renderReports(target) {
+        // Sort orders by time desc
         const sortedOrders = [...bizOrders].sort((a,b) => new Date(b.time) - new Date(a.time));
+        
+        // Group by Date for cleaner UI
         const grouped = {};
         sortedOrders.forEach(o => {
             const dateStr = new Date(o.time).toLocaleDateString();
@@ -1228,34 +1402,100 @@
         });
 
         let tableHtml = '';
-        if(sortedOrders.length === 0) tableHtml = '<p class="text-center text-gray p-2">No history.</p>';
-        else {
+        if(sortedOrders.length === 0) {
+            tableHtml = '<p class="text-center text-gray p-2">No order history available.</p>';
+        } else {
             Object.keys(grouped).forEach(date => {
                 tableHtml += `<h4 class="mt-2" style="background:#eee; padding:5px 10px; border-radius:5px;">${date}</h4>`;
-                tableHtml += `<table class="report-table"><thead><tr><th>Order #</th><th>Customer</th><th>Type</th><th>Details</th><th>Status</th></tr></thead><tbody>${grouped[date].map(o => `<tr><td data-label="Order #">${o.orderNum}</td><td data-label="Customer"><b>${o.custName}</b><br>📞 ${o.custPhone}</td><td data-label="Type">${o.deliveryType === 'delivery' ? '<b class="text-red">Delivery</b>' : 'Pick Up'}</td><td data-label="Details">${o.items.map(i => `${i.name}`).join(', ')}<br><b>Tot: Rs. ${o.total}</b></td><td data-label="Status">${o.status}</td></tr>`).join('')}</tbody></table>`;
+                tableHtml += `
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>Order #</th>
+                            <th>Customer Info</th>
+                            <th>Type</th>
+                            <th>Details</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${grouped[date].map(o => `
+                            <tr>
+                                <td data-label="Order #">${o.orderNum}</td>
+                                <td data-label="Customer Info">
+                                    <b>${o.custName}</b><br>
+                                    📞 ${o.custPhone || 'N/A'}<br>
+                                    💬 ${o.custWa}
+                                </td>
+                                <td data-label="Type">
+                                    ${o.deliveryType === 'delivery' ? '<b class="text-red">Delivery</b>' : 'Pick Up'}
+                                    ${o.deliveryType === 'delivery' ? `<br><small>${o.deliveryAddress}</small>` : ''}
+                                </td>
+                                <td data-label="Details">
+                                    ${o.items.map(i => `${i.name} (${i.variant})`).join(', ')}<br>
+                                    ${o.deliveryType === 'delivery' ? `<small>+ Delivery: ${o.deliveryFee}</small><br>`:''}
+                                    <b>Total: Rs. ${o.total}</b>
+                                </td>
+                                <td data-label="Status">
+                                    <span class="status-badge" style="background:${o.status==='unpaid'?'#fff0f0':(o.status==='completed'?'#eafff3':'#f1f2f6')}; color:${o.status==='unpaid'?'red':(o.status==='completed'?'green':'black')}">
+                                        ${o.status.toUpperCase()}
+                                    </span>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>`;
             });
         }
-        target.innerHTML = `<div class="card"><h3>📜 Sales Report</h3>${tableHtml}</div>`;
+
+        target.innerHTML = `
+            <div class="card">
+                <h3>📜 Detailed Sales Report</h3>
+                <p class="text-gray mb-2">Automated order history log.</p>
+                ${tableHtml}
+            </div>
+        `;
     }
 
-    // H) ADMIN CHAT
+    // H) ADMIN CHAT (User Side)
     function renderAdminChat(target) {
-        target.innerHTML = `<div class="card" style="height:60vh; display:flex; flex-direction:column;"><h3 style="border-bottom:1px solid #eee; padding-bottom:10px;">Admin Chat</h3><div style="flex:1; display:flex; align-items:center; justify-content:center; color:#ccc;"><p>💬 Coming soon!</p></div></div>`;
+        target.innerHTML = `
+            <div class="card" style="height:60vh; display:flex; flex-direction:column;">
+                <h3 style="border-bottom:1px solid #eee; padding-bottom:10px;">Admin Support Chat</h3>
+                <div style="flex:1; display:flex; align-items:center; justify-content:center; color:#ccc;">
+                    <p>💬 Chat functionality with admin is coming soon!</p>
+                </div>
+                <div class="input-group flex mt-1">
+                    <input placeholder="Type message..." style="margin-bottom:0; border-radius: 20px 0 0 20px;" disabled>
+                    <button class="btn btn-primary" style="width:auto; margin:0; border-radius: 0 20px 20px 0;" disabled>Send</button>
+                </div>
+            </div>
+        `;
     }
 
-    // SEARCH
+    // SEARCH UTILS
     function searchOrder(val) {
         const resDiv = document.getElementById('res-order');
-        if(!val || val.length < 2) { resDiv.innerHTML = ''; return; }
+        if(!val || val.length < 2) { // Add a minimum length for search
+            resDiv.innerHTML = '';
+            return;
+        }
         const o = bizOrders.find(x => x.orderNum === val);
-        resDiv.innerHTML = o ? `<div class="p-1 text-green" style="background:#eafff3; border-radius:8px;">Found: <b>${o.status.toUpperCase()}</b></div>` : '<small class="text-red">Not found.</small>';
+        resDiv.innerHTML = o 
+            ? `<div class="p-1 text-green" style="background:#eafff3; border-radius:8px;">Found: <b>${o.status.toUpperCase()}</b></div>`
+            : '<small class="text-red">Order not found.</small>';
     }
 
     function searchUnpaid(val) {
         const resDiv = document.getElementById('res-unpaid');
-        if(val.length < 5) { resDiv.innerHTML = ''; return; }
+        if(val.length < 5) { // Minimum 5 digits for phone number search
+            resDiv.innerHTML = '';
+            return;
+        }
         const found = bizOrders.filter(x => x.custWa.includes(val) && x.status === 'unpaid');
-        resDiv.innerHTML = found.length ? `<div class="p-1 text-red" style="background:#fff0f0; border-radius:8px;">⚠ <b>${found.length} Unpaid!</b></div>` : '<div class="text-green p-1">No unpaid records.</div>';
+        resDiv.innerHTML = found.length 
+            ? `<div class="p-1 text-red" style="background:#fff0f0; border-radius:8px;">⚠ <b>${found.length} Unpaid Bill(s)!</b></div>`
+            : '<div class="text-green p-1">No unpaid records found for this number.</div>';
     }
 
 
@@ -1263,93 +1503,120 @@
     let cart = [];
     let bizIdForCart = null;
     let bizOwnerWa = null;
-    let publicBizData = null; 
+    let publicBizData = null; // Store fetched data for cart logic
+    // FIXED: REMOVED DUPLICATE DECLARATION OF customerLocation FROM HERE
 
     async function loadPublicPage(bizId) {
         bizIdForCart = bizId;
-        app.innerHTML = `<div style="height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;"><div class="loader"></div><p class="mt-2 bold text-red">Loading Store...</p></div>`;
         
+        // Show Loading State (Spinner) instead of Landing Page
+        app.innerHTML = `<div style="height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;"><div class="loader"></div><p class="mt-2 bold text-red">Loading EatlyHub Store...</p></div>`;
+        
+        // Helper to extract YouTube ID
+        const getYoutubeId = (url) => {
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+            const match = url.match(regExp);
+            return (match && match[2].length === 11) ? match[2] : null;
+        };
+
         try {
             const doc = await db.collection('users').doc(bizId).get();
-            if(!doc.exists || !doc.data().locked) return app.innerHTML = "<div class='text-center p-2'><h2>Store Not Available</h2></div>";
+            if(!doc.exists || !doc.data().locked) { // Ensure profile is locked to be public
+                return app.innerHTML = "<div class='text-center p-2'><h2>Business Not Found or Not Public</h2><p>This business may not have completed their profile setup.</p></div>";
+            }
             const data = doc.data();
-            publicBizData = data; 
+            publicBizData = data; // Save for later use in cart
             bizOwnerWa = data.whatsapp;
 
             // Load Reviews
-            const reviewSnap = await db.collection('users').doc(bizId).collection('reviews').where('status', '==', 'published').limit(10).get();
+            const reviewSnap = await db.collection('users').doc(bizId).collection('reviews').where('status', '==', 'published').limit(50).get();
             let reviews = reviewSnap.docs.map(d => d.data());
+            // Sort reviews client-side (Newest first)
+            reviews.sort((a, b) => new Date(b.time) - new Date(a.time));
+            // Limit to 10
+            reviews = reviews.slice(0, 10);
 
-            // Parse YouTube
+            // Parse YouTube Links
             const social = data.socialLinks || {};
-            const getYoutubeId = (url) => { const m = url.match(/^.*(youtu.be\/|v\/|embed\/|watch\?v=|&v=)([^#&?]*).*/); return (m && m[2].length === 11) ? m[2] : null; };
-            let ytHtml = '';
-            if(social.yt) ytHtml = social.yt.split(',').filter(u=>u).map(u => getYoutubeId(u) ? `<iframe src=" frameborder="0" allowfullscreen style="width:100%; height:200px; border-radius:12px; margin-bottom:10px;"></iframe>` : '').join('');
-
-            const deliveryBanner = data.canDeliver 
-                ? `<div class="status-badge st-new mt-1" style="font-size:0.8rem">🛵 WE DELIVER TO YOUR DOORSTEP</div>`
-                : `<div class="status-badge st-unverified mt-1" style="font-size:0.8rem">🚶 PICKUP ONLY</div>`;
-
-            // Super App Stories (Simulated from menu items)
-            let storiesHtml = '';
-            if(data.foods && data.foods.length > 0) {
-                storiesHtml = `<div class="stories-wrapper">` + data.foods.slice(0, 8).map(f => `
-                    <div class="story-item" onclick="document.getElementById('pub-menu').scrollIntoView({behavior:'smooth'})">
-                        <div class="story-ring"><img class="story-img" src="${f.img}"></div>
-                        <div class="story-name">${f.name}</div>
-                    </div>
-                `).join('') + `</div>`;
+            let ytGalleryHtml = '';
+            if(social.yt) {
+                const urls = social.yt.split(',').filter(u => u.trim() !== ''); // Filter out empty strings
+                ytGalleryHtml = urls.map(u => {
+                    const id = getYoutubeId(u.trim());
+                    // FIX: Corrected the missing src URL for the iframe
+                    return id ? `<iframe src=" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="width:100%; height:200px; border-radius:12px; margin-bottom:10px; border:none;"></iframe>` : '';
+                }).join('');
             }
 
-            app.innerHTML = `
-                <div id="public-view" style="background:#f8f9fe; padding-bottom:100px;">
-                    <div id="public-status" class="p-1 text-center bold text-white" style="position:sticky; top:0; z-index:900; font-size:0.9rem; box-shadow:0 4px 10px rgba(0,0,0,0.1);"></div>
-                    
-                    ${storiesHtml}
+            // DELIVERY STATUS BANNER
+            const deliveryBanner = data.canDeliver 
+                ? `<div class="status-badge st-new mt-1" style="font-size:0.8rem">🛵 WE DELIVER TO YOUR DOORSTEP</div>`
+                : `<div class="status-badge st-unverified mt-1" style="font-size:0.8rem">🚶 PICKUP ONLY - NO DELIVERY</div>`;
 
-                    <div class="container p-2" style="background:white; border-radius:30px; margin: 10px 15px; box-shadow:0 5px 25px rgba(0,0,0,0.05); text-align:center;">
+            // Generate HTML
+            app.innerHTML = `
+                <div id="public-view">
+                    <div id="public-status" class="p-1 text-center bold text-white" style="position:sticky; top:0; z-index:900; font-size:0.9rem"></div>
+                    
+                    <div class="container p-2" style="background:white; border-radius:0 0 20px 20px; box-shadow:0 5px 15px rgba(0,0,0,0.05); text-align:center;">
                         <div class="center flex-col">
-                            <img id="pub-logo" src="${data.logo}" style="width:110px; height:110px; border-radius:50%; object-fit:cover; border:5px solid var(--primary); margin-bottom:10px; margin-top:-10px;">
-                            <h2 style="margin:0;">${data.businessName}</h2>
-                            ${data.verified ? `<span class="status-badge st-new mt-1">✔ Verified</span>` : ''}
+                            <img id="pub-logo" src="${data.logo || 'https://via.placeholder.com/100'}" style="width:110px; height:110px; border-radius:50%; object-fit:cover; border:5px solid var(--primary); margin-bottom:10px; margin-top:-10px;">
+                            <h2 id="pub-name" style="margin:0;">${data.businessName}</h2>
+                            ${data.verified ? `<div class="mt-1"><span class="status-badge st-new">✔ Verified Business</span></div>` : ''}
                             ${deliveryBanner}
                             <p style="color:#888; margin-top:5px; font-size:0.9rem;">${data.address}</p>
                             
+                            <!-- Social Icons -->
                             <div class="flex center mt-1" style="gap:15px;">
-                                ${social.fb ? `<a href="${social.fb}" target="_blank" style="font-size:1.5rem; text-decoration:none;">🔵</a>` : ''}
-                                ${social.ig ? `<a href="${social.ig}" target="_blank" style="font-size:1.5rem; text-decoration:none;">📸</a>` : ''}
+                                ${social.fb ? `<a href="${social.fb}" target="_blank" style="font-size:1.5rem; text-decoration:none; color:#3b5998;">🔵</a>` : ''}
+                                ${social.ig ? `<a href="${social.ig}" target="_blank" style="font-size:1.5rem; text-decoration:none; background:radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">📸</a>` : ''}
                             </div>
+
                             <div class="flex center mt-1" style="gap:10px; width:100%;">
-                                <a href="tel:${data.hotline}" class="btn btn-green" style="flex:1;">📞 Call</a>
-                                <a href="https://wa.me/${data.whatsapp}" target="_blank" class="btn btn-green" style="flex:1;">💬 Chat</a>
+                                <a href="tel:${data.hotline}" class="btn btn-green" style="flex:1;">📞 ${data.hotline}</a>
+                                <a href="https://wa.me/${data.whatsapp}" target="_blank" class="btn btn-green" style="flex:1;">💬 WhatsApp</a>
                             </div>
                         </div>
                     </div>
 
-                    <div class="hero mt-2" style="border-radius:20px; padding:30px 20px; margin: 15px; background: linear-gradient(135deg, #6c5ce7, #a29bfe);">
+                    <div class="hero mt-2" style="border-radius:20px; padding:30px 20px; margin: 15px;">
                         <h2 style="font-size:1.5rem;">${data.heroText || "Welcome!"}</h2>
-                        <button class="btn btn-secondary mt-1" style="background:white; color:#6c5ce7;" onclick="document.getElementById('pub-menu').scrollIntoView({behavior:'smooth'})">ORDER NOW</button>
+                        <button class="btn btn-secondary mt-1" style="background:white; color:var(--primary);" onclick="document.getElementById('pub-menu').scrollIntoView({behavior:'smooth'})">ORDER NOW</button>
                     </div>
 
+                    <!-- OUR SERVICE AREA SECTION -->
                     <div class="p-2 container">
-                        <h3>Our Zone</h3>
-                        <p class="text-gray" style="font-size:0.9rem">${data.nearbyTowns ? `Serving: ${data.nearbyTowns}` : 'Check map.'}</p>
+                        <h3>Our Service Area</h3>
+                        <p class="text-gray" style="font-size:0.9rem">${data.nearbyTowns ? `Serving: ${data.nearbyTowns}` : 'Check the map below for delivery zones.'}</p>
                         <div id="public-map" class="map-container" style="pointer-events:none;"></div>
+                        ${!data.canDeliver ? '<p class="text-red mt-1 text-center bold">Note: We do not provide delivery. You must come and pick up.</p>' : ''}
                     </div>
 
-                    ${ytHtml ? `<div class="p-2 container"><h3>Gallery</h3>${ytHtml}</div>` : ''}
+                    <!-- Video Gallery -->
+                    ${ytGalleryHtml ? `<div class="p-2 container"><h3>Video Gallery</h3>${ytGalleryHtml}</div>` : ''}
 
-                    <div id="pub-menu" class="p-2 container"></div>
+                    <div id="pub-menu" class="p-2 container">
+                        <!-- Menu Items Injected Here -->
+                        <h3 class="text-center text-gray" style="margin-top:20px;">Loading Menu...</h3>
+                    </div>
                     
+                    <!-- Reviews Section -->
                     <div class="p-2 container mt-2" style="background:#fff; border-radius:20px; margin:15px;">
-                        <h3>Reviews</h3>
+                        <h3>Customer Reviews</h3>
                         <div style="max-height:300px; overflow-y:auto; margin-bottom:15px;">
-                            ${reviews.length ? reviews.map(r => `<div style="border-bottom:1px solid #eee; padding:10px 0;"><b>${r.name}</b> <span class="text-yellow">${'★'.repeat(r.stars)}</span><p style="margin:5px 0; font-size:0.9rem;">${r.text}</p></div>`).join('') : '<p style="color:#888;">No reviews yet.</p>'}
+                            ${reviews.length ? reviews.map(r => `<div style="border-bottom:1px solid #eee; padding:10px 0;"><b>${r.name}</b> <span class="text-yellow">${'★'.repeat(r.stars)}</span><p style="margin:5px 0; font-size:0.9rem;">${r.text}</p></div>`).join('') : '<p style="color:#888; text-align:center;">No reviews yet. Be the first to share your experience!</p>'}
                         </div>
-                        <input id="rev-name" class="w-100 p-1 mb-1" style="border:1px solid #ddd; border-radius:8px;" placeholder="Name">
-                        <select id="rev-star" class="w-100 p-1 mb-1" style="border:1px solid #ddd; border-radius:8px;"><option value="5">★★★★★</option><option value="4">★★★★</option></select>
-                        <textarea id="rev-text" class="w-100 p-1 mb-1" style="border:1px solid #ddd; border-radius:8px;" placeholder="Review..."></textarea>
-                        <button class="btn btn-primary" onclick="submitReview('${bizId}')">Submit</button>
+                        <h4>Write a Review</h4>
+                        <input id="rev-name" class="w-100 p-1 mb-1" style="border:1px solid #ddd; border-radius:8px;" placeholder="Your Name">
+                        <select id="rev-star" class="w-100 p-1 mb-1" style="border:1px solid #ddd; border-radius:8px;">
+                            <option value="5">★★★★★ Excellent</option>
+                            <option value="4">★★★★ Good</option>
+                            <option value="3">★★★ Average</option>
+                            <option value="2">★★ Poor</option>
+                            <option value="1">★ Terrible</option>
+                        </select>
+                        <textarea id="rev-text" class="w-100 p-1 mb-1" style="border:1px solid #ddd; border-radius:8px;" placeholder="Share your experience..."></textarea>
+                        <button class="btn btn-primary" onclick="submitReview('${bizId}')">Submit Review</button>
                     </div>
                     
                     <footer class="text-center p-2 mt-2" style="background:var(--secondary); color:white; border-radius:20px 20px 0 0; margin-top:20px;">
@@ -1359,14 +1626,17 @@
                     </footer>
 
                     <div class="floating-cart" onclick="showCartModal()">
-                        🛒 <div class="cart-badge" id="cart-count">0</div>
+                        🛒 <div class="cart-badge" id="cart-count">${cart.length}</div>
                     </div>
                 </div>
             `;
 
+            // Initialize Public Map
             initPublicMap(data);
 
+            // Render Menu with Beautiful Cards
             const menuDiv = document.getElementById('pub-menu');
+            menuDiv.innerHTML = ''; // Clear loading message
             const cats = [...new Set((data.foods||[]).map(f => f.cat))];
             
             if (data.foods && data.foods.length > 0) {
@@ -1375,12 +1645,12 @@
                     data.foods.filter(f => f.cat === c).forEach(f => {
                         menuDiv.innerHTML += `
                             <div class="card flex justify-between center" style="padding:15px; margin-bottom:15px; box-shadow:0 4px 15px rgba(0,0,0,0.05); border:none;">
-                                <img src="${f.img}" style="width:90px;height:90px;border-radius:15px;object-fit:cover;margin-right:15px;">
+                                <img src="${f.img}" alt="${f.name}" style="width:90px;height:90px;border-radius:12px;object-fit:cover;margin-right:15px;">
                                 <div style="flex:1;">
                                     <div class="bold" style="font-size:1.1rem;">${f.name}</div>
                                     <div class="mt-1 flex" style="gap:5px; flex-wrap:wrap;">
-                                        ${f.half ? `<button class="btn btn-outline" style="width:auto;padding:6px 12px;font-size:12px;margin:0" onclick="addToCart('${f.name}', 'Half', ${f.half})">Half: ${f.half}</button>` : ''}
-                                        ${f.full ? `<button class="btn btn-outline" style="width:auto;padding:6px 12px;font-size:12px;margin:0" onclick="addToCart('${f.name}', 'Full', ${f.full})">Full: ${f.full}</button>` : ''}
+                                        ${f.half ? `<button class="btn btn-outline" style="width:auto;padding:6px 12px;font-size:12px;margin:0" onclick="addToCart('${f.name}', 'Half', ${f.half})">Half: Rs. ${f.half}</button>` : ''}
+                                        ${f.full ? `<button class="btn btn-outline" style="width:auto;padding:6px 12px;font-size:12px;margin:0" onclick="addToCart('${f.name}', 'Full', ${f.full})">Full: Rs. ${f.full}</button>` : ''}
                                     </div>
                                 </div>
                             </div>
@@ -1388,7 +1658,7 @@
                     });
                 });
             } else {
-                menuDiv.innerHTML = `<div class="card text-center text-gray mt-4"><h3>Coming Soon!</h3></div>`;
+                menuDiv.innerHTML = `<div class="card text-center text-gray mt-4"><h3>Menu Coming Soon!</h3><p>This business has not added any menu items yet.</p></div>`;
             }
 
             // Status Bar Logic
@@ -1396,7 +1666,7 @@
             const sched = data.schedule?.[today];
             const statusDiv = document.getElementById('public-status');
             let isOpenNow = false;
-            let statusText = "CLOSED NOW";
+            let statusText = "WE ARE CLOSED NOW";
             let statusBg = 'var(--secondary)';
 
             if(sched && sched.open) {
@@ -1407,9 +1677,12 @@
                 const startMins = sh * 60 + sm;
                 const endMins = eh * 60 + em;
                 
+                // Handle closing time spanning past midnight (e.g., 22:00 to 02:00)
                 if (endMins < startMins) { 
+                    // Case 1: Before midnight (e.g., 22:00 - 23:59)
                     if (curMins >= startMins || curMins <= endMins) isOpenNow = true;
                 } else {
+                    // Case 2: Standard hours (e.g., 08:00 - 20:00)
                     if (curMins >= startMins && curMins <= endMins) isOpenNow = true;
                 }
             }
@@ -1417,16 +1690,20 @@
             if(isOpenNow) {
                 statusText = `OPEN NOW (${sched.start} - ${sched.end})`;
                 statusBg = 'var(--green)';
+            } else if (sched && !sched.open) {
+                statusText = `CLOSED TODAY`;
+                statusBg = 'var(--secondary)';
+            } else {
+                statusText = "SCHEDULE NOT SET / CLOSED";
+                statusBg = 'var(--secondary)';
             }
+
             statusDiv.innerText = statusText;
             statusDiv.style.background = statusBg;
 
-            // Trigger "Crazy App" Feature: Spin Wheel after 5 seconds
-            setTimeout(showSpinWheel, 5000);
-
         } catch (e) {
-            console.error(e);
-            app.innerHTML = "<div class='text-center p-2'><h2>Error</h2></div>";
+            console.error("Error loading public page:", e);
+            app.innerHTML = "<div class='text-center p-2'><h2>Error Loading Page</h2><p>Please try again later or contact support.</p></div>";
         }
     }
 
@@ -1435,90 +1712,95 @@
         const loc = data.serviceLocation || { lat: 6.9271, lng: 79.8612 };
         publicMap = L.map('public-map', {zoomControl: false, dragging: false, scrollWheelZoom: false}).setView([loc.lat, loc.lng], 12);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(publicMap);
+        
         L.marker([loc.lat, loc.lng]).addTo(publicMap);
-        L.circle([loc.lat, loc.lng], { color: 'red', fillColor: '#f03', fillOpacity: 0.2, radius: (data.serviceRadius || 5) * 1000 }).addTo(publicMap);
+        L.circle([loc.lat, loc.lng], {
+            color: 'red',
+            fillColor: '#f03',
+            fillOpacity: 0.2,
+            radius: (data.serviceRadius || 5) * 1000
+        }).addTo(publicMap);
+        
         setTimeout(() => { publicMap.invalidateSize(); }, 500);
     }
 
     function addToCart(name, variant, price) {
-        cart.push({name, variant, price: Number(price)}); 
+        cart.push({name, variant, price: Number(price)}); // Ensure price is number
         document.getElementById('cart-count').innerText = cart.length;
-        showToast(`${name} added!`, 'info');
+        showToast(`${name} (${variant}) added to cart!`, 'info');
+        // No auto-open cart, let user decide when to open
     }
     
     function submitReview(bizId) {
         const name = document.getElementById('rev-name').value.trim();
         const stars = document.getElementById('rev-star').value;
         const text = document.getElementById('rev-text').value.trim();
-        if(!name || !text) return showToast("Name & Review required.", "error");
+        if(!name || !text) return showToast("Please fill in your name and review message.", "error");
+        
         db.collection('users').doc(bizId).collection('reviews').add({
             name, stars: Number(stars), text, status: 'pending', time: new Date().toISOString()
-        }).then(() => showToast("Review submitted!", 'success'));
+        }).then(() => {
+            showToast("Review submitted for approval! Thank you.", 'success');
+            document.getElementById('rev-name').value = '';
+            document.getElementById('rev-text').value = '';
+            document.getElementById('rev-star').value = '5'; // Reset stars
+        }).catch(e => showToast("Failed to submit review: " + e.message, 'error'));
     }
 
-    // --- CRAZY APP FEATURE: SPIN WHEEL ---
-    function showSpinWheel() {
-        if(sessionStorage.getItem('spinShown')) return; // Show only once per session
-        showModal(`
-            <div class="text-center">
-                <h2 class="text-red">🎉 LUCKY SPIN!</h2>
-                <p>Spin to win a discount!</p>
-                <div style="font-size:4rem; margin:10px 0; animation: spin 0.5s infinite linear;" id="wheel">🎡</div>
-                <button class="btn btn-primary" onclick="spinResult()">STOP & WIN</button>
-            </div>
-        `);
-        sessionStorage.setItem('spinShown', 'true');
-    }
-
-    function spinResult() {
-        const wheel = document.getElementById('wheel');
-        wheel.style.animation = 'none';
-        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-        document.querySelector('.modal-box').innerHTML = `
-            <div class="text-center">
-                <h1 class="text-green">YOU WON!</h1>
-                <h3 class="text-primary">FREE DELIVERY</h3>
-                <p>Mention "LUCKY SPIN" in your order notes.</p>
-                <button class="btn btn-secondary mt-1" onclick="closeModal()">Claim Now</button>
-            </div>
-        `;
-    }
-
-    // UPDATED: Show Cart Modal with DELIVERY OPTIONS
+    // UPDATED (Task E): Show Cart Modal with DELIVERY OPTIONS and LOGIC
     function showCartModal() {
-        if(cart.length === 0) return showToast("Cart is empty!", "error");
-        const total = cart.reduce((a,b)=>a+b.price,0); 
+        if(cart.length === 0) return showToast("Your cart is empty. Add some items first!", "error");
+        const total = cart.reduce((a,b)=>a+b.price,0); // Use numeric price
         
         showModal(`
-            <h2 class="text-center">Order Summary</h2>
+            <h2 class="text-center">Your Order Summary</h2>
             <div style="background:#f8f9fa; padding:10px; border-radius:12px; max-height:250px; overflow-y:auto; margin-bottom:15px;">
                 ${cart.map((i,idx) => `<div class="flex justify-between" style="padding:8px 0; border-bottom:1px solid #eee;"><span>${i.name} (${i.variant})</span><b>Rs. ${i.price}</b> <button onclick="removeFromCart(${idx})" style="background:none; border:none; color:var(--primary); font-size:1.2rem; cursor:pointer;">&times;</button></div>`).join('')}
             </div>
+            
             <h3 class="text-right text-red">Total: Rs. ${total} <span id="cart-del-fee" class="text-gray small hidden"></span></h3>
+            
             <hr class="mb-1" style="border:0; border-top:1px dashed #ccc;">
+            
+            <!-- Delivery Options -->
             <label class="bold mb-1 block">Select Option:</label>
             <div class="flex center" style="gap:10px; margin-bottom:15px;">
-                <label class="btn btn-outline" style="flex:1; cursor:pointer"><input type="radio" name="del-opt" value="pickup" checked onchange="toggleDeliveryUI('pickup')"> I pick up</label>
-                <label class="btn btn-outline" style="flex:1; cursor:pointer"><input type="radio" name="del-opt" value="delivery" onchange="toggleDeliveryUI('delivery')"> Deliver</label>
+                <label class="btn btn-outline" style="flex:1; cursor:pointer">
+                    <input type="radio" name="del-opt" value="pickup" checked onchange="toggleDeliveryUI('pickup')"> I come to pick
+                </label>
+                <label class="btn btn-outline" style="flex:1; cursor:pointer">
+                    <input type="radio" name="del-opt" value="delivery" onchange="toggleDeliveryUI('delivery')"> Please Deliver
+                </label>
             </div>
+            
+            <!-- Alert Box -->
             <div id="del-alert" class="hidden p-1 mb-1 text-center" style="border-radius:8px;"></div>
+
             <div id="del-fields" class="hidden">
-                 <div class="input-group"><label>Address *</label><textarea id="c-address" rows="2" placeholder="House No, Street..."></textarea></div>
+                 <div class="input-group">
+                    <label>Your Delivery Address *</label>
+                    <textarea id="c-address" rows="2" placeholder="House No, Street, Landmark..."></textarea>
+                </div>
+                <!-- NEW MAP FIX -->
                 <div class="input-group">
-                    <label>Confirm Location *</label>
+                    <label>Confirm Location on Map *</label>
+                    <p style="font-size:0.8rem; color:#666;">PC users: GPS is inaccurate. Drag the pin to your exact house.</p>
                     <button class="btn btn-secondary" onclick="getLocationForCheck()">📍 Get My Location</button>
-                    <div id="cust-map" class="map-container hidden" style="height:200px;"></div>
+                    <div id="cust-map" class="map-container hidden" style="height:250px;"></div>
                     <div id="loc-status" class="mt-1 small bold"></div>
                 </div>
             </div>
-            <div class="input-group"><label>Name *</label><input id="c-name" placeholder="John Doe"></div>
-            <div class="input-group"><label>Phone *</label><input id="c-phone" type="tel"></div>
-            <div class="input-group"><label>WhatsApp *</label><input id="c-wa" type="tel"></div>
-            <button id="btn-order" class="btn btn-green" onclick="placeOrder('${bizIdForCart}', ${total})">Confirm & Order (WhatsApp)</button>
-            <button class="btn btn-secondary mt-1" onclick="closeModal()">Back</button>
+
+            <div class="input-group"><label>Your Name *</label><input id="c-name" placeholder="John Doe"></div>
+            <div class="input-group"><label>Phone Number (for Call) *</label><input id="c-phone" type="tel" placeholder="e.g. 0771234567"></div>
+            <div class="input-group"><label>WhatsApp Number (for Confirmation) *</label><input id="c-wa" type="tel" placeholder="e.g. 94771234567 (with country code)"></div>
+            
+            <button id="btn-order" class="btn btn-green" onclick="placeOrder('${bizIdForCart}', ${total})">Confirm & Order via WhatsApp</button>
+            <button class="btn btn-secondary mt-1" onclick="closeModal()">Continue Browsing</button>
         `);
     }
 
+    // Toggle UI logic for Delivery selection
     function toggleDeliveryUI(type) {
         const delFields = document.getElementById('del-fields');
         const alertBox = document.getElementById('del-alert');
@@ -1531,20 +1813,25 @@
         orderBtn.disabled = false;
 
         if (type === 'delivery') {
+            // Check if business delivers
             if (!publicBizData.canDeliver) {
                 alertBox.classList.remove('hidden');
                 alertBox.style.background = '#fff0f0';
                 alertBox.style.color = 'var(--primary)';
-                alertBox.innerHTML = '<b>Sorry, No Delivery.</b><br>Pickup Only.';
+                alertBox.innerHTML = '<b>Sorry, we do not deliver.</b><br>You must come and pick up.';
+                // Disable confirm button if they select delivery but biz doesn't deliver
                 orderBtn.disabled = true;
+                // Force uncheck or reset (optional, user UX)
             } else {
                 delFields.classList.remove('hidden');
+                // Show Delivery Cost hint
                 if(publicBizData.deliveryCost > 0) {
                      alertBox.classList.remove('hidden');
                      alertBox.style.background = '#e7f1ff';
-                     alertBox.innerHTML = `Delivery Cost: <b>Rs. ${publicBizData.deliveryCost}</b>`;
+                     alertBox.style.color = '#2f3542';
+                     alertBox.innerHTML = `Note: Delivery Cost of <b>Rs. ${publicBizData.deliveryCost}</b> will be added to your bill.`;
                      feeSpan.classList.remove('hidden');
-                     feeSpan.innerHTML = `+ Rs. ${publicBizData.deliveryCost}`;
+                     feeSpan.innerHTML = `+ Rs. ${publicBizData.deliveryCost} (Del)`;
                 }
             }
         } else {
@@ -1552,130 +1839,225 @@
         }
     }
 
+    // --- NEW GPS FIX LOGIC ---
     function getLocationForCheck() {
         const status = document.getElementById('loc-status');
         const mapDiv = document.getElementById('cust-map');
-        status.innerHTML = "⏳ Detecting GPS...";
+        status.innerHTML = "⏳ Detecting IP/GPS...";
+        
         if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition((pos) => {
-                customerLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-                mapDiv.classList.remove('hidden');
-                if(customerMap) customerMap.remove();
-                customerMap = L.map('cust-map').setView([customerLocation.lat, customerLocation.lng], 13);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(customerMap);
-                L.circle([publicBizData.serviceLocation.lat, publicBizData.serviceLocation.lng], {color: 'red', fillColor: '#f03', fillOpacity: 0.1, radius: publicBizData.serviceRadius*1000}).addTo(customerMap);
-                customerMarker = L.marker([customerLocation.lat, customerLocation.lng], {draggable: true}).addTo(customerMap);
-                customerMarker.on('dragend', function(e) { const ll = e.target.getLatLng(); customerLocation = { lat: ll.lat, lng: ll.lng }; checkDeliveryZone(); });
-                checkDeliveryZone();
-            }, () => { status.innerHTML = "❌ GPS Error."; status.style.color = "red"; });
-        }
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    customerLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+                    // Initialize Map for Manual Correction
+                    mapDiv.classList.remove('hidden');
+                    if(customerMap) customerMap.remove();
+                    
+                    customerMap = L.map('cust-map').setView([customerLocation.lat, customerLocation.lng], 13);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(customerMap);
+                    
+                    // Add Business Circle
+                    L.circle([publicBizData.serviceLocation.lat, publicBizData.serviceLocation.lng], {
+                        color: 'red', fillColor: '#f03', fillOpacity: 0.1, radius: publicBizData.serviceRadius*1000
+                    }).addTo(customerMap);
+
+                    // Add Draggable Marker
+                    customerMarker = L.marker([customerLocation.lat, customerLocation.lng], {draggable: true}).addTo(customerMap);
+                    
+                    customerMarker.on('dragend', function(e) {
+                        const ll = e.target.getLatLng();
+                        customerLocation = { lat: ll.lat, lng: ll.lng }; // Force plain object
+                        checkDeliveryZone();
+                    });
+
+                    checkDeliveryZone();
+                },
+                () => { status.innerHTML = "❌ GPS Error. Allow location access."; status.style.color = "red"; }
+            );
+        } else { status.innerHTML = "❌ Not supported."; }
     }
 
     function checkDeliveryZone() {
         const bizLoc = publicBizData.serviceLocation;
-        const getDist = (lat1,lon1,lat2,lon2) => {
-            const R = 6371, dLat = (lat2-lat1)*(Math.PI/180), dLon = (lon2-lon1)*(Math.PI/180);
-            const a = Math.sin(dLat/2)*Math.sin(dLat/2) + Math.cos(lat1*(Math.PI/180))*Math.cos(lat2*(Math.PI/180)) * Math.sin(dLon/2)*Math.sin(dLon/2);
-            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        };
         const dist = getDist(bizLoc.lat, bizLoc.lng, customerLocation.lat, customerLocation.lng);
         const status = document.getElementById('loc-status');
         const btn = document.getElementById('btn-order');
+        
         if (dist <= publicBizData.serviceRadius) {
-            status.innerHTML = `✔ Valid Location (${dist.toFixed(1)}km).`; status.style.color = "var(--green)"; btn.disabled = false;
+            status.innerHTML = `✔ Valid Location (${dist.toFixed(1)}km).`;
+            status.style.color = "var(--green)";
+            btn.disabled = false;
         } else {
-            status.innerHTML = `❌ Too far (${dist.toFixed(1)}km). Limit: ${publicBizData.serviceRadius}km.`; status.style.color = "red"; btn.disabled = true;
+            status.innerHTML = `❌ Too far (${dist.toFixed(1)}km). Limit: ${publicBizData.serviceRadius}km.<br>Drag pin to correct location.`;
+            status.style.color = "red";
+            btn.disabled = true;
         }
+    }
+    
+    function getDist(lat1,lon1,lat2,lon2) {
+      const R = 6371, dLat = (lat2-lat1)*(Math.PI/180), dLon = (lon2-lon1)*(Math.PI/180);
+      const a = Math.sin(dLat/2)*Math.sin(dLat/2) + Math.cos(lat1*(Math.PI/180))*Math.cos(lat2*(Math.PI/180)) * Math.sin(dLon/2)*Math.sin(dLon/2);
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     }
 
     function removeFromCart(index) {
         cart.splice(index, 1);
         document.getElementById('cart-count').innerText = cart.length;
-        closeModal(); showCartModal();
+        closeModal(); // Close and re-open to refresh content
+        showCartModal();
+        showToast("Item removed from cart.", "info");
     }
 
+    // UPDATED (Task D): Sequential Order Number Logic
+    // FIX APPLIED: Removed server-side sorting (orderBy) to avoid 'Index Required' error.
+    // Sorting and finding max ID is now done in JavaScript.
     async function placeOrder(bizId, total) {
         const name = document.getElementById('c-name').value.trim();
         const phone = document.getElementById('c-phone').value.trim();
         const wa = document.getElementById('c-wa').value.trim();
         const delOpt = document.querySelector('input[name="del-opt"]:checked').value;
         
-        if(!name || !phone || !wa) return showToast("All fields required!", "error");
-        if (cart.length === 0) return showToast("Cart empty!", "error");
+        if(!name || !phone || !wa) return showToast("All fields (Name, Phone, WhatsApp) are required!", "error");
+        if (cart.length === 0) return showToast("Your cart is empty!", "error");
 
         let deliveryFee = 0;
         let deliveryAddress = "";
         let finalTotal = total;
 
+        // Delivery Validation logic
         if (delOpt === 'delivery') {
+            if (!publicBizData.canDeliver) {
+                return showToast("Delivery is not available. Please select Pick Up.", "error");
+            }
             deliveryAddress = document.getElementById('c-address').value.trim();
-            if (!deliveryAddress) return showToast("Address required.", "error");
-            if (!customerLocation) return showToast("Please check location on map.", "error");
+            if (!deliveryAddress) return showToast("Delivery Address is required.", "error");
+            if (!customerLocation) return showToast("Please confirm your location using the button.", "error");
+            
+            // Re-check zone just in case
+            const bizLoc = publicBizData.serviceLocation;
+            const dist = getDist(bizLoc.lat, bizLoc.lng, customerLocation.lat, customerLocation.lng);
+            if(dist > (publicBizData.serviceRadius || 5)) {
+                 return showToast("Your location is outside the service area.", "error");
+            }
+
             deliveryFee = publicBizData.deliveryCost || 0;
             finalTotal += deliveryFee;
         }
 
+        // Disable button to prevent double clicks
         document.getElementById('btn-order').disabled = true;
         document.getElementById('btn-order').innerText = "Processing...";
 
         try {
-            const todayStr = new Date().toISOString().split('T')[0];
-            const snapshot = await db.collection('users').doc(bizId).collection('orders').where('dateString', '==', todayStr).get();
-            let maxSeq = 0;
-            snapshot.docs.forEach(doc => { if (doc.data().dailySeq > maxSeq) maxSeq = doc.data().dailySeq; });
-            const nextSeq = maxSeq + 1;
+            // Task D: Generate Sequential Order Number (#000001 per day)
+            const todayStr = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+            
+            // NEW QUERY (Fix): Get all orders for today, then calculate max ID in JS
+            const snapshot = await db.collection('users').doc(bizId).collection('orders')
+                .where('dateString', '==', todayStr)
+                .get();
+
+            let nextSeq = 1;
+            if (!snapshot.empty) {
+                // Find max manually
+                let maxSeq = 0;
+                snapshot.docs.forEach(doc => {
+                    const data = doc.data();
+                    if (data.dailySeq && data.dailySeq > maxSeq) {
+                        maxSeq = data.dailySeq;
+                    }
+                });
+                nextSeq = maxSeq + 1;
+            }
+
+            // Format: #000001
             const orderNum = '#' + String(nextSeq).padStart(6, '0');
 
             const orderData = {
-                orderNum, dailySeq: nextSeq, dateString: todayStr, custName: name, custPhone: phone, custWa: wa, items: cart, total: finalTotal, deliveryType: delOpt, deliveryAddress, deliveryFee,
+                orderNum, 
+                dailySeq: nextSeq,
+                dateString: todayStr,
+                custName: name, 
+                custPhone: phone, // Saved for Reports
+                custWa: wa, 
+                items: cart, 
+                total: finalTotal, // Includes Delivery Fee
+                deliveryType: delOpt, // 'pickup' or 'delivery'
+                deliveryAddress: deliveryAddress,
+                deliveryFee: deliveryFee,
+                // FIX: Ensure plain object for Firestore
                 deliveryLocation: (delOpt === 'delivery' && customerLocation) ? { lat: Number(customerLocation.lat), lng: Number(customerLocation.lng) } : null,
-                time: new Date().toISOString(), status: 'new', seen: false
+                time: new Date().toISOString(), 
+                status: 'new', 
+                seen: false
             };
 
             await db.collection('users').doc(bizId).collection('orders').add(orderData);
 
-            let msg = `🔔 *New Order!* \nName: ${name}\n#: ${orderNum}\nType: *${delOpt.toUpperCase()}*\n`;
-            if(delOpt === 'delivery') msg += `Addr: ${deliveryAddress}\n`;
-            msg += `\n*Items:*\n${cart.map(i=>`- ${i.name} (${i.variant})`).join('\n')}\n`;
-            msg += `\n*Total: Rs. ${finalTotal}*`;
+            let msg = `🔔 *New Order from EatlyHub!* \n\nCustomer: ${name}\nPhone: ${phone}\nOrder #: ${orderNum}\nType: *${delOpt.toUpperCase()}*\n`;
+            if(delOpt === 'delivery') msg += `Address: ${deliveryAddress}\n`;
+            msg += `\n*Items Ordered:*\n${cart.map(i=>`- ${i.name} (${i.variant})`).join('\n')}\n`;
+            if(delOpt === 'delivery') msg += `Delivery Fee: Rs. ${deliveryFee}\n`;
+            msg += `\n*Total Amount: Rs. ${finalTotal}*\n\n_Please check your EatlyHub dashboard for details._`;
             
             window.open(`https://wa.me/${bizOwnerWa}?text=${encodeURIComponent(msg)}`, '_blank');
-            cart = []; document.getElementById('cart-count').innerText = '0';
+            
+            cart = []; // Clear cart after order is placed
+            document.getElementById('cart-count').innerText = '0';
             closeModal();
-            // Confetti Success
-            confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
-            showToast("Order Placed Successfully!", "success");
+            showToast("Order Placed Successfully! Business notified.", "success");
 
         } catch(e) {
             console.error(e);
-            showToast("Failed: " + e.message, 'error');
+            showToast("Failed to place order: " + e.message, 'error');
             document.getElementById('btn-order').disabled = false;
+            document.getElementById('btn-order').innerText = "Confirm & Order via WhatsApp";
         }
     }
 
-    // ================= CONFIRMATION PAGE =================
+    // ================= CUSTOMER CONFIRMATION PAGE =================
     async function loadCustomerConfirmPage(bizId, orderId) {
-        const doc = await db.collection('users').doc(bizId).collection('orders').doc(orderId).get();
-        if(!doc.exists) return app.innerHTML = "<div class='text-center'><h2>Order not found</h2></div>";
+        const docRef = db.collection('users').doc(bizId).collection('orders').doc(orderId);
+        const doc = await docRef.get();
+        if(!doc.exists) return app.innerHTML = "<div class='text-center p-2'><h2>Order not found</h2><p>The order ID might be incorrect or expired.</p></div>";
         const o = doc.data();
-        let statusMessage = '', buttonHtml = '';
 
+        // Check current status to prevent re-confirming/canceling
+        let statusMessage = '';
+        let buttonHtml = '';
         if (o.status === 'new') {
-            statusMessage = `<h2 class="text-green mb-1">Confirm Order?</h2>`;
-            buttonHtml = `<button class="btn btn-green" onclick="confirmAction('${bizId}', '${orderId}', 'confirmed')">✅ YES, CONFIRM</button><button class="btn btn-secondary mt-1" style="background:#ff6b81" onclick="confirmAction('${bizId}', '${orderId}', 'canceled')">❌ CANCEL</button>`;
+            statusMessage = `<h2 class="text-green mb-1">Confirm Your Order</h2><small class="mb-2">EatlyHub Order Verification</small>`;
+            buttonHtml = `
+                <button class="btn btn-green" onclick="confirmAction('${bizId}', '${orderId}', 'confirmed')">✅ YES, CONFIRM ORDER</button>
+                <button class="btn btn-secondary mt-1" style="background:#ff6b81" onclick="confirmAction('${bizId}', '${orderId}', 'canceled')">❌ CANCEL ORDER</button>
+            `;
+        } else if (o.status === 'confirmed') {
+            statusMessage = `<h2 class="text-green mb-1">Order Confirmed!</h2><small class="mb-2">Your order #${o.orderNum} is being prepared.</small>`;
+            buttonHtml = `<button class="btn btn-secondary mt-1" onclick="window.close()">Close this window</button>`;
+        } else if (o.status === 'canceled') {
+            statusMessage = `<h2 class="text-red mb-1">Order Canceled</h2><small class="mb-2">Your order #${o.orderNum} has been canceled.</small>`;
+            buttonHtml = `<button class="btn btn-secondary mt-1" onclick="window.close()">Close this window</button>`;
         } else {
-            statusMessage = `<h2 class="text-yellow mb-1">Status: ${o.status.toUpperCase()}</h2>`;
-            buttonHtml = `<button class="btn btn-secondary mt-1" onclick="window.close()">Close</button>`;
+            statusMessage = `<h2 class="text-yellow mb-1">Order Status: ${o.status.toUpperCase()}</h2><small class="mb-2">Your order #${o.orderNum} is ${o.status}.</small>`;
+            buttonHtml = `<button class="btn btn-secondary mt-1" onclick="window.close()">Close this window</button>`;
         }
+
 
         app.innerHTML = `
             <div class="flex-col center p-2" style="min-height:100vh; background:white;">
-                ${statusMessage}<h1 style="font-size:3rem; margin:0;">${o.orderNum}</h1>
+                <svg viewBox="0 0 24 24" fill="var(--green)" style="width:64px;height:64px;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                ${statusMessage}
+                <h1 style="font-size:3rem; margin:0;">${o.orderNum}</h1>
+                
                 <div class="card w-100" style="max-width:400px; text-align:left;">
                     ${o.items.map(i => `<div class="flex justify-between p-1" style="border-bottom:1px solid #eee"><span>${i.name}</span><span>Rs. ${i.price}</span></div>`).join('')}
+                    ${o.deliveryType === 'delivery' ? `<div class="flex justify-between p-1 text-red"><span>Delivery Fee</span><span>Rs. ${o.deliveryFee}</span></div>` : ''}
                     <div class="flex justify-between bold p-1" style="font-size:1.2rem"><span>Total</span><span>Rs. ${o.total}</span></div>
                 </div>
-                <div class="w-100 mt-2" style="max-width:400px">${buttonHtml}</div>
+
+                <div class="w-100 mt-2" style="max-width:400px">
+                    ${buttonHtml}
+                </div>
             </div>
         `;
     }
@@ -1683,13 +2065,23 @@
     function confirmAction(bizId, orderId, status) {
         db.collection('users').doc(bizId).collection('orders').doc(orderId).update({status, seen: true})
         .then(() => {
-            document.body.innerHTML = `<div style="height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;"><h1>${status === 'confirmed' ? '✅ Confirmed!' : '❌ Canceled'}</h1></div>`;
+            document.body.innerHTML = `<div style="height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;">
+                <h1 style="color:${status === 'confirmed' ? 'var(--green)' : 'red'}">${status === 'confirmed' ? '✅ Order Confirmed!' : '❌ Order Canceled'}</h1>
+                <p class="mt-2">Thank you for your response. You can close this window now.</p>
+            </div>`;
+        }).catch(e => {
+            showToast("Action failed: " + e.message, 'error');
+            document.body.innerHTML = `<div style="height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;">
+                <h1 style="color:red;">Error!</h1>
+                <p class="mt-2">Could not update order status. Please try again later.</p>
+            </div>`;
         });
     }
 
     // ================= UTILITIES =================
     function showModal(content) {
-        const el = document.createElement('div'); el.className = 'modal-overlay';
+        const el = document.createElement('div');
+        el.className = 'modal-overlay';
         el.innerHTML = `<div class="modal-box">${content}</div>`;
         document.body.appendChild(el);
     }
@@ -1700,10 +2092,20 @@
     }
 
     function showToast(msg, type='success') {
-        const t = document.createElement('div'); t.innerText = msg;
-        t.style = `position: fixed; top: 20px; right: 20px; z-index: 2000; background: ${type==='error'?'#ff4757':(type==='info'?'#2f3542':'#2ed573')}; color: white; padding: 12px 20px; border-radius: 50px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); font-weight:700; font-size:0.9rem; animation: slideIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);`;
+        const t = document.createElement('div');
+        t.innerText = msg;
+        t.style = `
+            position: fixed; top: 20px; right: 20px; z-index: 2000;
+            background: ${type==='error'?'#ff4757':(type==='info'?'#2f3542':'#2ed573')}; 
+            color: white; padding: 12px 20px; border-radius: 50px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2); font-weight:600; font-size:0.9rem;
+            animation: slideIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        `;
         document.body.appendChild(t);
-        setTimeout(() => { t.style.animation = 'fadeOut 0.3s forwards'; setTimeout(() => t.remove(), 300); }, 3000);
+        setTimeout(() => {
+            t.style.animation = 'fadeOut 0.3s forwards';
+            setTimeout(() => t.remove(), 300);
+        }, 3000);
     }
 </script>
 

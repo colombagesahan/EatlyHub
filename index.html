@@ -389,6 +389,11 @@
     let profileMarker = null;
     let profileCircle = null;
     let publicMap = null;
+    
+    // ADDED: State variables for Customer Map Fix
+    let customerMap = null;
+    let customerMarker = null;
+    let customerLocation = null;
 
     // Tabs List (User) - Swipeable manually
     const TABS = [
@@ -1776,10 +1781,13 @@
                     <label>Your Delivery Address *</label>
                     <textarea id="c-address" rows="2" placeholder="House No, Street, Landmark..."></textarea>
                 </div>
+                <!-- NEW MAP FIX -->
                 <div class="input-group">
-                    <label>Confirm Location (Required for Check) *</label>
-                    <button class="btn btn-secondary" onclick="getLocationForCheck()" style="font-size:0.9rem">📍 Get My Current Location</button>
-                    <div id="loc-status" class="mt-1 small text-green hidden">✔ Location Captured</div>
+                    <label>Confirm Location on Map *</label>
+                    <p style="font-size:0.8rem; color:#666;">PC users: GPS is inaccurate. Drag the pin to your exact house.</p>
+                    <button class="btn btn-secondary" onclick="getLocationForCheck()">📍 Get My Location</button>
+                    <div id="cust-map" class="map-container hidden" style="height:250px;"></div>
+                    <div id="loc-status" class="mt-1 small bold"></div>
                 </div>
             </div>
 
@@ -1831,68 +1839,64 @@
         }
     }
 
-    // Get Customer Location using Browser API
+    // --- NEW GPS FIX LOGIC ---
     function getLocationForCheck() {
+        const status = document.getElementById('loc-status');
+        const mapDiv = document.getElementById('cust-map');
+        status.innerHTML = "⏳ Detecting IP/GPS...";
+        
         if (navigator.geolocation) {
-            document.getElementById('loc-status').innerHTML = "⏳ Detecting location...";
-            document.getElementById('loc-status').classList.remove('hidden');
             navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    customerLocation = {
-                        lat: position.coords.latitude,
-                        lng: position.coords.longitude
-                    };
-                    // Check Geofence
+                (pos) => {
+                    customerLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+                    // Initialize Map for Manual Correction
+                    mapDiv.classList.remove('hidden');
+                    if(customerMap) customerMap.remove();
+                    
+                    customerMap = L.map('cust-map').setView([customerLocation.lat, customerLocation.lng], 13);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(customerMap);
+                    
+                    // Add Business Circle
+                    L.circle([publicBizData.serviceLocation.lat, publicBizData.serviceLocation.lng], {
+                        color: 'red', fillColor: '#f03', fillOpacity: 0.1, radius: publicBizData.serviceRadius*1000
+                    }).addTo(customerMap);
+
+                    // Add Draggable Marker
+                    customerMarker = L.marker([customerLocation.lat, customerLocation.lng], {draggable: true}).addTo(customerMap);
+                    
+                    customerMarker.on('dragend', function(e) {
+                        customerLocation = e.target.getLatLng();
+                        checkDeliveryZone();
+                    });
+
                     checkDeliveryZone();
                 },
-                (error) => {
-                    document.getElementById('loc-status').innerHTML = "❌ Failed to get location. Enable GPS.";
-                    document.getElementById('loc-status').style.color = 'red';
-                }
+                () => { status.innerHTML = "❌ GPS Error. Allow location access."; status.style.color = "red"; }
             );
-        } else {
-            alert("Geolocation is not supported by this browser.");
-        }
+        } else { status.innerHTML = "❌ Not supported."; }
     }
 
-    // Calculate Distance and Validate Zone
     function checkDeliveryZone() {
-        if(!customerLocation || !publicBizData.serviceLocation) return;
-        
         const bizLoc = publicBizData.serviceLocation;
-        const dist = getDistanceFromLatLonInKm(bizLoc.lat, bizLoc.lng, customerLocation.lat, customerLocation.lng);
-        
-        const statusDiv = document.getElementById('loc-status');
+        const dist = getDist(bizLoc.lat, bizLoc.lng, customerLocation.lat, customerLocation.lng);
+        const status = document.getElementById('loc-status');
         const btn = document.getElementById('btn-order');
         
-        if (dist <= (publicBizData.serviceRadius || 5)) {
-            statusDiv.innerHTML = "✔ Location Verified: Inside Delivery Zone";
-            statusDiv.style.color = "var(--green)";
+        if (dist <= publicBizData.serviceRadius) {
+            status.innerHTML = `✔ Valid Location (${dist.toFixed(1)}km).`;
+            status.style.color = "var(--green)";
             btn.disabled = false;
         } else {
-            statusDiv.innerHTML = `❌ Sorry, we do not deliver to your current location.<br>(Dist: ${dist.toFixed(1)}km, Limit: ${publicBizData.serviceRadius}km)`;
-            statusDiv.style.color = "red";
-            btn.disabled = true; // Block order
+            status.innerHTML = `❌ Too far (${dist.toFixed(1)}km). Limit: ${publicBizData.serviceRadius}km.<br>Drag pin to correct location.`;
+            status.style.color = "red";
+            btn.disabled = true;
         }
     }
-
-    // Haversine Formula for distance
-    function getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2) {
-      var R = 6371; // Radius of the earth in km
-      var dLat = deg2rad(lat2-lat1);  // deg2rad below
-      var dLon = deg2rad(lon2-lon1); 
-      var a = 
-        Math.sin(dLat/2) * Math.sin(dLat/2) +
-        Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
-        Math.sin(dLon/2) * Math.sin(dLon/2)
-        ; 
-      var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
-      var d = R * c; // Distance in km
-      return d;
-    }
-
-    function deg2rad(deg) {
-      return deg * (Math.PI/180)
+    
+    function getDist(lat1,lon1,lat2,lon2) {
+      const R = 6371, dLat = (lat2-lat1)*(Math.PI/180), dLon = (lon2-lon1)*(Math.PI/180);
+      const a = Math.sin(dLat/2)*Math.sin(dLat/2) + Math.cos(lat1*(Math.PI/180))*Math.cos(lat2*(Math.PI/180)) * Math.sin(dLon/2)*Math.sin(dLon/2);
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     }
 
     function removeFromCart(index) {
@@ -1930,7 +1934,7 @@
             
             // Re-check zone just in case
             const bizLoc = publicBizData.serviceLocation;
-            const dist = getDistanceFromLatLonInKm(bizLoc.lat, bizLoc.lng, customerLocation.lat, customerLocation.lng);
+            const dist = getDist(bizLoc.lat, bizLoc.lng, customerLocation.lat, customerLocation.lng);
             if(dist > (publicBizData.serviceRadius || 5)) {
                  return showToast("Your location is outside the service area.", "error");
             }

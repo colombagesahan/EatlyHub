@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>EatlyHub | Login</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#FF4757">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3075/3075977.png">
+
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary: #FF4757;
+            --primary-grad: linear-gradient(135deg, #FF4757, #FF6B81);
+            --secondary: #2F3542;
+            --bg-body: #F4F7FC;
+            --surface: #FFFFFF;
+            --shadow-card: 0 10px 30px rgba(0,0,0,0.08);
+            --font: 'Poppins', sans-serif;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { 
+            margin: 0; padding: 0; font-family: var(--font); 
+            background: var(--bg-body); color: var(--secondary);
+            min-height: 100vh; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            background: radial-gradient(circle at top right, #fff0f0 0%, #ffffff 60%);
+        }
+
+        .container {
+            width: 100%; max-width: 450px; padding: 25px;
+            text-align: center;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        /* Logo Area */
+        .logo-area { margin-bottom: 30px; }
+        .logo-img {
+            width: 100px; height: 100px; 
+            border-radius: 50%; border: 4px solid white;
+            box-shadow: 0 15px 30px rgba(255, 71, 87, 0.2);
+            background: white; object-fit: cover;
+            animation: float 6s ease-in-out infinite;
+        }
+        h1 { margin: 15px 0 5px; font-weight: 800; color: var(--secondary); font-size: 2rem; }
+        p { color: #747d8c; margin: 0 0 30px; font-size: 0.95rem; }
+
+        /* Login Cards */
+        .role-card {
+            background: var(--surface);
+            padding: 20px;
+            border-radius: 20px;
+            margin-bottom: 15px;
+            display: flex; align-items: center;
+            box-shadow: var(--shadow-card);
+            cursor: pointer;
+            text-decoration: none;
+            color: var(--secondary);
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 2px solid transparent;
+            position: relative; overflow: hidden;
+        }
+
+        .role-card:active { transform: scale(0.98); }
+        .role-card:hover { border-color: var(--primary); transform: translateY(-3px); }
+
+        .role-icon {
+            width: 50px; height: 50px;
+            background: #fff0f0; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; color: var(--primary);
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        .role-info { text-align: left; flex: 1; }
+        .role-title { font-weight: 700; font-size: 1.1rem; display: block; }
+        .role-desc { font-size: 0.8rem; color: #a4b0be; }
+
+        .arrow { color: #ddd; }
+
+        /* Bottom Link */
+        .home-link {
+            margin-top: 30px;
+            display: inline-block;
+            color: #747d8c;
+            font-weight: 600;
+            text-decoration: none;
+            font-size: 0.9rem;
+            padding: 10px 20px;
+            border-radius: 50px;
+            background: white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        .home-link:hover { color: var(--primary); }
+
+        /* Animations */
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <div class="logo-area">
+            <img src="https://cdn-icons-png.flaticon.com/512/3075/3075977.png" class="logo-img" alt="EatlyHub Logo">
+            <h1>EatlyHub</h1>
+            <p>Select your account type to login</p>
+        </div>
+
+        <!-- 1. Customer -->
+        <a href="customer.html" class="role-card">
+            <div class="role-icon"><i class="fa-solid fa-burger"></i></div>
+            <div class="role-info">
+                <span class="role-title">Customer</span>
+                <span class="role-desc">Order food & browse menus</span>
+            </div>
+            <i class="fa-solid fa-chevron-right arrow"></i>
+        </a>
+
+        <!-- 2. Merchant (index.html) -->
+        <a href="index.html" class="role-card">
+            <div class="role-icon" style="background:#eafff3; color:#2ed573"><i class="fa-solid fa-store"></i></div>
+            <div class="role-info">
+                <span class="role-title">Merchant</span>
+                <span class="role-desc">Manage restaurant & orders</span>
+            </div>
+            <i class="fa-solid fa-chevron-right arrow"></i>
+        </a>
+
+        <!-- 3. Rider -->
+        <a href="rider.html" class="role-card">
+            <div class="role-icon" style="background:#fff9e6; color:#ffa502"><i class="fa-solid fa-motorcycle"></i></div>
+            <div class="role-info">
+                <span class="role-title">Rider</span>
+                <span class="role-desc">Deliver food & earn</span>
+            </div>
+            <i class="fa-solid fa-chevron-right arrow"></i>
+        </a>
+
+        <!-- Home Page Link -->
+        <a href="home.html" class="home-link">
+            <i class="fa-solid fa-globe"></i> Visit Website
+        </a>
+
+    </div>
+
+    <!-- PWA Install Script (Optional) -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js')
+                .then(reg => console.log('SW Registered'))
+                .catch(err => console.log('SW Error', err));
+        }
+    </script>
+</body>
+</html>

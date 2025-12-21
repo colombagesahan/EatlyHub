@@ -399,34 +399,101 @@
 
 <!-- 1. LANDING PAGE -->
 <template id="tpl-landing">
-    <div class="hero">
-        <i class="fa-solid fa-utensils fa-3x" style="margin-bottom: 15px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));"></i>
-        <h1 style="color:white; margin-bottom: 10px;">EatlyHub</h1>
-        <p style="opacity:0.9; margin-bottom:30px; font-size:1rem; color: white;">The #1 Platform for Hotels, Restaurants & Home Kitchens</p>
-        <button class="btn" onclick="authLogin()" style="background:white; color:var(--primary); font-weight:800; border-radius:50px; width: auto; padding: 14px 30px; display: inline-flex; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
-            <i class="fa-brands fa-google"></i> Continue with Gmail
+    <!-- Hero Section -->
+    <div class="hero" style="padding-bottom: 80px;">
+        <div style="background: rgba(255,255,255,0.2); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; backdrop-filter: blur(5px);">
+            <i class="fa-solid fa-shop fa-2x"></i>
+        </div>
+        <h1 style="color:white; margin-bottom: 10px; font-size: 2rem; line-height: 1.2;">Stop Sharing Your Profits.</h1>
+        <p style="opacity:0.95; margin-bottom:25px; font-size:1.1rem; color: white; max-width: 500px; margin-left: auto; margin-right: auto;">
+            Keep <b>100%</b> of your sales. No commissions per order.<br>Just one flat fee.
+        </p>
+        
+        <button class="btn" onclick="authLogin()" style="background:white; color:var(--primary); font-weight:800; border-radius:50px; width: auto; padding: 16px 35px; display: inline-flex; box-shadow: 0 10px 30px rgba(0,0,0,0.25); font-size: 1rem;">
+            <i class="fa-brands fa-google"></i> &nbsp; Start My Store
         </button>
+        <div style="margin-top: 15px; font-size: 0.8rem; color: rgba(255,255,255,0.8);">All you need is a Gmail account</div>
     </div>
 
-    <div class="container p-2" style="margin-top: -50px; position: relative; z-index: 5;">
-        <div class="card text-center">
-            <div style="background: #f1f2f6; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;">
-                <i class="fa-solid fa-hotel fa-lg text-red"></i>
+    <!-- The "Problem vs Solution" Section -->
+    <div class="container p-2" style="margin-top: -60px; position: relative; z-index: 5;">
+        
+        <!-- Value Prop Card -->
+        <div class="card text-center" style="border: none; box-shadow: var(--shadow-float);">
+            <h3 style="color: var(--secondary);">The Simple Truth</h3>
+            
+            <div class="flex center justify-between mt-2" style="gap: 10px; align-items: stretch;">
+                <!-- The "Other Apps" Side -->
+                <div style="flex: 1; background: #FFF0F0; padding: 15px; border-radius: 12px; border: 1px solid #ffccc7;">
+                    <div style="color: var(--primary); font-weight: 800; font-size: 1.2rem; margin-bottom: 5px;">30%</div>
+                    <small style="color: var(--primary); font-weight: 700;">LOST</small>
+                    <p style="font-size: 0.75rem; color: #57606f; margin-top: 5px;">Standard Delivery Apps charge you per order.</p>
+                </div>
+
+                <!-- Your Platform Side -->
+                <div style="flex: 1; background: #E7FFF0; padding: 15px; border-radius: 12px; border: 1px solid #7BED9F; position: relative; overflow: hidden;">
+                    <div style="position: absolute; top: 0; right: 0; background: var(--green); color: white; font-size: 0.6rem; padding: 2px 8px; border-radius: 0 0 0 10px; font-weight: bold;">EATLYHUB</div>
+                    <div style="color: var(--green); font-weight: 800; font-size: 1.2rem; margin-bottom: 5px;">0%</div>
+                    <small style="color: var(--green); font-weight: 700;">COMMISSION</small>
+                    <p style="font-size: 0.75rem; color: #57606f; margin-top: 5px;">You keep every single rupee you earn.</p>
+                </div>
             </div>
-            <h4>Hotels & Restaurants</h4>
-            <p class="text-gray" style="font-size: 0.9rem;">Digital menus for room service. Zero hardware costs.</p>
         </div>
 
-        <div class="card text-center" style="border-top: 4px solid var(--green);">
-            <div style="background: #eafff3; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;">
-                <i class="fa-solid fa-house-chimney fa-lg text-green"></i>
+        <!-- Pricing Highlight -->
+        <div class="card text-center" style="background: var(--secondary); color: white; position: relative; overflow: hidden;">
+            <i class="fa-solid fa-tags" style="position: absolute; top: -10px; right: -10px; font-size: 5rem; color: rgba(255,255,255,0.05);"></i>
+            <h4 style="color: #a4b0be; text-transform: uppercase; letter-spacing: 1px; font-size: 0.8rem;">Flat Monthly Rate</h4>
+            <h1 style="color: white; font-size: 2.8rem; margin: 10px 0;">Rs. 1,500</h1>
+            <p style="color: #dfe4ea; font-size: 0.9rem;">Unlimited Orders • Unlimited Items • Free Setup</p>
+            <div class="mt-2" style="background: rgba(255,255,255,0.1); padding: 10px; border-radius: 12px;">
+                <i class="fa-solid fa-check text-green"></i> No hidden fees. Cancel anytime.
             </div>
-            <h4>Home Based Kitchens</h4>
-            <p class="text-gray" style="font-size: 0.9rem;">Start your food business today! Get a link & accept WhatsApp orders.</p>
-            <div class="text-green bold text-center mt-1" style="font-size: 0.9rem;">Start Home Production <i class="fa-solid fa-arrow-right"></i></div>
         </div>
+
+        <!-- How It Works Features -->
+        <h3 class="text-center mt-2 mb-1">Everything You Need</h3>
+        
+        <div class="card flex center" style="text-align: left; gap: 15px;">
+            <div style="background: #e1f0ff; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <i class="fa-brands fa-whatsapp fa-lg text-blue"></i>
+            </div>
+            <div>
+                <h4>Direct WhatsApp Orders</h4>
+                <p class="text-gray" style="font-size: 0.85rem; margin: 0;">Customers order via your link. You get a fully detailed bill instantly on WhatsApp.</p>
+            </div>
+        </div>
+
+        <div class="card flex center" style="text-align: left; gap: 15px;">
+            <div style="background: #fff4e6; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <i class="fa-solid fa-qrcode fa-lg text-yellow"></i>
+            </div>
+            <div>
+                <h4>Digital QR Menu</h4>
+                <p class="text-gray" style="font-size: 0.85rem; margin: 0;">Perfect for Dine-in or Room Service. Save money on printing paper menus.</p>
+            </div>
+        </div>
+
+        <div class="card flex center" style="text-align: left; gap: 15px;">
+            <div style="background: #ffe6e6; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <i class="fa-solid fa-truck-fast fa-lg text-red"></i>
+            </div>
+            <div>
+                <h4>Manage Deliveries</h4>
+                <p class="text-gray" style="font-size: 0.85rem; margin: 0;">Set your own delivery radius and fees. You control your logistics, not us.</p>
+            </div>
+        </div>
+        
+        <!-- Final CTA -->
+        <div class="text-center mt-2 mb-2">
+            <h3>Ready to take control?</h3>
+            <button class="btn btn-primary" onclick="authLogin()" style="border-radius: 50px; padding: 15px 30px; font-size: 1rem; box-shadow: 0 5px 15px rgba(255, 71, 87, 0.4);">
+                Build My Free Menu Now <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </div>
+
     </div>
-    <div class="text-center p-2 text-gray" style="font-size:0.75rem">Powered by EatlyHub © 2025</div>
+    <div class="text-center p-2 text-gray" style="font-size:0.75rem; padding-bottom: 40px;">Powered by EatlyHub © 2025</div>
 </template>
 
 <!-- 2. DASHBOARD SHELL (User & Admin) -->

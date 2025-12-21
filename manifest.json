@@ -1,7 +1,7 @@
 {
   "name": "EatlyHub",
   "short_name": "EatlyHub",
-  "start_url": "./index.html",
+  "start_url": "./loging.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#ff4757",

@@ -397,156 +397,169 @@
 
 <!-- ================= TEMPLATES ================= -->
 
-<!-- 1. LANDING PAGE (PROFESSIONAL BUSINESS SUITE) -->
+<!-- 1. LANDING PAGE (ULTIMATE WOW EDITION) -->
 <template id="tpl-landing">
     
+    <!-- CSS for Landing Page Animations -->
+    <style>
+        .hero-grad { background: linear-gradient(135deg, #FF4757 0%, #FF6B81 50%, #ffa502 100%); }
+        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.5); box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .float-anim { animation: float 3s ease-in-out infinite; }
+        .pulse-btn { animation: pulse-glow 2s infinite; }
+        
+        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-15px); } 100% { transform: translateY(0px); } }
+        @keyframes pulse-glow { 0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(255, 255, 255, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); } }
+        
+        .feature-icon-box { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; margin-bottom: 10px; }
+    </style>
+
     <!-- Language Toggle -->
     <div style="position: absolute; top: 20px; right: 20px; z-index: 100;">
-        <button onclick="toggleLanguage()" class="btn btn-secondary" style="border-radius: 50px; padding: 8px 16px; font-size: 0.8rem; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border: 2px solid white;">
+        <button onclick="toggleLanguage()" class="btn" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(5px); color: white; border-radius: 50px; padding: 5px 15px; font-size: 0.8rem; border: 1px solid rgba(255,255,255,0.4);">
             <i class="fa-solid fa-language"></i> <span id="lang-btn-txt">සිංහල</span>
         </button>
     </div>
 
-    <!-- Hero Section: The "Modern Business" Vibe -->
-    <div class="hero" style="padding-bottom: 100px; background: linear-gradient(135deg, #2F3542 0%, #57606f 100%); position: relative; overflow: hidden;">
-        <!-- Background Decoration -->
-        <i class="fa-solid fa-chart-line" style="position: absolute; top: 20px; left: 20px; color: white; opacity: 0.05; font-size: 150px;"></i>
-        <i class="fa-solid fa-utensils" style="position: absolute; bottom: 20px; right: 20px; color: white; opacity: 0.05; font-size: 150px;"></i>
-
-        <div style="background: rgba(255,255,255,0.1); width: 80px; height: 80px; border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2);">
-            <i class="fa-solid fa-rocket fa-3x text-white"></i>
-        </div>
+    <!-- 1. HERO SECTION -->
+    <div class="hero hero-grad" style="padding-bottom: 80px; padding-top: 60px; border-radius: 0 0 50px 50px; overflow: visible;">
         
+        <!-- Floating Main Icon -->
+        <div class="float-anim" style="background: white; width: 90px; height: 90px; border-radius: 30px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); transform: rotate(-5deg);">
+            <i class="fa-solid fa-burger fa-3x text-red"></i>
+        </div>
+
         <div class="lang-en">
-            <h1 style="color:white; font-size: 2.2rem; margin-bottom: 10px; line-height: 1.2;">Upgrade Your Business.</h1>
-            <p style="color: #dfe4ea; font-size: 1rem; max-width: 600px; margin: 0 auto; font-weight: 300;">
-                The all-in-one operating system for modern food businesses. <br>Marketing. Operations. Finance.
+            <h1 style="color:white; font-size: 2.5rem; line-height: 1.1; text-shadow: 0 2px 10px rgba(0,0,0,0.1);">Turn Your Food<br>Into Money.</h1>
+            <p style="color: white; font-size: 1.1rem; opacity: 0.95; font-weight: 300; max-width: 500px; margin: 10px auto;">
+                Hotels, Restaurants, or <b>Home Kitchens</b>.<br>Start your business in 2 minutes.
             </p>
         </div>
 
         <div class="lang-si hidden">
-            <h1 style="color:white; font-size: 2rem; margin-bottom: 10px; line-height: 1.2;">ඔබේ ව්‍යාපාරය ඊළඟ පියවරට.</h1>
-            <p style="color: #dfe4ea; font-size: 0.95rem; max-width: 600px; margin: 0 auto; font-weight: 300;">
-                නවීන ආපනශාලා සඳහා වූ සම්පූර්ණ කළමනාකරණ පද්ධතිය.<br>අලෙවිකරණය. මෙහෙයුම්. මූල්‍ය පාලනය.
+            <h1 style="color:white; font-size: 2.2rem; line-height: 1.2; text-shadow: 0 2px 10px rgba(0,0,0,0.1);">රසට උයන අතට<br>සල්ලි මිටියක්.</h1>
+            <p style="color: white; font-size: 1rem; opacity: 0.95; font-weight: 300; max-width: 500px; margin: 10px auto;">
+                ලොකු හෝටලයක් වුනත්, <b>ගෙදර කුස්සියක්</b> වුනත්.<br>විනාඩි 2න් ඔබේම ව්‍යාපාරයක් පටන් ගන්න.
             </p>
         </div>
 
-        <button class="btn mt-2" onclick="authLogin()" style="background:var(--primary); color:white; font-weight:700; border-radius:50px; width: auto; padding: 15px 40px; box-shadow: 0 10px 30px rgba(255, 71, 87, 0.4); border: none;">
-            <span class="lang-en">Start Free Trial</span>
-            <span class="lang-si hidden">නොමිලේ අත්හදා බලන්න</span>
+        <!-- Pulse Button -->
+        <button class="btn pulse-btn mt-2" onclick="authLogin()" style="background: white; color: var(--primary); font-weight: 800; border-radius: 50px; padding: 18px 40px; font-size: 1.1rem; box-shadow: 0 10px 25px rgba(0,0,0,0.2); transform: scale(1.05);">
+            <i class="fa-solid fa-rocket"></i> &nbsp;
+            <span class="lang-en">Start 3-Day Free Trial</span>
+            <span class="lang-si hidden">දින 3ක් නොමිලේ බලන්න</span>
         </button>
+        <div style="color: white; font-size: 0.8rem; margin-top: 10px; opacity: 0.8;">No credit card required</div>
     </div>
 
-    <!-- Main Value Proposition -->
-    <div class="container p-2" style="margin-top: -80px; position: relative; z-index: 5;">
+    <!-- 2. FOR EVERYONE SECTION (Home vs Hotel) -->
+    <div class="container p-2" style="margin-top: -60px; position: relative; z-index: 5;">
         
-        <!-- Intro Card -->
-        <div class="card text-center" style="border: none; box-shadow: 0 20px 40px rgba(0,0,0,0.1);">
-            <div class="lang-en"><h3 style="color: var(--secondary);">More Than Just Delivery</h3></div>
-            <div class="lang-si hidden"><h3 style="color: var(--secondary);">ඩිලිවරි සේවාවකට එහා ගිය තාක්ෂණයක්</h3></div>
-            
-            <p class="text-gray lang-en" style="font-size: 0.9rem;">
-                EatlyHub provides professional tools to manage and grow your restaurant.
-            </p>
-            <p class="text-gray lang-si hidden" style="font-size: 0.9rem;">
-                EatlyHub ඔබට ලබා දෙන්නේ ඔබේ ව්‍යාපාරය දියුණු කිරීමට අවශ්‍ය වෘත්තීය මට්ටමේ මෙවලම් සමූහයකි.
-            </p>
+        <div class="glass-card card" style="text-align: center; border-radius: 25px;">
+            <div class="lang-en"><h3 style="color: var(--secondary); margin-bottom: 5px;">Who is this for?</h3></div>
+            <div class="lang-si hidden"><h3 style="color: var(--secondary); margin-bottom: 5px;">මේ කා සඳහාද?</h3></div>
+            <p class="text-gray" style="font-size: 0.9rem;">EatlyHub fits in your pocket or your POS.</p>
+
+            <div class="flex mt-2" style="gap: 15px;">
+                <!-- Home Based -->
+                <div style="flex: 1; background: #e7f1ff; padding: 15px; border-radius: 20px; border: 2px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.05);">
+                    <div style="font-size: 2rem;">🏠</div>
+                    <h4 class="lang-en" style="font-size: 0.9rem; margin: 5px 0 0;">Home Cooks</h4>
+                    <h4 class="lang-si hidden" style="font-size: 0.9rem; margin: 5px 0 0;">ගෘහණියන්</h4>
+                    <small class="text-blue lang-en">Earn Extra Cash</small>
+                    <small class="text-blue lang-si hidden">අමතර ආදායමක්</small>
+                </div>
+                <!-- Restaurants -->
+                <div style="flex: 1; background: #FFF0F0; padding: 15px; border-radius: 20px; border: 2px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.05);">
+                    <div style="font-size: 2rem;">🏨</div>
+                    <h4 class="lang-en" style="font-size: 0.9rem; margin: 5px 0 0;">Restaurants</h4>
+                    <h4 class="lang-si hidden" style="font-size: 0.9rem; margin: 5px 0 0;">ලොකු හෝටල්</h4>
+                    <small class="text-red lang-en">Manage Like a Pro</small>
+                    <small class="text-red lang-si hidden">වෘත්තීය මට්ටම</small>
+                </div>
+            </div>
         </div>
 
-        <!-- 4 Key Pillars (Grid Layout) -->
-        <div class="lang-en"><h4 style="margin-top: 30px; margin-bottom: 15px; color: #a4b0be; text-transform: uppercase; letter-spacing: 1px; font-size: 0.8rem;">Core Features</h4></div>
-        <div class="lang-si hidden"><h4 style="margin-top: 30px; margin-bottom: 15px; color: #a4b0be; text-transform: uppercase; letter-spacing: 1px; font-size: 0.8rem;">ප්‍රධාන පහසුකම්</h4></div>
+        <!-- 3. POWERFUL FEATURES GRID -->
+        <div class="lang-en"><h2 class="text-center mt-2 mb-1" style="font-size: 1.5rem;">Everything You Need</h2></div>
+        <div class="lang-si hidden"><h2 class="text-center mt-2 mb-1" style="font-size: 1.5rem;">ඔබට අවශ්‍ය සියල්ලම</h2></div>
 
-        <div class="stat-grid" style="gap: 20px;">
+        <div class="stat-grid" style="gap: 15px;">
             
-            <!-- 1. Web Presence -->
-            <div class="card" style="padding: 20px; margin: 0; text-align: center; border-bottom: 4px solid var(--blue);">
-                <div style="background: #e7f1ff; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px;">
-                    <i class="fa-solid fa-globe fa-xl text-blue"></i>
-                </div>
-                <h4 class="lang-en" style="font-size: 1rem;">Your Own Webpage</h4>
-                <h4 class="lang-si hidden" style="font-size: 1rem;">ඔබේම වෙබ් පිටුවක්</h4>
-                <p class="text-gray lang-en" style="font-size: 0.8rem; margin-bottom: 0;">Showcase your menu professionally. Share your link on Facebook & WhatsApp to find new customers.</p>
-                <p class="text-gray lang-si hidden" style="font-size: 0.8rem; margin-bottom: 0;">ඔබේ මෙනුව අලංකාරව පෙන්වන්න. Facebook සහ WhatsApp හරහා බෙදාහැර නව පාරිභෝගිකයින් සොයාගන්න.</p>
+            <!-- Feature 1 -->
+            <div class="card" style="margin: 0; padding: 20px; border-radius: 20px; border-bottom: 5px solid #2ED573;">
+                <div class="feature-icon-box" style="background: #eafff3; color: #2ED573;"><i class="fa-brands fa-whatsapp"></i></div>
+                <b class="lang-en">Direct Orders</b>
+                <b class="lang-si hidden">WhatsApp ඇණවුම්</b>
+                <p class="text-gray" style="font-size: 0.75rem; margin: 5px 0 0;">Get orders straight to your phone.</p>
             </div>
 
-            <!-- 2. Smart POS -->
-            <div class="card" style="padding: 20px; margin: 0; text-align: center; border-bottom: 4px solid var(--green);">
-                <div style="background: #eafff3; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px;">
-                    <i class="fa-solid fa-receipt fa-xl text-green"></i>
-                </div>
-                <h4 class="lang-en" style="font-size: 1rem;">Smart POS & Billing</h4>
-                <h4 class="lang-si hidden" style="font-size: 1rem;">ස්මාර්ට් බිල්පත් පද්ධතිය</h4>
-                <p class="text-gray lang-en" style="font-size: 0.8rem; margin-bottom: 0;">Generate digital bills instantly. No paper needed. Send professional receipts to customers.</p>
-                <p class="text-gray lang-si hidden" style="font-size: 0.8rem; margin-bottom: 0;">ක්ෂණිකව ඩිජිටල් බිල්පත් සකසන්න. කඩදාසි අවශ්‍ය නැත. පාරිභෝගිකයාට පිළිවෙලට බිල්පත යවන්න.</p>
+            <!-- Feature 2 -->
+            <div class="card" style="margin: 0; padding: 20px; border-radius: 20px; border-bottom: 5px solid #1E90FF;">
+                <div class="feature-icon-box" style="background: #e7f1ff; color: #1E90FF;"><i class="fa-solid fa-globe"></i></div>
+                <b class="lang-en">Free Webpage</b>
+                <b class="lang-si hidden">නොමිලේ වෙබ් පිටුවක්</b>
+                <p class="text-gray" style="font-size: 0.75rem; margin: 5px 0 0;">A beautiful menu link to share online.</p>
             </div>
 
-            <!-- 3. Financial Accounts -->
-            <div class="card" style="padding: 20px; margin: 0; text-align: center; border-bottom: 4px solid var(--yellow);">
-                <div style="background: #fff9e6; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px;">
-                    <i class="fa-solid fa-chart-pie fa-xl text-yellow"></i>
-                </div>
-                <h4 class="lang-en" style="font-size: 1rem;">Financial Control</h4>
-                <h4 class="lang-si hidden" style="font-size: 1rem;">මූල්‍ය පාලනය</h4>
-                <p class="text-gray lang-en" style="font-size: 0.8rem; margin-bottom: 0;">Track daily income and expenses. Understand your real profit. Be a smart business owner.</p>
-                <p class="text-gray lang-si hidden" style="font-size: 0.8rem; margin-bottom: 0;">දෛනික ආදායම් සහ වියදම් වාර්තා තබාගන්න. ඔබේ සැබෑ ලාභය හඳුනාගන්න.</p>
+            <!-- Feature 3 -->
+            <div class="card" style="margin: 0; padding: 20px; border-radius: 20px; border-bottom: 5px solid #FFA502;">
+                <div class="feature-icon-box" style="background: #fff9e6; color: #FFA502;"><i class="fa-solid fa-calculator"></i></div>
+                <b class="lang-en">POS System</b>
+                <b class="lang-si hidden">බිල්පත් පද්ධතිය</b>
+                <p class="text-gray" style="font-size: 0.75rem; margin: 5px 0 0;">Create bills & track daily profits.</p>
             </div>
 
-            <!-- 4. Growth -->
-            <div class="card" style="padding: 20px; margin: 0; text-align: center; border-bottom: 4px solid var(--primary);">
-                <div style="background: #fff0f0; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px;">
-                    <i class="fa-solid fa-users fa-xl text-red"></i>
-                </div>
-                <h4 class="lang-en" style="font-size: 1rem;">New Customers</h4>
-                <h4 class="lang-si hidden" style="font-size: 1rem;">නව පාරිභෝගිකයින්</h4>
-                <p class="text-gray lang-en" style="font-size: 0.8rem; margin-bottom: 0;">Get discovered by food lovers on the EatlyHub network. Grow your customer base.</p>
-                <p class="text-gray lang-si hidden" style="font-size: 0.8rem; margin-bottom: 0;">EatlyHub හරහා පැමිණෙන නව පාරිභෝගිකයින්ට ඔබේ ආහාර හඳුන්වා දෙන්න. ව්‍යාපාරය පුළුල් කරන්න.</p>
+            <!-- Feature 4 -->
+            <div class="card" style="margin: 0; padding: 20px; border-radius: 20px; border-bottom: 5px solid #FF4757;">
+                <div class="feature-icon-box" style="background: #fff0f0; color: #FF4757;"><i class="fa-solid fa-users"></i></div>
+                <b class="lang-en">Get Customers</b>
+                <b class="lang-si hidden">පාරිභෝගිකයන්</b>
+                <p class="text-gray" style="font-size: 0.75rem; margin: 5px 0 0;">We show your food to hungry people.</p>
             </div>
-
         </div>
 
-        <!-- The "Price vs Value" Conclusion -->
-        <div class="card mt-2 text-center" style="background: #2F3542; color: white; border-radius: 25px; padding: 30px 20px;">
+        <!-- 4. THE KILLER OFFER (Pricing) -->
+        <div class="card mt-2 text-center" style="background: #2F3542; color: white; border-radius: 30px; padding: 30px 20px; position: relative; overflow: hidden; box-shadow: 0 15px 40px rgba(47, 53, 66, 0.4);">
+            <!-- Background glow -->
+            <div style="position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; background: radial-gradient(circle, rgba(255,71,87,0.4) 0%, rgba(0,0,0,0) 70%);"></div>
+            
+            <div class="status-badge st-new mb-1" style="background: white; color: var(--primary); border: none; font-size: 0.8rem; padding: 5px 15px;">LIMITED OFFER</div>
             
             <div class="lang-en">
-                <h3 style="color: white; margin-bottom: 5px;">A Real Business Investment</h3>
-                <p style="color: #a4b0be; font-size: 0.9rem; margin-bottom: 20px;">Why give away 30% commission? Pay a small service fee for professional tools.</p>
-                
-                <div style="display: inline-block; background: rgba(255,255,255,0.1); padding: 15px 30px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.2);">
-                    <small style="text-transform: uppercase; color: #2ed573; letter-spacing: 1px; font-weight: 700;">Platform Service Fee</small>
-                    <h1 style="color: white; margin: 5px 0; font-size: 2.5rem;">Rs. 1,500</h1>
-                    <small style="color: #dfe4ea;">/ Month</small>
-                </div>
-                
-                <div class="mt-2 text-green">
-                    <i class="fa-solid fa-check-circle"></i> 0% Commission on Food Sales
-                </div>
+                <h2 style="color: white; font-size: 2rem; margin: 0;">Try Before You Pay</h2>
+                <p style="color: #a4b0be; font-size: 0.95rem;">Experience the power of EatlyHub completely free.</p>
             </div>
-
             <div class="lang-si hidden">
-                <h3 style="color: white; margin-bottom: 5px;">ව්‍යාපාරික ආයෝජනයක්</h3>
-                <p style="color: #a4b0be; font-size: 0.9rem; margin-bottom: 20px;">ඔබේ ලාභයෙන් 30% ක් අනුන්ට දෙන්නේ ඇයි? වෘත්තීය තාක්ෂණය සඳහා කුඩා සේවා ගාස්තුවක් පමණක් ගෙවන්න.</p>
-                
-                <div style="display: inline-block; background: rgba(255,255,255,0.1); padding: 15px 30px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.2);">
-                    <small style="text-transform: uppercase; color: #2ed573; letter-spacing: 1px; font-weight: 700;">මාසික සේවා ගාස්තුව</small>
-                    <h1 style="color: white; margin: 5px 0; font-size: 2.5rem;">රු. 1,500</h1>
-                    <small style="color: #dfe4ea;">/ මසකට</small>
+                <h2 style="color: white; font-size: 1.8rem; margin: 0;">සල්ලි ගෙවන්න කලින්<br>පාවිච්චි කරලා බලන්න</h2>
+                <p style="color: #a4b0be; font-size: 0.95rem;">මුලින්ම දවස් 3ක් සම්පූර්ණයෙන්ම නොමිලේ.</p>
+            </div>
+
+            <div style="background: rgba(255,255,255,0.1); border-radius: 20px; padding: 20px; margin: 20px 0; border: 1px solid rgba(255,255,255,0.1);">
+                <div class="flex justify-between center mb-1">
+                    <span style="color: #dfe4ea;">Trial Period</span>
+                    <span class="text-green bold">3 Days FREE</span>
                 </div>
-                
-                <div class="mt-2 text-green">
-                    <i class="fa-solid fa-check-circle"></i> ආහාර විකිණීමෙන් කොමිස් අයකිරීමක් නැත
+                <div class="flex justify-between center" style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px;">
+                    <span style="color: #dfe4ea;">Monthly Fee</span>
+                    <span style="color: white; font-weight: 800; font-size: 1.2rem;">Rs. 1,500</span>
                 </div>
             </div>
 
-            <button class="btn btn-green mt-2" onclick="authLogin()" style="font-size: 1.1rem; padding: 15px; width: 100%; max-width: 300px;">
-                <span class="lang-en">Start My Business</span>
-                <span class="lang-si hidden">මගේ ව්‍යාපාරය අරඹන්න</span>
+            <button class="btn btn-primary" onclick="authLogin()" style="width: 100%; padding: 16px; font-size: 1.1rem; border-radius: 15px;">
+                <span class="lang-en">Start My 3-Day Free Trial</span>
+                <span class="lang-si hidden">නොමිලේ පටන් ගන්න</span>
             </button>
+            <div class="mt-1" style="font-size: 0.8rem; color: #a4b0be;">Cancel anytime. No contracts.</div>
         </div>
 
     </div>
-    <div class="text-center p-2 text-gray" style="font-size:0.75rem; padding-bottom: 40px;">Powered by EatlyHub © 2025</div>
+
+    <!-- Footer -->
+    <div class="text-center p-2 text-gray" style="font-size:0.75rem; padding-bottom: 40px; margin-top: 20px;">
+        Powered by <b class="text-red">EatlyHub</b> © 2025
+    </div>
 </template>
+    
 <!-- 2. DASHBOARD SHELL (User & Admin) -->
 <template id="tpl-dashboard">
     <nav>

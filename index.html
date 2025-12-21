@@ -397,167 +397,189 @@
 
 <!-- ================= TEMPLATES ================= -->
 
-<!-- 1. LANDING PAGE (ULTIMATE WOW EDITION) -->
+<!-- 1. LANDING PAGE (PERFECTED UI EDITION) -->
 <template id="tpl-landing">
     
-    <!-- CSS for Landing Page Animations -->
     <style>
-        .hero-grad { background: linear-gradient(135deg, #FF4757 0%, #FF6B81 50%, #ffa502 100%); }
-        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.5); box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-        .float-anim { animation: float 3s ease-in-out infinite; }
-        .pulse-btn { animation: pulse-glow 2s infinite; }
+        /* --- LANDING PAGE SPECIFIC CSS --- */
+        .hero-bg { background: linear-gradient(135deg, #FF4757 0%, #FF6B81 100%); }
+        .glass-panel { background: rgba(255, 255, 255, 0.95); border-radius: 24px; box-shadow: 0 15px 40px rgba(0,0,0,0.08); border: 1px solid rgba(255,255,255,0.6); }
         
-        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-15px); } 100% { transform: translateY(0px); } }
-        @keyframes pulse-glow { 0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(255, 255, 255, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); } }
+        /* Typography Boost */
+        .big-title { font-size: 2.8rem; line-height: 1.1; font-weight: 800; letter-spacing: -1px; text-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .sub-text { font-size: 1.1rem; opacity: 0.95; font-weight: 400; line-height: 1.5; }
         
-        .feature-icon-box { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; margin-bottom: 10px; }
+        /* Button Upgrades */
+        .btn-xl { padding: 18px 30px; font-size: 1.2rem; border-radius: 18px; font-weight: 700; box-shadow: 0 10px 25px rgba(255, 71, 87, 0.3); transition: transform 0.2s; }
+        .btn-xl:active { transform: scale(0.96); }
+        
+        /* Animation */
+        .bounce-slow { animation: bounce 3s infinite; }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        .pulse-ring { animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(46, 213, 115, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(46, 213, 115, 0); } 100% { box-shadow: 0 0 0 0 rgba(46, 213, 115, 0); } }
+
+        /* Comparison Bar */
+        .vs-bar { display: flex; height: 12px; border-radius: 6px; overflow: hidden; margin: 15px 0; }
+        .vs-left { width: 30%; background: #ff4757; }
+        .vs-right { width: 70%; background: #2ed573; }
     </style>
 
     <!-- Language Toggle -->
-    <div style="position: absolute; top: 20px; right: 20px; z-index: 100;">
-        <button onclick="toggleLanguage()" class="btn" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(5px); color: white; border-radius: 50px; padding: 5px 15px; font-size: 0.8rem; border: 1px solid rgba(255,255,255,0.4);">
+    <div style="position: absolute; top: 25px; right: 25px; z-index: 100;">
+        <button onclick="toggleLanguage()" class="btn" style="background: rgba(255,255,255,0.25); backdrop-filter: blur(5px); color: white; border-radius: 50px; padding: 8px 20px; font-size: 0.9rem; border: 1px solid rgba(255,255,255,0.4); font-weight: 600;">
             <i class="fa-solid fa-language"></i> <span id="lang-btn-txt">සිංහල</span>
         </button>
     </div>
 
     <!-- 1. HERO SECTION -->
-    <div class="hero hero-grad" style="padding-bottom: 80px; padding-top: 60px; border-radius: 0 0 50px 50px; overflow: visible;">
+    <div class="hero hero-bg" style="padding-bottom: 100px; padding-top: 70px; border-radius: 0 0 60px 60px; position: relative;">
         
-        <!-- Floating Main Icon -->
-        <div class="float-anim" style="background: white; width: 90px; height: 90px; border-radius: 30px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); transform: rotate(-5deg);">
-            <i class="fa-solid fa-burger fa-3x text-red"></i>
+        <!-- Floating Icon -->
+        <div class="bounce-slow" style="background: white; width: 100px; height: 100px; border-radius: 35px; display: flex; align-items: center; justify-content: center; margin: 0 auto 25px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); transform: rotate(-6deg);">
+            <i class="fa-solid fa-sack-dollar fa-4x text-red"></i>
         </div>
 
         <div class="lang-en">
-            <h1 style="color:white; font-size: 2.5rem; line-height: 1.1; text-shadow: 0 2px 10px rgba(0,0,0,0.1);">Turn Your Food<br>Into Money.</h1>
-            <p style="color: white; font-size: 1.1rem; opacity: 0.95; font-weight: 300; max-width: 500px; margin: 10px auto;">
-                Hotels, Restaurants, or <b>Home Kitchens</b>.<br>Start your business in 2 minutes.
+            <h1 class="big-title" style="color:white; margin-bottom: 15px;">Keep 100%<br>Profit.</h1>
+            <p class="sub-text" style="color: white; max-width: 500px; margin: 0 auto;">
+                All-in-One Food Delivery Platform.<br>
+                <span style="background: rgba(0,0,0,0.2); padding: 2px 10px; border-radius: 8px;">Hotels</span> & 
+                <span style="background: rgba(0,0,0,0.2); padding: 2px 10px; border-radius: 8px;">Home Cooks</span>
             </p>
         </div>
 
         <div class="lang-si hidden">
-            <h1 style="color:white; font-size: 2.2rem; line-height: 1.2; text-shadow: 0 2px 10px rgba(0,0,0,0.1);">රසට උයන අතට<br>සල්ලි මිටියක්.</h1>
-            <p style="color: white; font-size: 1rem; opacity: 0.95; font-weight: 300; max-width: 500px; margin: 10px auto;">
-                ලොකු හෝටලයක් වුනත්, <b>ගෙදර කුස්සියක්</b> වුනත්.<br>විනාඩි 2න් ඔබේම ව්‍යාපාරයක් පටන් ගන්න.
+            <h1 class="big-title" style="color:white; margin-bottom: 15px;">ලාභය 100%ක්<br>ඔබටමයි.</h1>
+            <p class="sub-text" style="color: white; max-width: 500px; margin: 0 auto;">
+                හෝටල් සහ ගෘහස්ථ ව්‍යාපාර සඳහාම සැකසූ<br>නවීන තාක්ෂණය.
             </p>
         </div>
-
-        <!-- Pulse Button -->
-        <button class="btn pulse-btn mt-2" onclick="authLogin()" style="background: white; color: var(--primary); font-weight: 800; border-radius: 50px; padding: 18px 40px; font-size: 1.1rem; box-shadow: 0 10px 25px rgba(0,0,0,0.2); transform: scale(1.05);">
-            <i class="fa-solid fa-rocket"></i> &nbsp;
-            <span class="lang-en">Start 3-Day Free Trial</span>
-            <span class="lang-si hidden">දින 3ක් නොමිලේ බලන්න</span>
-        </button>
-        <div style="color: white; font-size: 0.8rem; margin-top: 10px; opacity: 0.8;">No credit card required</div>
     </div>
 
-    <!-- 2. FOR EVERYONE SECTION (Home vs Hotel) -->
-    <div class="container p-2" style="margin-top: -60px; position: relative; z-index: 5;">
+    <!-- 2. THE COMPARISON (THE MONEY MAKER) -->
+    <div class="container p-2" style="margin-top: -80px; position: relative; z-index: 5;">
         
-        <div class="glass-card card" style="text-align: center; border-radius: 25px;">
-            <div class="lang-en"><h3 style="color: var(--secondary); margin-bottom: 5px;">Who is this for?</h3></div>
-            <div class="lang-si hidden"><h3 style="color: var(--secondary); margin-bottom: 5px;">මේ කා සඳහාද?</h3></div>
-            <p class="text-gray" style="font-size: 0.9rem;">EatlyHub fits in your pocket or your POS.</p>
+        <div class="glass-panel" style="padding: 25px;">
+            <div class="lang-en"><h2 class="text-center" style="margin: 0 0 20px 0; color: var(--secondary);">Why Lose Money?</h2></div>
+            <div class="lang-si hidden"><h2 class="text-center" style="margin: 0 0 20px 0; color: var(--secondary);">ඇයි පාඩු ලබන්නේ?</h2></div>
 
-            <div class="flex mt-2" style="gap: 15px;">
-                <!-- Home Based -->
-                <div style="flex: 1; background: #e7f1ff; padding: 15px; border-radius: 20px; border: 2px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.05);">
-                    <div style="font-size: 2rem;">🏠</div>
-                    <h4 class="lang-en" style="font-size: 0.9rem; margin: 5px 0 0;">Home Cooks</h4>
-                    <h4 class="lang-si hidden" style="font-size: 0.9rem; margin: 5px 0 0;">ගෘහණියන්</h4>
-                    <small class="text-blue lang-en">Earn Extra Cash</small>
-                    <small class="text-blue lang-si hidden">අමතර ආදායමක්</small>
+            <!-- Visual Battle -->
+            <div class="flex flex-col" style="gap: 15px;">
+                
+                <!-- Competitors -->
+                <div style="background: #fff0f0; padding: 20px; border-radius: 20px; border: 2px solid #ff4757; position: relative;">
+                    <div style="position: absolute; top: -10px; left: 15px; background: #ff4757; color: white; padding: 2px 12px; border-radius: 10px; font-size: 0.75rem; font-weight: 700;">OTHER APPS</div>
+                    <div class="flex justify-between center">
+                        <span class="bold" style="font-size: 1.1rem; color: #57606f;">They Take</span>
+                        <span class="bold" style="font-size: 1.8rem; color: #ff4757;">30%</span>
+                    </div>
+                    <div class="lang-en text-gray" style="font-size: 0.85rem;">Commission on EVERY order.</div>
+                    <div class="lang-si text-gray hidden" style="font-size: 0.85rem;">සෑම ඇණවුමකින්ම 30% කපා ගනී.</div>
                 </div>
-                <!-- Restaurants -->
-                <div style="flex: 1; background: #FFF0F0; padding: 15px; border-radius: 20px; border: 2px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.05);">
-                    <div style="font-size: 2rem;">🏨</div>
-                    <h4 class="lang-en" style="font-size: 0.9rem; margin: 5px 0 0;">Restaurants</h4>
-                    <h4 class="lang-si hidden" style="font-size: 0.9rem; margin: 5px 0 0;">ලොකු හෝටල්</h4>
-                    <small class="text-red lang-en">Manage Like a Pro</small>
-                    <small class="text-red lang-si hidden">වෘත්තීය මට්ටම</small>
+
+                <!-- EatlyHub -->
+                <div style="background: #eafff3; padding: 25px 20px; border-radius: 20px; border: 2px solid #2ed573; position: relative; box-shadow: 0 10px 30px rgba(46, 213, 115, 0.2);">
+                    <div style="position: absolute; top: -12px; left: 15px; background: #2ed573; color: white; padding: 4px 15px; border-radius: 10px; font-size: 0.85rem; font-weight: 800;">EATLYHUB</div>
+                    <div class="flex justify-between center">
+                        <span class="bold" style="font-size: 1.2rem; color: var(--secondary);">You Keep</span>
+                        <span class="bold" style="font-size: 2.2rem; color: #2ed573;">100%</span>
+                    </div>
+                    <div class="lang-en bold text-green" style="font-size: 1rem;">NO COMMISSIONS. EVER.</div>
+                    <div class="lang-si bold text-green hidden" style="font-size: 1rem;">කොමිස් මුදල් නැත. සම්පූර්ණ ලාභය ඔබට.</div>
                 </div>
+
+            </div>
+
+            <!-- Unlimited Badge -->
+            <div class="mt-2 text-center" style="background: #f1f2f6; padding: 15px; border-radius: 15px;">
+                <i class="fa-solid fa-infinity fa-2x text-blue"></i>
+                <h3 class="lang-en" style="margin: 5px 0 0 0; color: var(--secondary);">UNLIMITED ORDERS</h3>
+                <h3 class="lang-si hidden" style="margin: 5px 0 0 0; color: var(--secondary);">ඇණවුම් අසීමිතයි</h3>
+                <p class="text-gray" style="margin: 0; font-size: 0.9rem;">No limits on sales. No hidden fees.</p>
             </div>
         </div>
 
-        <!-- 3. POWERFUL FEATURES GRID -->
-        <div class="lang-en"><h2 class="text-center mt-2 mb-1" style="font-size: 1.5rem;">Everything You Need</h2></div>
-        <div class="lang-si hidden"><h2 class="text-center mt-2 mb-1" style="font-size: 1.5rem;">ඔබට අවශ්‍ය සියල්ලම</h2></div>
-
-        <div class="stat-grid" style="gap: 15px;">
-            
-            <!-- Feature 1 -->
-            <div class="card" style="margin: 0; padding: 20px; border-radius: 20px; border-bottom: 5px solid #2ED573;">
-                <div class="feature-icon-box" style="background: #eafff3; color: #2ED573;"><i class="fa-brands fa-whatsapp"></i></div>
-                <b class="lang-en">Direct Orders</b>
-                <b class="lang-si hidden">WhatsApp ඇණවුම්</b>
-                <p class="text-gray" style="font-size: 0.75rem; margin: 5px 0 0;">Get orders straight to your phone.</p>
-            </div>
-
-            <!-- Feature 2 -->
-            <div class="card" style="margin: 0; padding: 20px; border-radius: 20px; border-bottom: 5px solid #1E90FF;">
-                <div class="feature-icon-box" style="background: #e7f1ff; color: #1E90FF;"><i class="fa-solid fa-globe"></i></div>
-                <b class="lang-en">Free Webpage</b>
-                <b class="lang-si hidden">නොමිලේ වෙබ් පිටුවක්</b>
-                <p class="text-gray" style="font-size: 0.75rem; margin: 5px 0 0;">A beautiful menu link to share online.</p>
-            </div>
-
-            <!-- Feature 3 -->
-            <div class="card" style="margin: 0; padding: 20px; border-radius: 20px; border-bottom: 5px solid #FFA502;">
-                <div class="feature-icon-box" style="background: #fff9e6; color: #FFA502;"><i class="fa-solid fa-calculator"></i></div>
-                <b class="lang-en">POS System</b>
-                <b class="lang-si hidden">බිල්පත් පද්ධතිය</b>
-                <p class="text-gray" style="font-size: 0.75rem; margin: 5px 0 0;">Create bills & track daily profits.</p>
-            </div>
-
-            <!-- Feature 4 -->
-            <div class="card" style="margin: 0; padding: 20px; border-radius: 20px; border-bottom: 5px solid #FF4757;">
-                <div class="feature-icon-box" style="background: #fff0f0; color: #FF4757;"><i class="fa-solid fa-users"></i></div>
-                <b class="lang-en">Get Customers</b>
-                <b class="lang-si hidden">පාරිභෝගිකයන්</b>
-                <p class="text-gray" style="font-size: 0.75rem; margin: 5px 0 0;">We show your food to hungry people.</p>
-            </div>
-        </div>
-
-        <!-- 4. THE KILLER OFFER (Pricing) -->
-        <div class="card mt-2 text-center" style="background: #2F3542; color: white; border-radius: 30px; padding: 30px 20px; position: relative; overflow: hidden; box-shadow: 0 15px 40px rgba(47, 53, 66, 0.4);">
-            <!-- Background glow -->
-            <div style="position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; background: radial-gradient(circle, rgba(255,71,87,0.4) 0%, rgba(0,0,0,0) 70%);"></div>
-            
-            <div class="status-badge st-new mb-1" style="background: white; color: var(--primary); border: none; font-size: 0.8rem; padding: 5px 15px;">LIMITED OFFER</div>
-            
-            <div class="lang-en">
-                <h2 style="color: white; font-size: 2rem; margin: 0;">Try Before You Pay</h2>
-                <p style="color: #a4b0be; font-size: 0.95rem;">Experience the power of EatlyHub completely free.</p>
-            </div>
-            <div class="lang-si hidden">
-                <h2 style="color: white; font-size: 1.8rem; margin: 0;">සල්ලි ගෙවන්න කලින්<br>පාවිච්චි කරලා බලන්න</h2>
-                <p style="color: #a4b0be; font-size: 0.95rem;">මුලින්ම දවස් 3ක් සම්පූර්ණයෙන්ම නොමිලේ.</p>
-            </div>
-
-            <div style="background: rgba(255,255,255,0.1); border-radius: 20px; padding: 20px; margin: 20px 0; border: 1px solid rgba(255,255,255,0.1);">
-                <div class="flex justify-between center mb-1">
-                    <span style="color: #dfe4ea;">Trial Period</span>
-                    <span class="text-green bold">3 Days FREE</span>
-                </div>
-                <div class="flex justify-between center" style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px;">
-                    <span style="color: #dfe4ea;">Monthly Fee</span>
-                    <span style="color: white; font-weight: 800; font-size: 1.2rem;">Rs. 1,500</span>
-                </div>
-            </div>
-
-            <button class="btn btn-primary" onclick="authLogin()" style="width: 100%; padding: 16px; font-size: 1.1rem; border-radius: 15px;">
-                <span class="lang-en">Start My 3-Day Free Trial</span>
-                <span class="lang-si hidden">නොමිලේ පටන් ගන්න</span>
+        <!-- 3. MAIN ACTION BUTTON -->
+        <div class="mt-2 text-center">
+            <button class="btn btn-xl btn-primary pulse-ring w-100" onclick="authLogin()" style="background: #2ed573; box-shadow: 0 10px 30px rgba(46, 213, 115, 0.4);">
+                <i class="fa-brands fa-whatsapp"></i> 
+                <span class="lang-en">Start Free Trial</span>
+                <span class="lang-si hidden">නොමිලේ අරඹන්න</span>
             </button>
-            <div class="mt-1" style="font-size: 0.8rem; color: #a4b0be;">Cancel anytime. No contracts.</div>
+            <div class="mt-1 bold text-gray" style="font-size: 0.9rem;">
+                <span class="lang-en">3 Days Free • Then Rs. 1500/mo</span>
+                <span class="lang-si hidden">දින 3ක් නොමිලේ • පසුව රු. 1500/මසකට</span>
+            </div>
+        </div>
+
+        <!-- 4. FEATURES GRID -->
+        <div class="lang-en"><h2 class="text-center mt-2 mb-1" style="font-size: 1.6rem; color: var(--secondary);">Why We Are Better?</h2></div>
+        <div class="lang-si hidden"><h2 class="text-center mt-2 mb-1" style="font-size: 1.6rem; color: var(--secondary);">අපේ විශේෂත්වය</h2></div>
+
+        <div class="stat-grid" style="grid-template-columns: 1fr; gap: 20px;">
+            
+            <!-- Webpage Feature -->
+            <div class="card" style="margin: 0; padding: 25px; border-radius: 20px; display: flex; align-items: center; gap: 20px;">
+                <div style="width: 60px; height: 60px; background: #e7f1ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: #1E90FF;">
+                    <i class="fa-solid fa-globe"></i>
+                </div>
+                <div>
+                    <h3 class="lang-en" style="margin: 0; font-size: 1.2rem;">Free Webpage</h3>
+                    <h3 class="lang-si hidden" style="margin: 0; font-size: 1.2rem;">නොමිලේ වෙබ් පිටුවක්</h3>
+                    <p class="lang-en text-gray" style="margin: 5px 0 0; font-size: 0.9rem;">Share your menu on Facebook & WhatsApp.</p>
+                    <p class="lang-si hidden text-gray" style="margin: 5px 0 0; font-size: 0.9rem;">Facebook සහ WhatsApp හි බෙදාගන්න.</p>
+                </div>
+            </div>
+
+            <!-- POS Feature -->
+            <div class="card" style="margin: 0; padding: 25px; border-radius: 20px; display: flex; align-items: center; gap: 20px;">
+                <div style="width: 60px; height: 60px; background: #fff9e6; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: #FFA502;">
+                    <i class="fa-solid fa-calculator"></i>
+                </div>
+                <div>
+                    <h3 class="lang-en" style="margin: 0; font-size: 1.2rem;">Smart Billing</h3>
+                    <h3 class="lang-si hidden" style="margin: 0; font-size: 1.2rem;">බිල්පත් පද්ධතිය</h3>
+                    <p class="lang-en text-gray" style="margin: 5px 0 0; font-size: 0.9rem;">Create digital bills instantly. No paper needed.</p>
+                    <p class="lang-si hidden text-gray" style="margin: 5px 0 0; font-size: 0.9rem;">ක්ෂණිකව ඩිජිටල් බිල්පත් සකසන්න.</p>
+                </div>
+            </div>
+
+            <!-- Financials Feature -->
+            <div class="card" style="margin: 0; padding: 25px; border-radius: 20px; display: flex; align-items: center; gap: 20px;">
+                <div style="width: 60px; height: 60px; background: #eafff3; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: #2ED573;">
+                    <i class="fa-solid fa-chart-line"></i>
+                </div>
+                <div>
+                    <h3 class="lang-en" style="margin: 0; font-size: 1.2rem;">Track Profits</h3>
+                    <h3 class="lang-si hidden" style="margin: 0; font-size: 1.2rem;">ලාභ/අලාභ වාර්තා</h3>
+                    <p class="lang-en text-gray" style="margin: 5px 0 0; font-size: 0.9rem;">See your daily income & expenses easily.</p>
+                    <p class="lang-si hidden text-gray" style="margin: 5px 0 0; font-size: 0.9rem;">දෛනික ආදායම් වියදම් බලාගන්න.</p>
+                </div>
+            </div>
+
+             <!-- Customers Feature -->
+             <div class="card" style="margin: 0; padding: 25px; border-radius: 20px; display: flex; align-items: center; gap: 20px;">
+                <div style="width: 60px; height: 60px; background: #fff0f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: #ff4757;">
+                    <i class="fa-solid fa-users"></i>
+                </div>
+                <div>
+                    <h3 class="lang-en" style="margin: 0; font-size: 1.2rem;">New Customers</h3>
+                    <h3 class="lang-si hidden" style="margin: 0; font-size: 1.2rem;">නව පාරිභෝගිකයින්</h3>
+                    <p class="lang-en text-gray" style="margin: 5px 0 0; font-size: 0.9rem;">Get discovered by food lovers near you.</p>
+                    <p class="lang-si hidden text-gray" style="margin: 5px 0 0; font-size: 0.9rem;">අවට සිටින පාරිභෝගිකයින් සොයාගන්න.</p>
+                </div>
+            </div>
+
         </div>
 
     </div>
 
-    <!-- Footer -->
-    <div class="text-center p-2 text-gray" style="font-size:0.75rem; padding-bottom: 40px; margin-top: 20px;">
+    <!-- 5. FOOTER -->
+    <div class="text-center p-2 text-gray" style="font-size:0.85rem; padding-bottom: 50px; margin-top: 20px; border-top: 1px solid #eee;">
         Powered by <b class="text-red">EatlyHub</b> © 2025
     </div>
+
 </template>
     
 <!-- 2. DASHBOARD SHELL (User & Admin) -->

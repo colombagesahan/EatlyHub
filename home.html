@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EatlyHub | Food Delivery Ecosystem</title>
+    
+    <!-- Meta Tags -->
+    <meta name="theme-color" content="#FF4757">
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3075/3075977.png">
+
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Firebase SDKs (Same version as index.html for compatibility) -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+
+    <style>
+        :root {
+            --primary: #FF4757;
+            --primary-dark: #e84118;
+            --secondary: #2F3542;
+            --bg-body: #F4F7FC;
+            --surface: #FFFFFF;
+            --grad-primary: linear-gradient(135deg, #FF4757 0%, #FF6B81 100%);
+            --grad-dark: linear-gradient(135deg, #2F3542 0%, #404b5a 100%);
+            --shadow-card: 0 10px 30px rgba(0,0,0,0.08);
+            --font: 'Poppins', sans-serif;
+            --radius: 16px;
+        }
+
+        * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; padding: 0; font-family: var(--font); background: var(--bg-body); color: var(--secondary); overflow-x: hidden; }
+        a { text-decoration: none; color: inherit; transition: 0.3s; }
+        ul { list-style: none; padding: 0; }
+
+        /* --- NAVIGATION --- */
+        nav {
+            position: fixed; top: 0; width: 100%; z-index: 1000;
+            background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);
+            padding: 15px 5%; display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        }
+        .logo { font-size: 1.5rem; font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 8px; }
+        .nav-links { display: flex; gap: 20px; align-items: center; }
+        
+        .btn { padding: 10px 24px; border-radius: 50px; font-weight: 600; border: none; cursor: pointer; transition: transform 0.2s; font-size: 0.9rem; }
+        .btn:active { transform: scale(0.96); }
+        .btn-primary { background: var(--grad-primary); color: white; box-shadow: 0 5px 15px rgba(255, 71, 87, 0.3); }
+        .btn-outline { border: 2px solid var(--primary); color: var(--primary); background: transparent; }
+        .btn-dark { background: var(--secondary); color: white; }
+
+        /* --- HERO SECTION --- */
+        .hero {
+            position: relative; min-height: 90vh; display: flex; align-items: center;
+            padding: 100px 5% 50px; overflow: hidden;
+            background: radial-gradient(circle at top right, #fff0f0 0%, #ffffff 60%);
+        }
+        .hero-content { flex: 1; z-index: 2; max-width: 600px; animation: slideInLeft 0.8s ease; }
+        .hero-img { flex: 1; position: relative; z-index: 2; text-align: center; animation: float 6s ease-in-out infinite; }
+        .hero-img img { max-width: 100%; width: 550px; drop-shadow: 0 20px 40px rgba(0,0,0,0.15); }
+        
+        h1.hero-title { font-size: 3.5rem; line-height: 1.1; margin-bottom: 20px; color: var(--secondary); }
+        h1.hero-title span { color: var(--primary); }
+        p.hero-sub { font-size: 1.1rem; color: #747d8c; margin-bottom: 30px; line-height: 1.6; }
+
+        /* Role Cards in Hero */
+        .role-selector { display: flex; gap: 15px; margin-top: 30px; flex-wrap: wrap; }
+        .role-btn {
+            display: flex; align-items: center; gap: 10px; padding: 15px 25px;
+            background: white; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            border: 2px solid transparent; cursor: pointer; transition: 0.3s;
+        }
+        .role-btn:hover { border-color: var(--primary); transform: translateY(-5px); }
+        .role-btn i { font-size: 1.2rem; color: var(--primary); }
+        .role-btn div { text-align: left; }
+        .role-btn strong { display: block; font-size: 0.9rem; }
+        .role-btn small { font-size: 0.75rem; color: #a4b0be; }
+
+        /* --- LIVE FOOD FEED --- */
+        .feed-section { padding: 60px 5%; }
+        .section-header { text-align: center; margin-bottom: 40px; }
+        .section-header h2 { font-size: 2.5rem; margin-bottom: 10px; }
+        .section-header p { color: #747d8c; max-width: 600px; margin: 0 auto; }
+
+        .food-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+        }
+
+        .food-card {
+            background: white; border-radius: 20px; overflow: hidden;
+            box-shadow: var(--shadow-card); transition: all 0.3s ease;
+            position: relative; border: 1px solid #f1f2f6;
+            display: flex; flex-direction: column;
+        }
+        .food-card:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(255, 71, 87, 0.15); }
+        
+        .card-img { width: 100%; height: 180px; object-fit: cover; }
+        .card-body { padding: 20px; flex: 1; display: flex; flex-direction: column; }
+        .card-cat { font-size: 0.75rem; color: #a4b0be; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+        .card-title { font-size: 1.1rem; font-weight: 700; margin: 5px 0; color: var(--secondary); }
+        .card-biz { display: flex; align-items: center; gap: 8px; margin-bottom: 15px; font-size: 0.85rem; color: #57606f; }
+        .card-biz img { width: 20px; height: 20px; border-radius: 50%; }
+        
+        .card-footer { margin-top: auto; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f1f2f6; padding-top: 15px; }
+        .price { font-size: 1.2rem; font-weight: 800; color: var(--primary); }
+        .btn-sm { padding: 8px 16px; font-size: 0.8rem; }
+
+        /* --- FOOTER --- */
+        footer { background: var(--secondary); color: white; padding: 60px 5% 20px; }
+        .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 40px; margin-bottom: 40px; }
+        .footer-col h3 { color: var(--primary); margin-bottom: 20px; }
+        .footer-col ul li { margin-bottom: 10px; }
+        .footer-col ul li a { color: #dfe4ea; }
+        .footer-col ul li a:hover { color: var(--primary); padding-left: 5px; }
+        .social-links a { display: inline-flex; width: 40px; height: 40px; background: rgba(255,255,255,0.1); border-radius: 50%; align-items: center; justify-content: center; margin-right: 10px; }
+        .social-links a:hover { background: var(--primary); }
+        .copyright { text-align: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; color: #a4b0be; font-size: 0.85rem; }
+
+        /* --- LOADING & MODALS --- */
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; width: 40px; height: 40px; animation: spin 0.8s linear infinite; margin: 50px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+        @keyframes slideInLeft { from { opacity: 0; transform: translateX(-50px); } to { opacity: 1; transform: translateX(0); } }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .hero { flex-direction: column-reverse; text-align: center; padding-top: 80px; }
+            .hero-img { width: 100%; margin-bottom: 30px; }
+            .hero-img img { width: 80%; }
+            h1.hero-title { font-size: 2.5rem; }
+            .role-selector { justify-content: center; }
+        }
+        @media (max-width: 500px) {
+            .nav-links { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <nav>
+        <div class="logo">
+            <i class="fa-solid fa-utensils"></i> EatlyHub
+        </div>
+        <div class="nav-links">
+            <a href="#feed">Explore Food</a>
+            <a href="index.html">For Merchants</a>
+            <a href="riders.html">For Riders</a>
+            <button onclick="loginCustomer()" class="btn btn-primary">Login</button>
+        </div>
+        <!-- Mobile Menu Icon could go here -->
+    </nav>
+
+    <!-- HERO SECTION -->
+    <section class="hero">
+        <div class="hero-content">
+            <div style="display:inline-block; background:#FFE3E3; color:var(--primary); padding:5px 15px; border-radius:50px; font-weight:700; font-size:0.8rem; margin-bottom:15px;">
+                🚀 #1 Food Platform in Sri Lanka
+            </div>
+            <h1 class="hero-title">Delicious Food,<br> <span>Delivered To You.</span></h1>
+            <p class="hero-sub">Whether you are hungry, running a restaurant, or looking to earn money by delivering, EatlyHub is the place for you.</p>
+
+            <!-- THE 3 ACCOUNT TYPES -->
+            <div class="role-selector">
+                
+                <!-- 1. CUSTOMER -->
+                <div class="role-btn" onclick="scrollToFeed()">
+                    <i class="fa-solid fa-burger fa-2x"></i>
+                    <div>
+                        <strong>Order Food</strong>
+                        <small>Customers</small>
+                    </div>
+                </div>
+
+                <!-- 2. MERCHANT (Links to index.html) -->
+                <a href="index.html" class="role-btn">
+                    <i class="fa-solid fa-store fa-2x"></i>
+                    <div>
+                        <strong>Sell Food</strong>
+                        <small>Restaurants & Home Cooks</small>
+                    </div>
+                </a>
+
+                <!-- 3. RIDER (Links to riders.html) -->
+                <a href="riders.html" class="role-btn">
+                    <i class="fa-solid fa-motorcycle fa-2x"></i>
+                    <div>
+                        <strong>Deliver</strong>
+                        <small>Join as Rider</small>
+                    </div>
+                </a>
+
+            </div>
+        </div>
+
+        <div class="hero-img">
+            <!-- Using a high quality food illustration -->
+            <img src="https://cdn3d.iconscout.com/3d/premium/thumb/burger-5582991-4672049.png" alt="Delicious Food">
+        </div>
+    </section>
+
+    <!-- LIVE FOOD FEED -->
+    <section id="feed" class="feed-section">
+        <div class="section-header">
+            <h2>Trending Now 🔥</h2>
+            <p>Direct from local restaurants and home kitchens. We give every chef a reasonable opportunity to shine. Support local businesses!</p>
+        </div>
+
+        <div id="food-loader" class="loader"></div>
+        <div id="food-grid" class="food-grid">
+            <!-- Items injected via JS -->
+        </div>
+        
+        <div style="text-align: center; margin-top: 50px;">
+            <button onclick="loadFoods()" class="btn btn-outline">Load More</button>
+        </div>
+    </section>
+
+    <!-- BANNER -->
+    <section style="background: var(--primary); color: white; padding: 50px 5%; text-align: center; margin: 20px 5%; border-radius: 20px;">
+        <h2>Ready to grow your business?</h2>
+        <p style="margin: 10px 0 25px; opacity: 0.9;">Create your online store in 2 minutes. Free web page, billing system, and unlimited orders.</p>
+        <a href="index.html" class="btn" style="background: white; color: var(--primary);">Start Selling Free</a>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-col">
+                <h3>EatlyHub</h3>
+                <p style="color: #a4b0be; font-size: 0.9rem;">Connecting food lovers with the best local flavors. The fairest platform for merchants.</p>
+                <div class="social-links mt-2">
+                    <a href="#"><i class="fa-brands fa-facebook-f"></i></a>
+                    <a href="#"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="#"><i class="fa-brands fa-tiktok"></i></a>
+                </div>
+            </div>
+            <div class="footer-col">
+                <h3>Accounts</h3>
+                <ul>
+                    <li><a href="#" onclick="loginCustomer()">Customer Login</a></li>
+                    <li><a href="index.html">Merchant Login</a></li>
+                    <li><a href="riders.html">Rider Login</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h3>Company</h3>
+                <ul>
+                    <li><a href="#">About Us</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Terms of Service</a></li>
+                    <li><a href="#">Contact Support</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h3>Newsletter</h3>
+                <p style="font-size:0.85rem; color:#a4b0be;">Get discounts and updates.</p>
+                <div style="display:flex; margin-top:10px;">
+                    <input type="email" placeholder="Email" style="padding:10px; border-radius:8px 0 0 8px; border:none; width:100%;">
+                    <button style="background:var(--primary); color:white; border:none; padding:0 15px; border-radius:0 8px 8px 0;"><i class="fa-solid fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </div>
+        <div class="copyright">
+            &copy; 2025 EatlyHub Technologies. All Rights Reserved.
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // 1. FIREBASE CONFIG (MUST MATCH INDEX.HTML)
+        const firebaseConfig = {
+          apiKey: "AIzaSyA4mlpgLA8l1N8VHqwpVLbPXvDvPxGPcSI",
+          authDomain: "eatlyhub.firebaseapp.com",
+          projectId: "eatlyhub",
+          storageBucket: "eatlyhub.firebasestorage.app",
+          messagingSenderId: "1094045089044",
+          appId: "1:1094045089044:web:397e0fd73412a07c3ad601",
+          measurementId: "G-V3K3QB1715"
+        };
+
+        // Initialize Firebase
+        try {
+            if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        } catch(e) { console.error("Firebase Init Error", e); }
+        const db = firebase.firestore();
+
+        // 2. FETCH AND DISPLAY FOODS
+        window.onload = loadFoods;
+
+        async function loadFoods() {
+            const grid = document.getElementById('food-grid');
+            const loader = document.getElementById('food-loader');
+            
+            try {
+                // Fetch all users (Merchants)
+                // In a real production app, you would use Collection Groups or specific indexing
+                const snapshot = await db.collection('users').limit(20).get(); // Limit to 20 shops for performance
+                
+                let allFoods = [];
+
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    // Filter: Only show active/locked profiles that have foods
+                    if (data.locked && data.foods && data.foods.length > 0) {
+                        data.foods.forEach(food => {
+                            allFoods.push({
+                                ...food,
+                                merchantId: doc.id,
+                                merchantName: data.businessName,
+                                merchantLogo: data.logo || 'https://via.placeholder.com/30'
+                            });
+                        });
+                    }
+                });
+
+                // REASONABLE OPPORTUNITY: Shuffle the array
+                // This ensures different foods show up first every refresh
+                allFoods = shuffleArray(allFoods);
+
+                loader.style.display = 'none';
+
+                if(allFoods.length === 0) {
+                    grid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding:40px;"><h3>No foods available right now.</h3><p>Check back later!</p></div>`;
+                    return;
+                }
+
+                // Render HTML
+                grid.innerHTML = allFoods.map(item => `
+                    <div class="food-card" onclick="visitStore('${item.merchantId}')">
+                        <img src="${item.img}" class="card-img" alt="${item.name}" loading="lazy">
+                        <div class="card-body">
+                            <div class="card-cat">${item.cat}</div>
+                            <div class="card-title">${item.name}</div>
+                            <div class="card-biz">
+                                <img src="${item.merchantLogo}"> ${item.merchantName}
+                            </div>
+                            <div class="card-footer">
+                                <div class="price">Rs. ${item.full || item.half}</div>
+                                <button class="btn btn-primary btn-sm">Order</button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+
+            } catch (e) {
+                console.error(e);
+                loader.style.display = 'none';
+                grid.innerHTML = `<p style="text-align:center">Failed to load foods.</p>`;
+            }
+        }
+
+        // 3. UTILITY FUNCTIONS
+        
+        // Fisher-Yates Shuffle Algorithm for "Reasonable Opportunity"
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // Navigate to the Store (Index.html Public View)
+        function visitStore(uid) {
+            window.location.href = `index.html?biz=${uid}`;
+        }
+
+        function scrollToFeed() {
+            document.getElementById('feed').scrollIntoView({behavior: 'smooth'});
+        }
+
+        function loginCustomer() {
+            // For now, simulate login or direct to a customer dashboard
+            // Since requirements asked for home.html to have the customer button
+            alert("Customer Dashboard coming soon! For now, browse foods and order via WhatsApp directly from stores.");
+            scrollToFeed();
+        }
+    </script>
+</body>
+</html>

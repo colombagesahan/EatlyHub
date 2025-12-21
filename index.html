@@ -397,7 +397,7 @@
 
 <!-- ================= TEMPLATES ================= -->
 
-<!-- 1. LANDING PAGE (FINAL MASTERPIECE) -->
+<!-- 1. LANDING PAGE (FINAL MASTERPIECE WITH EXTRA CONTENT) -->
 <template id="tpl-landing">
     
     <style>
@@ -421,6 +421,11 @@
 
         /* Icon Styling */
         .card-icon { width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-right: 15px; flex-shrink: 0; }
+
+        /* Scrolling Text Animation */
+        .scroll-container { width: 100%; overflow: hidden; background: #2ed573; padding: 12px 0; margin: 30px 0; transform: rotate(-1deg); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .scroll-text { white-space: nowrap; display: inline-block; animation: scroll 20s linear infinite; color: white; font-weight: 800; font-size: 1.2rem; letter-spacing: 1px; }
+        @keyframes scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
         /* --- MODAL STYLES --- */
         .profit-modal-overlay {
@@ -505,7 +510,7 @@
 
                 <!-- EatlyHub -->
                 <div style="background: #eafff3; padding: 25px 20px; border-radius: 20px; border: 2px solid #2ed573; position: relative; box-shadow: 0 10px 30px rgba(46, 213, 115, 0.2);">
-                    <div style="position: absolute; top: -12px; left: 15px; background: #2ed573; color: white; padding: 4px 15px; border-radius: 10px; font-size: 0.85rem; font-weight: 800;">EatlyHub</div>
+                    <div style="position: absolute; top: -12px; left: 15px; background: #2ed573; color: white; padding: 4px 15px; border-radius: 10px; font-size: 0.85rem; font-weight: 800;">EATLYHUB</div>
                     <div class="flex justify-between center">
                         <span class="bold" style="font-size: 1.2rem; color: var(--secondary);">You Keep</span>
                         <span class="bold" style="font-size: 2.2rem; color: #2ed573;">100%</span>
@@ -583,6 +588,83 @@
                 </div>
             </div>
 
+        </div>
+
+        <!-- ========== NEW SECTION: ANIMATED BANNER & GUIDE ========== -->
+        
+        <!-- Animated Scrolling Bar -->
+        <div class="scroll-container">
+            <div class="scroll-text">
+                NO COMMISSIONS • KEEP 100% PROFIT • UNLIMITED ORDERS • RS 1500 ONLY • NO HIDDEN FEES • 
+                NO COMMISSIONS • KEEP 100% PROFIT • UNLIMITED ORDERS • RS 1500 ONLY • NO HIDDEN FEES •
+            </div>
+        </div>
+
+        <!-- How It Works (3 Steps) -->
+        <div class="lang-en"><h2 class="text-center mt-2 mb-1" style="color: var(--secondary); font-size: 1.5rem;">How It Works</h2></div>
+        <div class="lang-si hidden"><h2 class="text-center mt-2 mb-1" style="color: var(--secondary); font-size: 1.5rem;">ක්‍රියා කරන ආකාරය</h2></div>
+
+        <div style="display: flex; flex-direction: column; gap: 15px;">
+            <!-- Step 1 -->
+            <div class="glass-panel" style="padding: 15px; border-left: 5px solid #FF4757; display: flex; align-items: center;">
+                <div style="font-size: 1.5rem; font-weight: 900; color: #FF4757; margin-right: 15px; background: #FFF0F0; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">1</div>
+                <div>
+                    <h4 class="lang-en" style="margin:0;">Register Free</h4>
+                    <h4 class="lang-si hidden" style="margin:0;">නොමිලේ ලියාපදිංචි වන්න</h4>
+                    <p class="lang-en text-gray" style="margin:0; font-size: 0.85rem;">Sign up with Google in 30 seconds.</p>
+                    <p class="lang-si hidden text-gray" style="margin:0; font-size: 0.85rem;">Google හරහා තත්පර 30න් ලියාපදිංචි වන්න.</p>
+                </div>
+            </div>
+            <!-- Step 2 -->
+            <div class="glass-panel" style="padding: 15px; border-left: 5px solid #FFA502; display: flex; align-items: center;">
+                <div style="font-size: 1.5rem; font-weight: 900; color: #FFA502; margin-right: 15px; background: #FFF9E6; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">2</div>
+                <div>
+                    <h4 class="lang-en" style="margin:0;">Add Your Menu</h4>
+                    <h4 class="lang-si hidden" style="margin:0;">මෙනුව සකසන්න</h4>
+                    <p class="lang-en text-gray" style="margin:0; font-size: 0.85rem;">Upload food photos and prices easily.</p>
+                    <p class="lang-si hidden text-gray" style="margin:0; font-size: 0.85rem;">කෑම වර්ග සහ මිල ගණන් පහසුවෙන් ඇතුලත් කරන්න.</p>
+                </div>
+            </div>
+            <!-- Step 3 -->
+            <div class="glass-panel" style="padding: 15px; border-left: 5px solid #2ED573; display: flex; align-items: center;">
+                <div style="font-size: 1.5rem; font-weight: 900; color: #2ED573; margin-right: 15px; background: #EAFFF3; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">3</div>
+                <div>
+                    <h4 class="lang-en" style="margin:0;">Start Selling</h4>
+                    <h4 class="lang-si hidden" style="margin:0;">විකිණීම අරඹන්න</h4>
+                    <p class="lang-en text-gray" style="margin:0; font-size: 0.85rem;">Share link & get orders on WhatsApp.</p>
+                    <p class="lang-si hidden text-gray" style="margin:0; font-size: 0.85rem;">ලින්ක් එක බෙදාහැර WhatsApp මගින් ඇණවුම් ලබන්න.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Premium "What You Get" Card -->
+        <div class="glass-panel mt-2" style="background: linear-gradient(135deg, #2F3542 0%, #404b5a 100%); color: white; padding: 25px; border: none; box-shadow: 0 20px 50px rgba(0,0,0,0.3);">
+            <div class="text-center mb-2">
+                <i class="fa-solid fa-crown text-yellow fa-2x mb-1"></i>
+                <h2 class="lang-en" style="color: white; margin: 0; font-size: 1.4rem;">What You Get For Rs. 1500?</h2>
+                <h2 class="lang-si hidden" style="color: white; margin: 0; font-size: 1.4rem;">රු. 1500 ට ඔබට ලැබෙන්නේ මොනවද?</h2>
+                <p style="color: #a4b0be; font-size: 0.9rem; margin-top: 5px;">Complete Business Suite</p>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr; gap: 10px;">
+                <div style="background: rgba(255,255,255,0.1); padding: 12px; border-radius: 12px; display: flex; align-items: center;">
+                    <i class="fa-solid fa-check text-green" style="margin-right: 10px;"></i> <span class="lang-en">Unlimited Orders</span><span class="lang-si hidden">ඇණවුම් අසීමිතයි</span>
+                </div>
+                <div style="background: rgba(255,255,255,0.1); padding: 12px; border-radius: 12px; display: flex; align-items: center;">
+                    <i class="fa-solid fa-check text-green" style="margin-right: 10px;"></i> <span class="lang-en">0% Commissions</span><span class="lang-si hidden">කොමිස් රහිතයි</span>
+                </div>
+                <div style="background: rgba(255,255,255,0.1); padding: 12px; border-radius: 12px; display: flex; align-items: center;">
+                    <i class="fa-solid fa-check text-green" style="margin-right: 10px;"></i> <span class="lang-en">Unlimited Menu Items</span><span class="lang-si hidden">කෑම වර්ග අසීමිතයි</span>
+                </div>
+                <div style="background: rgba(255,255,255,0.1); padding: 12px; border-radius: 12px; display: flex; align-items: center;">
+                    <i class="fa-solid fa-check text-green" style="margin-right: 10px;"></i> <span class="lang-en">Monthly Reports</span><span class="lang-si hidden">ලාභ වාර්තා</span>
+                </div>
+            </div>
+
+            <button onclick="authLogin()" class="btn-xl pulse-ring w-100 mt-2" style="background: #2ed573; color: white; margin-top: 20px;">
+                <span class="lang-en">Join EatlyHub Now</span>
+                <span class="lang-si hidden">දැන්ම සම්බන්ධ වන්න</span>
+            </button>
         </div>
 
     </div>

@@ -499,12 +499,22 @@
             transform: scale(0.9); transition: transform 0.3s;
         }
         .profit-modal-overlay.show .profit-modal { transform: scale(1); }
+        .nav-logo {
+    display: flex;
+    align-items: center; /* Ensures text and logo are aligned vertically */
+    gap: 10px; /* Adds space between the logo and the text */
+}
+
+.logo-img {
+    height: 40px; /* Adjust this to fit your navbar height */
+    width: auto;
+}
     </style>
 
     <!-- NAVBAR -->
     <nav class="landing-nav">
-       <div class="nav-logo">
-    <img src="logo.png" alt="EatlyHub Logo"> EatlyHub
+      <div class="nav-logo">
+    <img src="logo.png" class="logo-img" alt="EatlyHub Logo"> EatlyHub
 </div>
         <div style="display: flex; gap: 15px; align-items: center;">
             <button onclick="toggleLanguage()" class="lang-btn">

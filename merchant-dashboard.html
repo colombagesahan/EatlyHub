@@ -1484,6 +1484,9 @@
     }
 
     async function loadPublicPage(bizId) {
+        // 5. REMOVE EMPTY AREA UNDER FOOTER
+        document.body.style.paddingBottom = "0px"; 
+
         bizIdForCart = bizId;
         const app = document.getElementById('app');
         app.innerHTML = `<div style="height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;background:#f9f9f9;"><div class="loader"></div><p class="mt-2 bold text-red">Loading Restaurant...</p></div>`;
@@ -1527,8 +1530,9 @@
             }
 
             // Generate Menu HTML
-            let menuHtml = '';
+            const menuDiv = document.createElement('div');
             const cats = [...new Set((data.foods||[]).map(f => f.cat))];
+            let menuHtml = '';
             
             if (data.foods && data.foods.length > 0) {
                 cats.forEach(c => {
@@ -1617,8 +1621,13 @@
                         
                         <!-- Contact Buttons -->
                         <div class="flex center" style="gap:15px; flex-wrap:wrap; justify-content:center;">
-                            <a href="tel:${data.hotline}" class="luxury-btn" style="background:white; color:${theme}; border:1px solid ${theme};"><i class="fa-solid fa-phone"></i> Call Us</a>
-                            <a href="https://wa.me/${data.whatsapp}" target="_blank" class="luxury-btn" style="background:#25D366; color:white;"><i class="fa-brands fa-whatsapp"></i> WhatsApp</a>
+                            <!-- 1. DISPLAY PHONE NUMBER HERE -->
+                            <a href="tel:${data.hotline}" class="luxury-btn" style="background:white; color:${theme}; border:1px solid ${theme};">
+                                <i class="fa-solid fa-phone"></i> ${data.hotline}
+                            </a>
+                            <a href="https://wa.me/${data.whatsapp}" target="_blank" class="luxury-btn" style="background:#25D366; color:white;">
+                                <i class="fa-brands fa-whatsapp"></i> WhatsApp
+                            </a>
                         </div>
                     </div>
 
@@ -1660,7 +1669,7 @@
                         </div>
                     </div>
 
-                    <!-- 7. FOOTER (Verified Badge -> Copy -> Powered By) -->
+                    <!-- 7. FOOTER -->
                     <footer class="footer-lux">
                         ${data.verified ? `
                             <div class="mb-2">
@@ -1677,9 +1686,10 @@
                         </div>
                     </footer>
 
-                    <!-- Floating Cart -->
+                    <!-- Floating Cart with 3. FORCED COLORS -->
                     <div class="floating-cart" style="background:${theme}; box-shadow: 0 10px 30px ${theme}66;" onclick="showCartModal()">
-                        <i class="fa-solid fa-cart-shopping"></i> <div class="cart-badge" id="cart-count" style="color:${theme};">${cart.length}</div>
+                        <i class="fa-solid fa-cart-shopping"></i> 
+                        <div class="cart-badge" id="cart-count" style="background-color: #000000 !important; color: #ffffff !important;">${cart.length}</div>
                     </div>
                 </div>
             `;

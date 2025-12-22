@@ -1701,10 +1701,11 @@
     }
 
     let cart = [];
-    function addToCart(name, variant, price) {
+   function addToCart(name, variant, price) {
         cart.push({name, variant, price: Number(price)});
         document.getElementById('cart-count').innerText = cart.length;
-        showToast("Added to cart!", 'info');
+        // 2. OPEN CART AUTOMATICALLY
+        showCartModal(); 
     }
     
     function submitReview(bizId) {

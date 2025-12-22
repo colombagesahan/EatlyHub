@@ -532,6 +532,32 @@
     let customerMarker = null;
     let customerLocation = null;
 
+    // --- NEW GLOBALS FOR FOOD GALLERY ---
+    let tempFoodImgs = [null, null, null]; // Stores up to 3 images
+
+    async function handleFoodGalleryUpload(input, index) {
+        if(input.files[0]) {
+            showToast("Compressing & Uploading...", "info");
+            try {
+                const base64 = await compressImage(input.files[0]);
+                const timestamp = Date.now();
+                const path = `food_images/${currentUser.uid}/${timestamp}_${index}.jpg`;
+                const downloadUrl = await uploadImageToStorage(base64, path);
+                
+                tempFoodImgs[index] = downloadUrl;
+                
+                // Update Preview
+                const imgEl = document.getElementById(`f-prev-${index}`);
+                const txtEl = document.getElementById(`f-txt-${index}`);
+                imgEl.src = downloadUrl;
+                imgEl.classList.remove('hidden');
+                txtEl.innerText = "Change";
+                
+                showToast("Image " + (index+1) + " Ready", "success");
+            } catch (e) { showToast("Upload Failed", "error"); }
+        }
+    }
+
     const TABS_CONFIG = [
         { name: 'Dashboard', icon: 'fa-chart-pie' },
         { name: 'Profile', icon: 'fa-user-gear' },
@@ -1126,19 +1152,46 @@
 
     let tempFoodImg = null;
     function renderAddFoods(target) {
+        // Reset temp images when opening tab
+        if(document.getElementById('f-name') === null) tempFoodImgs = [null, null, null];
+
         target.innerHTML = `
             <div class="card">
                 <h3>Add New Menu Item</h3>
+                
                 <div class="input-group">
-                    <label>Food Image</label>
-                    <div class="file-upload-wrapper" onclick="document.getElementById('f-file').click()">
-                        <span id="f-file-txt">${tempFoodImg ? 'Image Selected' : 'Click to Upload Image'}</span>
-                        <input type="file" id="f-file" hidden onchange="handleFoodImg(this)">
+                    <label>Food Gallery (Max 3)</label>
+                    <div class="flex" style="gap:10px; overflow-x:auto;">
+                        <!-- Image Slot 1 -->
+                        <div class="file-upload-wrapper" style="flex:1; padding:10px; min-width:80px;" onclick="document.getElementById('f-file-0').click()">
+                            <span id="f-txt-0" style="font-size:0.7rem;">Main Photo</span>
+                            <input type="file" id="f-file-0" hidden onchange="handleFoodGalleryUpload(this, 0)">
+                            <img id="f-prev-0" class="hidden mt-1" style="width:100%; height:60px; object-fit:cover; border-radius:8px;">
+                        </div>
+                        <!-- Image Slot 2 -->
+                        <div class="file-upload-wrapper" style="flex:1; padding:10px; min-width:80px;" onclick="document.getElementById('f-file-1').click()">
+                            <span id="f-txt-1" style="font-size:0.7rem;">Photo 2</span>
+                            <input type="file" id="f-file-1" hidden onchange="handleFoodGalleryUpload(this, 1)">
+                            <img id="f-prev-1" class="hidden mt-1" style="width:100%; height:60px; object-fit:cover; border-radius:8px;">
+                        </div>
+                        <!-- Image Slot 3 -->
+                        <div class="file-upload-wrapper" style="flex:1; padding:10px; min-width:80px;" onclick="document.getElementById('f-file-2').click()">
+                            <span id="f-txt-2" style="font-size:0.7rem;">Photo 3</span>
+                            <input type="file" id="f-file-2" hidden onchange="handleFoodGalleryUpload(this, 2)">
+                            <img id="f-prev-2" class="hidden mt-1" style="width:100%; height:60px; object-fit:cover; border-radius:8px;">
+                        </div>
                     </div>
-                    <img id="f-prev" class="${tempFoodImg ? '' : 'hidden'} mt-1" src="${tempFoodImg || ''}" style="width:100%; height:150px; object-fit:cover; border-radius:12px;">
                 </div>
+
                 <div class="input-group"><label>Category</label><input id="f-cat" placeholder="e.g. Fried Rice"></div>
                 <div class="input-group"><label>Food Name</label><input id="f-name" placeholder="Delicious Chicken"></div>
+                
+                <!-- NEW DESCRIPTION FIELD -->
+                <div class="input-group">
+                    <label>Description (Explain your food)</label>
+                    <textarea id="f-desc" rows="3" placeholder="Made with fresh spices, served with chili paste..."></textarea>
+                </div>
+
                 <div class="flex" style="gap:15px">
                     <div class="input-group w-100"><label>Half Price (Rs.)</label><input id="f-half" type="number" placeholder="Optional"></div>
                     <div class="input-group w-100"><label>Full Price (Rs.)</label><input id="f-full" type="number" placeholder="Required if no half"></div>
@@ -1151,10 +1204,11 @@
                 ${(bizProfile.foods && bizProfile.foods.length > 0) ? bizProfile.foods.map((f,i) => `
                     <div class="card flex justify-between center" style="padding:15px; flex-direction:row;">
                         <div class="flex center">
-                            <img src="${f.img}" style="width:60px;height:60px;border-radius:12px;margin-right:15px;object-fit:cover; box-shadow: var(--shadow-sm);">
+                            <img src="${f.images ? f.images[0] : f.img}" style="width:60px;height:60px;border-radius:12px;margin-right:15px;object-fit:cover; box-shadow: var(--shadow-sm);">
                             <div>
                                 <div class="bold" style="font-size:1rem;">${f.name}</div>
                                 <small style="display:block;">${f.cat}</small>
+                                <small style="display:block; color:#888; font-size:0.7rem; max-width:150px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${f.desc || ''}</small>
                                 <div style="font-size:0.85rem; font-weight:600; color:var(--primary);">
                                     ${f.half ? `H: ${f.half} ` : ''} ${f.full ? `F: ${f.full}` : ''}
                                 </div>
@@ -1186,24 +1240,39 @@
         }
     }
 
-    function addFood() {
+     function addFood() {
         const cat = document.getElementById('f-cat').value.trim();
         const name = document.getElementById('f-name').value.trim();
+        const desc = document.getElementById('f-desc').value.trim();
         const half = document.getElementById('f-half').value.trim();
         const full = document.getElementById('f-full').value.trim();
 
-        if(!tempFoodImg || !name || (!half && !full)) return showToast("Image, Name and at least one Price required.", "error");
+        // Validate: Need at least the first image
+        if(!tempFoodImgs[0]) return showToast("Main Image (Photo 1) is required.", "error");
+        if(!name || (!half && !full)) return showToast("Name and at least one Price required.", "error");
 
-        const foods = [...(bizProfile.foods||[]), {cat, name, img: tempFoodImg, half: half || null, full: full || null}];
+        // Filter out null images for the final array
+        const finalImages = tempFoodImgs.filter(img => img !== null);
+
+        const newFood = {
+            cat, 
+            name, 
+            desc, 
+            images: finalImages, 
+            img: finalImages[0], // Backward compatibility
+            half: half || null, 
+            full: full || null
+        };
+
+        const foods = [...(bizProfile.foods||[]), newFood];
         
         db.collection('users').doc(currentUser.uid).update({foods})
         .then(() => {
             showToast("Added to Menu!", "success");
-            tempFoodImg = null;
+            tempFoodImgs = [null, null, null]; // Reset
             renderAddFoods(document.getElementById('dash-content'));
         });
     }
-
     function deleteFood(idx) {
         if(!confirm("Delete this item?")) return;
         const foods = bizProfile.foods.filter((_, i) => i !== idx);
@@ -1484,9 +1553,7 @@
     }
 
  async function loadPublicPage(bizId) {
-        // 5. REMOVE EMPTY AREA UNDER FOOTER (Kept from previous fix)
         document.body.style.paddingBottom = "0px"; 
-
         bizIdForCart = bizId;
         const app = document.getElementById('app');
         app.innerHTML = `<div style="height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;background:#f9f9f9;"><div class="loader"></div><p class="mt-2 bold text-red">Loading Restaurant...</p></div>`;
@@ -1504,14 +1571,13 @@
             const data = doc.data();
             publicBizData = data;
             bizOwnerWa = data.whatsapp;
-            const theme = data.themeColor || '#FF4757'; // Default color
+            const theme = data.themeColor || '#FF4757';
 
             const reviewSnap = await db.collection('users').doc(bizId).collection('reviews').where('status', '==', 'published').limit(10).get();
             const reviews = reviewSnap.docs.map(d => d.data());
-
             const social = data.socialLinks || {};
             
-            // Generate Video Gallery HTML
+            // Generate Video Gallery
             let ytGalleryHtml = '';
             if(social.yt) {
                 const urls = social.yt.split(',').filter(u => u.trim() !== '');
@@ -1529,7 +1595,7 @@
                 }
             }
 
-            // Generate Menu HTML with FIXED HOVER COLORS
+            // Generate Menu with READ MORE LINK
             const menuDiv = document.createElement('div');
             const cats = [...new Set((data.foods||[]).map(f => f.cat))];
             let menuHtml = '';
@@ -1537,39 +1603,49 @@
             if (data.foods && data.foods.length > 0) {
                 cats.forEach(c => {
                     menuHtml += `<div class="menu-category-title" style="color:${theme}">${c||'Specialties'}</div>`;
-                    data.foods.filter(f => f.cat === c).forEach(f => {
-                        menuHtml += `
-                            <div class="card flex justify-between center" style="padding:15px; margin-bottom:15px; flex-direction: row; border:none; box-shadow: 0 5px 20px rgba(0,0,0,0.03);">
-                                <img src="${f.img}" style="width:90px;height:90px;border-radius:15px;object-fit:cover;margin-right:20px; box-shadow: 0 5px 10px rgba(0,0,0,0.1);">
-                                <div style="flex:1;">
-                                    <div class="bold" style="font-size:1.1rem; margin-bottom:5px; color:#2f3542;">${f.name}</div>
-                                    <div class="mt-1 flex" style="gap:8px; flex-wrap:wrap;">
-                                        ${f.half ? `
-                                        <button class="btn btn-outline" 
-                                            style="border-color:${theme}; color:${theme}; width:auto;padding:6px 14px;font-size:12px;margin:0; border-radius:20px; transition:0.3s;" 
-                                            onmouseover="this.style.background='${theme}'; this.style.color='white'"
-                                            onmouseout="this.style.background='transparent'; this.style.color='${theme}'"
-                                            onclick="addToCart('${f.name}', 'Half', ${f.half})">
-                                            Half: ${f.half}
-                                        </button>` : ''}
+                    data.foods.forEach((f, index) => {
+                        if(f.cat === c) {
+                            menuHtml += `
+                                <div class="card flex justify-between center" style="padding:15px; margin-bottom:15px; flex-direction: row; border:none; box-shadow: 0 5px 20px rgba(0,0,0,0.03);">
+                                    <img src="${f.images ? f.images[0] : f.img}" style="width:90px;height:90px;border-radius:15px;object-fit:cover;margin-right:20px; box-shadow: 0 5px 10px rgba(0,0,0,0.1);">
+                                    <div style="flex:1;">
+                                        <div class="bold" style="font-size:1.1rem; margin-bottom:2px; color:#2f3542;">${f.name}</div>
                                         
-                                        ${f.full ? `
-                                        <button class="luxury-btn" 
-                                            style="background:${theme}; color:white; width:auto;padding:6px 14px;font-size:12px;margin:0;" 
-                                            onclick="addToCart('${f.name}', 'Full', ${f.full})">
-                                            Full: ${f.full}
-                                        </button>` : ''}
+                                        <!-- READ MORE LINK -->
+                                        <div style="margin-bottom:8px;">
+                                            <span onclick="openFoodDetail(${index}, '${bizId}')" style="color:${theme}; font-size:0.8rem; font-weight:600; cursor:pointer; text-decoration:underline;">
+                                                Read More & Photos
+                                            </span>
+                                        </div>
+
+                                        <div class="mt-1 flex" style="gap:8px; flex-wrap:wrap;">
+                                            ${f.half ? `
+                                            <button class="btn btn-outline" 
+                                                style="border-color:${theme}; color:${theme}; width:auto;padding:6px 14px;font-size:12px;margin:0; border-radius:20px; transition:0.3s;" 
+                                                onmouseover="this.style.background='${theme}'; this.style.color='white'"
+                                                onmouseout="this.style.background='transparent'; this.style.color='${theme}'"
+                                                onclick="addToCart('${f.name}', 'Half', ${f.half})">
+                                                Half: ${f.half}
+                                            </button>` : ''}
+                                            
+                                            ${f.full ? `
+                                            <button class="luxury-btn" 
+                                                style="background:${theme}; color:white; width:auto;padding:6px 14px;font-size:12px;margin:0;" 
+                                                onclick="addToCart('${f.name}', 'Full', ${f.full})">
+                                                Full: ${f.full}
+                                            </button>` : ''}
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        `;
+                            `;
+                        }
                     });
                 });
             } else {
                 menuHtml = `<div class="card text-center text-gray mt-4"><h3>Menu Coming Soon</h3></div>`;
             }
 
-            // Generate Reviews HTML
+            // Reviews Logic
             let reviewsHtml = '';
             if(reviews.length > 0) {
                 reviewsHtml = `
@@ -1588,11 +1664,10 @@
                                 `).join('')}
                             </div>
                         </div>
-                    </div>
-                `;
+                    </div>`;
             }
 
-            // Status Badge Logic
+            // Status Badge
             const today = new Date().toLocaleDateString('en-US', {weekday:'long'});
             const sched = data.schedule?.[today];
             let isOpenNow = false;
@@ -1617,49 +1692,30 @@
                 statusBg = '#2ED573';
             }
 
-            // MAIN HTML CONSTRUCTION
+            // MAIN HTML
             app.innerHTML = `
                 <div id="public-view" class="luxury-container">
-                    
-                    <!-- 1. HERO SECTION -->
+                    <!-- HERO -->
                     <div class="luxury-hero">
                         <div style="position:absolute; top:15px; right:15px; padding:6px 12px; background:${statusBg}; color:white; border-radius:30px; font-weight:700; font-size:0.75rem; box-shadow:0 5px 15px rgba(0,0,0,0.1);">
                             ${statusText}
                         </div>
-                        
                         <img src="${data.logo || 'https://via.placeholder.com/100'}" style="width:130px; height:130px; border-radius:50%; object-fit:cover; border:4px solid white; box-shadow: 0 10px 30px rgba(0,0,0,0.15); margin-bottom:20px;">
-                        
                         <h1 style="font-size:2.2rem; color:#2d3436; margin-bottom:5px;">${data.businessName}</h1>
                         <p style="color:#636e72; margin-bottom:20px; font-size:1rem; padding:0 10px;">${data.heroText || "Welcome to our finest dining experience."}</p>
-                        
-                        <!-- Contact Buttons (Phone Display Fix) -->
                         <div class="flex center" style="gap:15px; flex-wrap:wrap; justify-content:center;">
-                            <a href="tel:${data.hotline}" class="luxury-btn" style="background:white; color:${theme}; border:1px solid ${theme};">
-                                <i class="fa-solid fa-phone"></i> ${data.hotline}
-                            </a>
-                            <a href="https://wa.me/${data.whatsapp}" target="_blank" class="luxury-btn" style="background:#25D366; color:white;">
-                                <i class="fa-brands fa-whatsapp"></i> WhatsApp
-                            </a>
+                            <a href="tel:${data.hotline}" class="luxury-btn" style="background:white; color:${theme}; border:1px solid ${theme};"><i class="fa-solid fa-phone"></i> ${data.hotline}</a>
+                            <a href="https://wa.me/${data.whatsapp}" target="_blank" class="luxury-btn" style="background:#25D366; color:white;"><i class="fa-brands fa-whatsapp"></i> WhatsApp</a>
                         </div>
                     </div>
 
-                    <!-- 2. MENU SECTION (Categorized) -->
-                    <div id="pub-menu" class="container p-2">
-                        ${menuHtml}
-                    </div>
+                    <!-- MENU -->
+                    <div id="pub-menu" class="container p-2">${menuHtml}</div>
 
-                    <!-- 3. REVIEWS SECTION -->
+                    <!-- REVIEWS -->
                     ${reviewsHtml}
-                    
-                    <!-- Write Review Button (Fixed Hover) -->
                     <div class="container p-2 text-center">
-                         <button class="btn btn-outline" 
-                            style="width:auto; border-radius:50px; border-color:${theme}; color:${theme}; transition:0.3s;" 
-                            onmouseover="this.style.background='${theme}'; this.style.color='white'"
-                            onmouseout="this.style.background='transparent'; this.style.color='${theme}'"
-                            onclick="document.getElementById('write-review-area').classList.toggle('hidden')">
-                            Write a Review
-                         </button>
+                         <button class="btn btn-outline" style="width:auto; border-radius:50px; border-color:${theme}; color:${theme}; transition:0.3s;" onmouseover="this.style.background='${theme}'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='${theme}'" onclick="document.getElementById('write-review-area').classList.toggle('hidden')">Write a Review</button>
                          <div id="write-review-area" class="mt-2 hidden text-left" style="background:#f8f9fa; padding:20px; border-radius:20px;">
                             <input id="rev-name" class="w-100 p-1 mb-1" placeholder="Your Name">
                             <select id="rev-star" class="w-100 p-1 mb-1"><option value="5">★★★★★</option><option value="4">★★★★</option></select>
@@ -1668,17 +1724,17 @@
                          </div>
                     </div>
 
-                    <!-- 4. LOCATION SECTION -->
+                    <!-- LOCATION -->
                     <div class="p-2 container mt-2">
                         <h3 class="menu-category-title" style="color:${theme}">Our Location</h3>
                         <p class="text-center text-gray mb-1"><i class="fa-solid fa-location-dot" style="color:${theme}"></i> ${data.address}</p>
                         <div id="public-map" class="map-container" style="pointer-events:none; border-radius:20px; border:none; box-shadow:0 10px 30px rgba(0,0,0,0.1);"></div>
                     </div>
 
-                    <!-- 5. VIDEO GALLERY -->
+                    <!-- VIDEOS -->
                     ${ytGalleryHtml}
 
-                    <!-- 6. SOCIAL MEDIA ICONS -->
+                    <!-- SOCIAL -->
                     <div class="container text-center">
                         <div class="social-icons-lux">
                             ${social.fb ? `<a href="${social.fb}" target="_blank" style="color:#3b5998;"><i class="fa-brands fa-facebook"></i></a>` : ''}
@@ -1687,37 +1743,99 @@
                         </div>
                     </div>
 
-                    <!-- 7. FOOTER -->
+                    <!-- FOOTER -->
                     <footer class="footer-lux">
-                        ${data.verified ? `
-                            <div class="mb-2">
-                                <span style="background:#2ED573; color:white; padding:5px 15px; border-radius:50px; font-weight:bold; font-size:0.8rem; letter-spacing:1px;">
-                                    <i class="fa-solid fa-circle-check"></i> VERIFIED BUSINESS
-                                </span>
-                            </div>
-                        ` : ''}
-                        
+                        ${data.verified ? `<div class="mb-2"><span style="background:#2ED573; color:white; padding:5px 15px; border-radius:50px; font-weight:bold; font-size:0.8rem; letter-spacing:1px;"><i class="fa-solid fa-circle-check"></i> VERIFIED BUSINESS</span></div>` : ''}
                         <p style="margin:0 0 10px 0; opacity:0.7;">&copy; ${new Date().getFullYear()} ${data.businessName}. All Rights Reserved.</p>
-                        
-                        <div style="font-size:0.8rem; opacity:0.5;">
-                            POWERED BY <span style="color:${theme}; font-weight:800;">EATLYHUB</span>
-                        </div>
+                        <div style="font-size:0.8rem; opacity:0.5;">POWERED BY <span style="color:${theme}; font-weight:800;">EATLYHUB</span></div>
                     </footer>
 
-                    <!-- Floating Cart (Forced Colors) -->
+                    <!-- CART -->
                     <div class="floating-cart" style="background:${theme}; box-shadow: 0 10px 30px ${theme}66;" onclick="showCartModal()">
                         <i class="fa-solid fa-cart-shopping"></i> 
                         <div class="cart-badge" id="cart-count" style="background-color: #000000 !important; color: #ffffff !important;">${cart.length}</div>
                     </div>
                 </div>
             `;
-
             initPublicMap(data);
+        } catch (e) { console.error(e); app.innerHTML = "<div class='text-center p-2'><h2>Error Loading Page</h2></div>"; }
+    }
+    function openFoodDetail(index, bizId) {
+        const data = publicBizData;
+        const food = data.foods[index];
+        const theme = data.themeColor || '#FF4757';
+        
+        // Ensure image array exists
+        const images = food.images || [food.img];
+        
+        // Upsell Logic: Get 3 other foods (excluding current one)
+        const upsells = data.foods.filter((_, i) => i !== index).slice(0, 3);
 
-        } catch (e) {
-            console.error(e);
-            app.innerHTML = "<div class='text-center p-2'><h2>Error Loading Page</h2></div>";
-        }
+        const app = document.getElementById('app');
+        
+        app.innerHTML = `
+            <div class="luxury-container" style="background:#fff; min-height:100vh;">
+                <!-- HEADER -->
+                <div style="padding:20px; display:flex; align-items:center; position:sticky; top:0; background:rgba(255,255,255,0.9); backdrop-filter:blur(10px); z-index:100;">
+                    <button onclick="loadPublicPage('${bizId}')" style="background:none; border:none; font-size:1.5rem; color:${theme}; cursor:pointer;">
+                        <i class="fa-solid fa-arrow-left"></i> Back
+                    </button>
+                    <span style="margin-left:15px; font-weight:bold; font-size:1.1rem; color:#2d3436;">${food.name}</span>
+                </div>
+
+                <!-- IMAGES -->
+                <div style="overflow-x:auto; display:flex; gap:10px; padding:0 20px; scroll-snap-type:x mandatory;">
+                    ${images.map(img => `
+                        <img src="${img}" style="width:90%; flex-shrink:0; height:300px; object-fit:cover; border-radius:20px; scroll-snap-align:center; box-shadow:var(--shadow-card);">
+                    `).join('')}
+                </div>
+                <p class="text-center text-gray" style="font-size:0.8rem; margin-top:10px;">(Scroll for more photos)</p>
+
+                <!-- DETAILS -->
+                <div class="p-2 container">
+                    <h1 style="font-size:2rem; color:${theme}; margin-bottom:10px;">${food.name}</h1>
+                    <p style="color:#636e72; font-size:1.1rem; line-height:1.6; margin-bottom:20px;">
+                        ${food.desc || "No description available for this delicious dish."}
+                    </p>
+                    
+                    <div style="background:#f8f9fa; padding:20px; border-radius:20px; text-align:center;">
+                        <h3 style="margin-bottom:15px;">Add to Order</h3>
+                        <div class="flex center" style="gap:15px; justify-content:center;">
+                            ${food.half ? `<button class="luxury-btn" style="background:white; color:${theme}; border:2px solid ${theme};" onclick="addToCart('${food.name}', 'Half', ${food.half})">Half: Rs. ${food.half}</button>` : ''}
+                            ${food.full ? `<button class="luxury-btn" style="background:${theme}; color:white;" onclick="addToCart('${food.name}', 'Full', ${food.full})">Full: Rs. ${food.full}</button>` : ''}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- UPSELL / SEE ALSO -->
+                ${upsells.length > 0 ? `
+                <div class="p-2 container" style="background:#fcfcfc; border-top:1px solid #eee;">
+                    <h3 class="menu-category-title" style="color:${theme}; font-size:1.2rem; margin:20px 0;">You might also like</h3>
+                    <div style="display:flex; overflow-x:auto; gap:15px; padding-bottom:15px;">
+                        ${upsells.map((uf, idx) => `
+                            <div style="min-width:160px; background:white; padding:15px; border-radius:15px; box-shadow:var(--shadow-sm); cursor:pointer;" onclick="loadPublicPage('${bizId}'); setTimeout(()=>addToCart('${uf.name}', 'Full', ${uf.full || uf.half}), 500)">
+                                <img src="${uf.images ? uf.images[0] : uf.img}" style="width:100%; height:100px; object-fit:cover; border-radius:10px; margin-bottom:10px;">
+                                <div style="font-weight:bold; font-size:0.9rem; margin-bottom:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${uf.name}</div>
+                                <div style="color:${theme}; font-weight:bold; font-size:0.85rem;">Rs. ${uf.full || uf.half}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>` : ''}
+
+                <!-- FOOTER (Same as Public) -->
+                <footer class="footer-lux" style="margin-top:0;">
+                    ${data.verified ? `<div class="mb-2"><span style="background:#2ED573; color:white; padding:5px 15px; border-radius:50px; font-weight:bold; font-size:0.8rem; letter-spacing:1px;"><i class="fa-solid fa-circle-check"></i> VERIFIED BUSINESS</span></div>` : ''}
+                    <p style="margin:0 0 10px 0; opacity:0.7;">&copy; ${new Date().getFullYear()} ${data.businessName}. All Rights Reserved.</p>
+                    <div style="font-size:0.8rem; opacity:0.5;">POWERED BY <span style="color:${theme}; font-weight:800;">EATLYHUB</span></div>
+                </footer>
+
+                <!-- CART -->
+                <div class="floating-cart" style="background:${theme}; box-shadow: 0 10px 30px ${theme}66;" onclick="showCartModal()">
+                    <i class="fa-solid fa-cart-shopping"></i> 
+                    <div class="cart-badge" id="cart-count" style="background-color: #000000 !important; color: #ffffff !important;">${cart.length}</div>
+                </div>
+            </div>
+        `;
     }
 
     function initPublicMap(data) {

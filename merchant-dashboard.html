@@ -1262,11 +1262,18 @@
     
     function updateWebSettings() {
         const heroText = document.getElementById('hero-txt').value.trim();
-        const themeColor = document.getElementById('s-color').value;
+        let themeColor = document.getElementById('s-color').value;
         const fb = document.getElementById('s-fb').value.trim();
         const ig = document.getElementById('s-ig').value.trim();
         const tk = document.getElementById('s-tk').value.trim();
         const yt = document.getElementById('s-yt').value.trim();
+        
+        // 4. PREVENT WHITE COLORS
+        if(themeColor.toLowerCase() === '#ffffff') {
+            alert("White color is not allowed as it makes text invisible. Please select a darker color.");
+            themeColor = '#FF4757'; // Revert to default
+            document.getElementById('s-color').value = themeColor;
+        }
         
         db.collection('users').doc(currentUser.uid).update({
             heroText, 

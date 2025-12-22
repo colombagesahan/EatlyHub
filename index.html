@@ -394,22 +394,48 @@
 
 <!-- ================= TEMPLATES ================= -->
 
-<!-- 1. LANDING PAGE (REMASTERED LIKE HOME.HTML) -->
+<!-- 1. LANDING PAGE (REMASTERED & RESPONSIVE) -->
 <template id="tpl-landing">
     
     <style>
         /* --- SHARED & LAYOUT STYLES --- */
         .landing-container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
         
-        /* Navbar (Glass Effect like Home.html) */
+        /* Navbar */
         .landing-nav {
             position: fixed; top: 0; width: 100%; z-index: 1000;
-            background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(10px);
             padding: 15px 5%; display: flex; justify-content: space-between; align-items: center;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.05); transition: 0.3s;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05); 
+            transition: transform 0.4s ease-in-out;
         }
-        .nav-logo { font-size: 1.5rem; font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 8px; }
         
+        /* Hide Navbar Class */
+        .nav-hidden { transform: translateY(-100%); }
+
+        .nav-logo { font-size: 1.5rem; font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 8px; }
+        .logo-img { height: 40px; width: auto; }
+
+        /* Desktop Nav Items */
+        .desktop-menu { display: flex; gap: 15px; align-items: center; }
+
+        /* Mobile Toggle */
+        .mobile-menu-btn { display: none; font-size: 1.5rem; color: var(--secondary); cursor: pointer; }
+        
+        /* Mobile Menu Overlay */
+        .mobile-nav-overlay {
+            position: fixed; top: 0; right: -100%; width: 80%; height: 100vh;
+            background: white; z-index: 1001; transition: 0.3s;
+            box-shadow: -5px 0 20px rgba(0,0,0,0.1); padding: 25px;
+            display: flex; flex-direction: column; gap: 20px;
+        }
+        .mobile-nav-overlay.active { right: 0; }
+        .mobile-backdrop {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 1000; display: none;
+        }
+        .mobile-backdrop.active { display: block; }
+
         /* Language Button */
         .lang-btn {
             background: white; border: 2px solid #f1f2f6; padding: 8px 16px;
@@ -421,228 +447,276 @@
 
         /* --- HERO SECTION --- */
         .hero-section {
-            padding-top: 120px; padding-bottom: 60px;
+            padding-top: 100px; padding-bottom: 40px;
             background: radial-gradient(circle at top right, #fff0f0 0%, #ffffff 60%);
             overflow: hidden; min-height: 85vh; display: flex; align-items: center;
         }
         
         .hero-grid {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 50px; align-items: center;
+            display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center;
         }
 
-        .hero-text h1 { font-size: 3.5rem; line-height: 1.1; margin-bottom: 20px; color: var(--secondary); }
+        .hero-text h1 { font-size: 3rem; line-height: 1.1; margin-bottom: 15px; color: var(--secondary); }
         .hero-text h1 span { color: var(--primary); }
-        .hero-text p { font-size: 1.1rem; color: #747d8c; line-height: 1.6; margin-bottom: 30px; }
+        .hero-text p { font-size: 1.1rem; color: #747d8c; line-height: 1.6; margin-bottom: 25px; }
         
+        /* Key Selling Points List */
+        .hero-points { display: flex; flex-direction: column; gap: 10px; margin-bottom: 25px; }
+        .h-point { display: flex; align-items: center; gap: 10px; font-weight: 600; color: var(--secondary); font-size: 1rem; }
+        .h-point i { color: #2ed573; background: #eafff3; padding: 5px; border-radius: 50%; }
+
         .hero-img { position: relative; animation: float 6s ease-in-out infinite; text-align: center; }
-        .hero-img img { width: 100%; max-width: 500px; drop-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+        .hero-img img { width: 100%; max-width: 450px; drop-shadow: 0 20px 40px rgba(0,0,0,0.1); }
 
         /* --- SECTIONS --- */
         .section-title { text-align: center; margin-bottom: 40px; }
-        .section-title h2 { font-size: 2.5rem; margin-bottom: 10px; color: var(--secondary); }
-        .section-title p { color: #747d8c; }
-
+        .section-title h2 { font-size: 2.2rem; margin-bottom: 10px; color: var(--secondary); }
+        
         /* Comparison Cards */
         .comparison-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 40px; }
         .comp-card { padding: 30px; border-radius: 24px; position: relative; text-align: center; border: 2px solid transparent; transition: 0.3s; }
         .comp-card:hover { transform: translateY(-5px); }
-        
         .comp-bad { background: #fff0f0; border-color: #ff4757; }
         .comp-good { background: #eafff3; border-color: #2ed573; box-shadow: 0 10px 30px rgba(46, 213, 115, 0.15); }
-        
         .percent-box { font-size: 3rem; font-weight: 800; margin: 10px 0; display: block; }
 
         /* Feature Grid */
-        .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; }
-        .feature-card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 1px solid #f1f2f6; transition: 0.3s; }
-        .feature-card:hover { transform: translateY(-5px); border-color: var(--primary); }
-        .f-icon { width: 60px; height: 60px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 20px; }
+        .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+        .feature-card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 1px solid #f1f2f6; }
+        .f-icon { width: 50px; height: 50px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; margin-bottom: 15px; }
 
         /* Pricing Banner */
         .pricing-banner {
-            background: var(--secondary); color: white; border-radius: 30px; padding: 60px 40px;
-            text-align: center; margin-top: 60px; position: relative; overflow: hidden;
+            background: var(--secondary); color: white; border-radius: 24px; padding: 40px 20px;
+            text-align: center; margin-top: 40px; position: relative; overflow: hidden;
             box-shadow: 0 20px 50px rgba(47, 53, 66, 0.3);
         }
-        .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin: 40px 0; text-align: left; }
-        .p-item { background: rgba(255,255,255,0.1); padding: 15px 20px; border-radius: 12px; display: flex; align-items: center; gap: 10px; font-weight: 600; }
+        .pricing-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; margin: 30px 0; }
+        .p-item { background: rgba(255,255,255,0.1); padding: 10px 15px; border-radius: 10px; font-size: 0.9rem; font-weight: 600; display: flex; align-items: center; gap: 8px; }
 
         /* Animation Keyframes */
-        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
         @keyframes pulse-ring { 0% { box-shadow: 0 0 0 0 rgba(46, 213, 115, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(46, 213, 115, 0); } 100% { box-shadow: 0 0 0 0 rgba(46, 213, 115, 0); } }
-        
-        /* Scrolling Text */
-        .scroll-wrapper { background: #2ed573; padding: 15px 0; transform: rotate(-1deg); width: 105%; margin-left: -2.5%; margin-top: 40px; margin-bottom: 40px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-        .scroll-inner { white-space: nowrap; animation: scrollText 20s linear infinite; font-weight: 800; color: white; font-size: 1.2rem; letter-spacing: 1px; }
-        @keyframes scrollText { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
-        /* Mobile Adjustments */
+        /* --- RESPONSIVE 300px - 900px --- */
         @media (max-width: 900px) {
-            .hero-grid, .comparison-grid { grid-template-columns: 1fr; text-align: center; }
-            .hero-img { margin-top: 40px; }
-            .hero-text h1 { font-size: 2.5rem; }
-            .pricing-banner { padding: 40px 20px; }
+            .desktop-menu { display: none; }
+            .mobile-menu-btn { display: block; }
+            .hero-grid, .comparison-grid { grid-template-columns: 1fr; text-align: center; gap: 30px; }
+            .hero-points { align-items: center; } /* Center list on mobile */
+            .hero-img { order: -1; margin-bottom: 20px; } /* Image on top */
+            .hero-img img { max-width: 250px; }
+            .hero-text h1 { font-size: 2.2rem; }
+            
+            /* 300px Specific Tweaks */
+            @media (max-width: 380px) {
+                .nav-logo { font-size: 1.2rem; }
+                .logo-img { height: 30px; }
+                .hero-text h1 { font-size: 1.8rem; }
+                .hero-text p { font-size: 0.95rem; }
+                .h-point { font-size: 0.85rem; }
+                .btn { width: 100% !important; padding: 12px !important; }
+                .section-title h2 { font-size: 1.6rem; }
+                .comp-card { padding: 20px; }
+                .percent-box { font-size: 2.2rem; }
+                .pricing-banner { padding: 30px 15px; }
+                .footer-grid { grid-template-columns: 1fr; }
+            }
         }
 
-        /* --- PROFIT MODAL --- */
+        /* --- FOOTER --- */
+        footer { background: white; padding: 40px 20px; border-top: 1px solid #f1f1f1; margin-top: 40px; }
+        .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 30px; max-width: 1200px; margin: 0 auto; }
+        .footer-col h3 { font-size: 1.1rem; margin-bottom: 15px; }
+        .footer-col ul { list-style: none; padding: 0; margin: 0; }
+        .footer-col ul li { margin-bottom: 10px; }
+        .footer-col ul li a { text-decoration: none; color: #747d8c; transition: 0.3s; }
+        .footer-col ul li a:hover { color: var(--primary); }
+        .social-links { display: flex; gap: 15px; }
+        .social-links a { color: var(--secondary); background: #f1f2f6; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; border-radius: 50%; text-decoration: none; }
+        .copyright { text-align: center; color: #a4b0be; font-size: 0.8rem; margin-top: 40px; border-top: 1px solid #f1f2f6; padding-top: 20px; }
+
+        /* --- PROFIT MODAL (IMPROVED) --- */
         .profit-modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); z-index: 9999;
+            background: rgba(0,0,0,0.85); z-index: 9999;
             display: flex; align-items: center; justify-content: center;
             opacity: 0; pointer-events: none; transition: opacity 0.3s;
-            backdrop-filter: blur(5px); padding: 15px;
+            backdrop-filter: blur(8px); padding: 15px;
         }
         .profit-modal-overlay.show { opacity: 1; pointer-events: all; }
         .profit-modal {
-            background: white; width: 100%; max-width: 420px; border-radius: 24px;
+            background: white; width: 100%; max-width: 350px; border-radius: 20px;
             overflow: hidden; box-shadow: 0 25px 50px rgba(0,0,0,0.5);
             transform: scale(0.9); transition: transform 0.3s;
+            text-align: center;
         }
         .profit-modal-overlay.show .profit-modal { transform: scale(1); }
-        .nav-logo {
-    display: flex;
-    align-items: center; /* Ensures text and logo are aligned vertically */
-    gap: 10px; /* Adds space between the logo and the text */
-}
+        
+        .modal-header { background: #FF4757; color: white; padding: 15px; }
+        .modal-vs { display: flex; align-items: stretch; height: 120px; border-bottom: 1px solid #eee; }
+        .vs-box { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 10px; }
+        .vs-them { background: #fff0f0; color: #ff4757; }
+        .vs-us { background: #eafff3; color: #2ed573; position: relative; }
+        .vs-us:after { content: 'WINNER'; position: absolute; top: 0; background: #2ed573; color: white; font-size: 9px; padding: 2px 6px; border-radius: 0 0 5px 5px; font-weight: bold; }
+        
+        .big-price { font-size: 1.4rem; font-weight: 800; line-height: 1.2; }
+        .sub-text { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; }
 
-.logo-img {
-    height: 40px; /* Adjust this to fit your navbar height */
-    width: auto;
-}
     </style>
 
     <!-- NAVBAR -->
-    <nav class="landing-nav">
-      <div class="nav-logo">
-    <img src="logo.png" class="logo-img" alt="EatlyHub Logo"> EatlyHub
-</div>
-        <div style="display: flex; gap: 15px; align-items: center;">
+    <nav class="landing-nav" id="main-nav">
+        <div class="nav-logo">
+            <img src="logo.png" class="logo-img" alt="EatlyHub"> EatlyHub
+        </div>
+        
+        <!-- Desktop Menu -->
+        <div class="desktop-menu">
             <button onclick="toggleLanguage()" class="lang-btn">
                 <i class="fa-solid fa-language"></i> <span id="lang-btn-txt">සිංහල</span>
             </button>
-            <button onclick="authLogin()" class="btn btn-primary" style="padding: 10px 20px; border-radius: 50px; margin: 0;">Login</button>
+            <button onclick="authLogin()" class="btn btn-primary" style="padding: 10px 20px; border-radius: 50px; margin: 0; box-shadow: none;">Login</button>
+        </div>
+
+        <!-- Mobile Toggle -->
+        <div class="mobile-menu-btn" onclick="toggleMobileMenu()">
+            <i class="fa-solid fa-bars"></i>
         </div>
     </nav>
+
+    <!-- MOBILE MENU DRAWER -->
+    <div class="mobile-backdrop" onclick="toggleMobileMenu()"></div>
+    <div class="mobile-nav-overlay" id="mobile-nav">
+        <div class="flex justify-between center">
+            <div class="nav-logo"><img src="logo.png" class="logo-img"> EatlyHub</div>
+            <i class="fa-solid fa-xmark" style="font-size: 1.5rem; cursor: pointer;" onclick="toggleMobileMenu()"></i>
+        </div>
+        <hr style="border: 0; border-top: 1px solid #eee; width: 100%;">
+        <button onclick="toggleLanguage(); toggleMobileMenu()" class="btn btn-secondary w-100">
+            <i class="fa-solid fa-language"></i> Change Language
+        </button>
+        <button onclick="authLogin()" class="btn btn-primary w-100">Login / Sign Up</button>
+    </div>
 
     <!-- 1. HERO SECTION -->
     <section class="hero-section">
         <div class="landing-container">
             <div class="hero-grid">
                 
+                <!-- IMAGE SIDE (Mobile: Top, Desktop: Right) -->
+                <div class="hero-img">
+                    <img src="profit.png" alt="Happy Chef">
+                </div>
+
                 <!-- TEXT SIDE -->
                 <div class="hero-text">
                     <!-- English -->
                     <div class="lang-en">
-                        <div style="display:inline-block; background:#FFE3E3; color:var(--primary); padding:5px 15px; border-radius:50px; font-weight:700; font-size:0.8rem; margin-bottom:15px;">
-                            🚀 For Restaurants & Home Cooks
+                        <div style="display:inline-block; background:#FFE3E3; color:var(--primary); padding:5px 15px; border-radius:50px; font-weight:700; font-size:0.75rem; margin-bottom:15px; letter-spacing: 0.5px;">
+                            FOR RESTAURANTS
                         </div>
-                        <h1>Stop Paying Huge <br><span>Commissions.</span></h1>
-                        <p>The only food platform where you keep 100% of your profit. No hidden fees. Just pure business growth.</p>
+                        <h1>Keep 100% of<br><span>Your Profit.</span></h1>
+                        
+                        <div class="hero-points">
+                            <div class="h-point"><i class="fa-solid fa-check"></i> No Commissions (0%)</div>
+                            <div class="h-point"><i class="fa-solid fa-check"></i> Rs. 1500 Monthly Only</div>
+                            <div class="h-point"><i class="fa-solid fa-check"></i> Unlimited Orders</div>
+                            <div class="h-point"><i class="fa-solid fa-check"></i> Free 3-Day Trial</div>
+                        </div>
+
+                        <button onclick="authLogin()" class="btn btn-primary" style="padding: 18px 30px; font-size: 1rem; border-radius: 50px; animation: pulse-ring 2s infinite;">
+                            Start Free Trial
+                        </button>
+                        <div class="mt-1" style="color: #a4b0be; font-size: 0.8rem; font-weight: 500;">
+                            <i class="fa-regular fa-credit-card"></i> No bank card required.
+                        </div>
                     </div>
 
                     <!-- Sinhala -->
                     <div class="lang-si hidden">
-                        <div style="display:inline-block; background:#FFE3E3; color:var(--primary); padding:5px 15px; border-radius:50px; font-weight:700; font-size:0.8rem; margin-bottom:15px;">
-                            🚀 අවන්හල් සහ ගෘහස්ථ ව්‍යාපාර සඳහා
+                        <div style="display:inline-block; background:#FFE3E3; color:var(--primary); padding:5px 15px; border-radius:50px; font-weight:700; font-size:0.75rem; margin-bottom:15px;">
+                            අවන්හල් සඳහා
                         </div>
-                        <h1>විශාල කොමිස් මුදල් <br><span>ගෙවීම නවත්වන්න.</span></h1>
-                        <p>ඔබේ ලාභයෙන් 100%ක්ම ඔබට හිමිවන එකම පද්ධතිය. සැඟවුණු ගාස්තු කිසිවක් නැත.</p>
+                        <h1>ඔබේ ලාභය<br><span>100%ක් ඔබටමයි.</span></h1>
+
+                        <div class="hero-points">
+                            <div class="h-point"><i class="fa-solid fa-check"></i> කොමිස් මුදල් නැත (0%)</div>
+                            <div class="h-point"><i class="fa-solid fa-check"></i> මාසිකව රු. 1500 පමණයි</div>
+                            <div class="h-point"><i class="fa-solid fa-check"></i> ඕනෑම ඇණවුම් ප්‍රමාණයක්</div>
+                            <div class="h-point"><i class="fa-solid fa-check"></i> දින 3ක් නොමිලේ</div>
+                        </div>
+
+                        <button onclick="authLogin()" class="btn btn-primary" style="padding: 18px 30px; font-size: 1rem; border-radius: 50px; animation: pulse-ring 2s infinite;">
+                            නොමිලේ පටන් ගන්න
+                        </button>
+                        <div class="mt-1" style="color: #a4b0be; font-size: 0.8rem;">
+                            <i class="fa-regular fa-credit-card"></i> බැංකු විස්තර අවශ්‍ය නැත.
+                        </div>
                     </div>
-
-                    <button onclick="authLogin()" class="btn btn-primary" style="padding: 18px 30px; font-size: 1.1rem; border-radius: 50px; animation: pulse-ring 2s infinite;">
-                        <i class="fa-brands fa-google"></i>
-                        <span class="lang-en">Start 3-Day Free Trial</span>
-                        <span class="lang-si hidden">දින 3ක් නොමිලේ අත්හදා බලන්න</span>
-                    </button>
-                    <div class="mt-1" style="color: #a4b0be; font-size: 0.85rem;">No credit card required. Cancel anytime.</div>
-                </div>
-
-                <!-- IMAGE SIDE -->
-                <div class="hero-img">
-                    <img src="profit.png" alt="Happy Chef">
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- 2. SCROLLING BAR -->
-    <div class="scroll-wrapper">
-        <div class="scroll-inner">
-            NO COMMISSIONS • KEEP 100% PROFIT • UNLIMITED ORDERS • RS 1500/Month ONLY • NO HIDDEN FEES • 
-            NO COMMISSIONS • KEEP 100% PROFIT • UNLIMITED ORDERS • RS 1500/Month ONLY • NO HIDDEN FEES •
-            NO COMMISSIONS • KEEP 100% PROFIT • UNLIMITED ORDERS • RS 1500/Month ONLY • NO HIDDEN FEES •
-        </div>
-    </div>
-
-    <!-- 3. COMPARISON (THE HOOK) -->
-    <div class="landing-container" style="padding-top: 40px;">
+    <!-- 3. COMPARISON -->
+    <div class="landing-container" style="padding-top: 20px;">
         <div class="section-title">
             <h2 class="lang-en">Why Lose Money?</h2>
             <h2 class="lang-si hidden">ඇයි පාඩු ලබන්නේ?</h2>
-            <p class="lang-en">Compare EatlyHub with other delivery apps.</p>
-            <p class="lang-si hidden">වෙනත් ඇප් සමඟ සසඳා බලන්න.</p>
+            <p class="lang-en" style="font-size: 0.9rem;">Stop giving away 30% of your hard work.</p>
+            <p class="lang-si hidden" style="font-size: 0.9rem;">ඔබේ මහන්සියෙන් 30%ක් නිකරුණේ ගෙවන්න එපා.</p>
         </div>
 
         <div class="comparison-grid">
             <!-- THEM -->
             <div class="comp-card comp-bad">
-                <div style="position: absolute; top: -15px; left: 50%; transform: translateX(-50%); background: #ff4757; color: white; padding: 5px 15px; border-radius: 20px; font-weight: 700; font-size: 0.8rem;">OTHER APPS</div>
-                <h3 style="color: #57606f;">They Take</h3>
+                <div style="position: absolute; top: -15px; left: 50%; transform: translateX(-50%); background: #ff4757; color: white; padding: 5px 15px; border-radius: 20px; font-weight: 700; font-size: 0.75rem;">OTHER APPS</div>
+                <h3 style="color: #57606f; font-size: 1.2rem;">They Take</h3>
                 <span class="percent-box" style="color: #ff4757;">30%</span>
-                <p class="lang-en text-gray">Commission on EVERY order.</p>
-                <p class="lang-si text-gray hidden">සෑම ඇණවුමකින්ම 30% ඔබට අහිමි වේ.</p>
+                <p class="lang-en text-gray">Commission per order</p>
+                <p class="lang-si text-gray hidden">සෑම ඇණවුමකින්ම</p>
             </div>
 
             <!-- US -->
             <div class="comp-card comp-good">
-                <div style="position: absolute; top: -15px; left: 50%; transform: translateX(-50%); background: #2ed573; color: white; padding: 5px 15px; border-radius: 20px; font-weight: 700; font-size: 0.8rem;">EatlyHub</div>
-                <h3 style="color: var(--secondary);">You Keep</h3>
+                <div style="position: absolute; top: -15px; left: 50%; transform: translateX(-50%); background: #2ed573; color: white; padding: 5px 15px; border-radius: 20px; font-weight: 700; font-size: 0.75rem;">EatlyHub</div>
+                <h3 style="color: var(--secondary); font-size: 1.2rem;">You Keep</h3>
                 <span class="percent-box" style="color: #2ed573;">100%</span>
-                <p class="lang-en text-green bold">NO COMMISSIONS. EVER.</p>
-                <p class="lang-si text-green bold hidden">කොමිස් මුදල් නැත. සම්පූර්ණ ලාභය ඔබට.</p>
+                <p class="lang-en text-green bold">Profit per order</p>
+                <p class="lang-si text-green bold hidden">සම්පූර්ණ ලාභය</p>
             </div>
         </div>
     </div>
 
-    <!-- 4. FEATURES GRID -->
-    <div class="landing-container" style="padding-top: 40px;">
+    <!-- 4. FEATURES -->
+    <div class="landing-container" style="padding-top: 20px;">
         <div class="section-title">
-            <h2 class="lang-en">Everything You Need</h2>
-            <h2 class="lang-si hidden">ඔබට අවශ්‍ය සියල්ල</h2>
+            <h2 class="lang-en">Included Features</h2>
+            <h2 class="lang-si hidden">අන්තර්ගත පහසුකම්</h2>
         </div>
 
         <div class="feature-grid">
-            <!-- Feature 1 -->
             <div class="feature-card">
-                <div class="f-icon" style="background: #e7f1ff; color: #1E90FF;">
-                    <i class="fa-solid fa-globe"></i>
-                </div>
-                <h3 class="lang-en">Free Webpage</h3>
-                <h3 class="lang-si hidden">වෙබ් පිටුවක්</h3>
-                <p class="lang-en text-gray">Your own online store link. Share on WhatsApp & Facebook.</p>
-                <p class="lang-si hidden text-gray">Facebook සහ WhatsApp හි බෙදාගත හැකි වෙබ් පිටුවක්.</p>
+                <div class="f-icon" style="background: #e7f1ff; color: #1E90FF;"><i class="fa-solid fa-globe"></i></div>
+                <h3 class="lang-en" style="font-size: 1.1rem;">Free Webpage</h3>
+                <h3 class="lang-si hidden" style="font-size: 1.1rem;">වෙබ් පිටුවක්</h3>
+                <p class="lang-en text-gray" style="font-size: 0.9rem;">Share on WhatsApp & FB.</p>
+                <p class="lang-si hidden text-gray" style="font-size: 0.9rem;">WhatsApp/FB හරහා යවන්න.</p>
             </div>
-
-            <!-- Feature 2 -->
             <div class="feature-card">
-                <div class="f-icon" style="background: #fff9e6; color: #FFA502;">
-                    <i class="fa-solid fa-calculator"></i>
-                </div>
-                <h3 class="lang-en">Smart Billing</h3>
-                <h3 class="lang-si hidden">බිල්පත් පද්ධතිය</h3>
-                <p class="lang-en text-gray">Issue digital receipts and track your daily profit/loss easily.</p>
-                <p class="lang-si hidden text-gray">ඩිජිටල් බිල්පත් නිකුත් කිරීම සහ ලාභ අලාභ ගණනය.</p>
+                <div class="f-icon" style="background: #fff9e6; color: #FFA502;"><i class="fa-solid fa-receipt"></i></div>
+                <h3 class="lang-en" style="font-size: 1.1rem;">Billing System</h3>
+                <h3 class="lang-si hidden" style="font-size: 1.1rem;">බිල්පත් පද්ධතිය</h3>
+                <p class="lang-en text-gray" style="font-size: 0.9rem;">Digital receipts for customers.</p>
+                <p class="lang-si hidden text-gray" style="font-size: 0.9rem;">පාරිභෝගිකයාට ඩිජිටල් බිල්පතක්.</p>
             </div>
-
-            <!-- Feature 3 -->
             <div class="feature-card">
-                <div class="f-icon" style="background: #fff0f0; color: #ff4757;">
-                    <i class="fa-solid fa-users"></i>
-                </div>
-                <h3 class="lang-en">More Customers</h3>
-                <h3 class="lang-si hidden">නව පාරිභෝගිකයින්</h3>
-                <p class="lang-en text-gray">Get listed on our main food app and reach thousands of locals.</p>
-                <p class="lang-si hidden text-gray">අපගේ ප්‍රධාන ඇප් එක හරහා නව පාරිභෝගිකයින් සොයාගන්න.</p>
+                <div class="f-icon" style="background: #fff0f0; color: #ff4757;"><i class="fa-solid fa-bullhorn"></i></div>
+                <h3 class="lang-en" style="font-size: 1.1rem;">Free Marketing</h3>
+                <h3 class="lang-si hidden" style="font-size: 1.1rem;">අලෙවිකරණය</h3>
+                <p class="lang-en text-gray" style="font-size: 0.9rem;">Listed on our main food app.</p>
+                <p class="lang-si hidden text-gray" style="font-size: 0.9rem;">අපගේ ඇප් එකේ ඔබව පෙන්වයි.</p>
             </div>
         </div>
     </div>
@@ -650,105 +724,87 @@
     <!-- 5. PRICING BANNER -->
     <div class="landing-container">
         <div class="pricing-banner">
-            <i class="fa-solid fa-crown text-yellow fa-3x mb-1"></i>
-            <h2 class="lang-en" style="color: white; font-size: 2.2rem;">Complete Suite for <span style="color:#2ed573">Rs. 1500</span></h2>
-            <h2 class="lang-si hidden" style="color: white; font-size: 2.2rem;">සියල්ලම මාසයකට <span style="color:#2ed573">රු. 1500</span> පමණයි</h2>
+            <div style="background: rgba(255,255,255,0.2); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px;">
+                <i class="fa-solid fa-crown text-yellow fa-2x"></i>
+            </div>
+            <h2 class="lang-en" style="color: white; font-size: 1.8rem;">All This For <span style="color:#2ed573">Rs. 1500</span></h2>
+            <h2 class="lang-si hidden" style="color: white; font-size: 1.8rem;">සියල්ලම <span style="color:#2ed573">රු. 1500</span> පමණයි</h2>
             
             <div class="pricing-grid">
-                <div class="p-item"><i class="fa-solid fa-check text-green"></i> <span class="lang-en">Unlimited Orders</span><span class="lang-si hidden">ඇණවුම් අසීමිතයි</span></div>
-                <div class="p-item"><i class="fa-solid fa-check text-green"></i> <span class="lang-en">0% Commissions</span><span class="lang-si hidden">කොමිස් රහිතයි</span></div>
-                <div class="p-item"><i class="fa-solid fa-check text-green"></i> <span class="lang-en">Unlimited Menu Items</span><span class="lang-si hidden">කෑම වර්ග අසීමිතයි</span></div>
-                <div class="p-item"><i class="fa-solid fa-check text-green"></i> <span class="lang-en">Monthly Reports</span><span class="lang-si hidden">ලාභ වාර්තා</span></div>
+                <div class="p-item"><i class="fa-solid fa-check text-green"></i> No Hidden Fees</div>
+                <div class="p-item"><i class="fa-solid fa-check text-green"></i> Unlimited Items</div>
+                <div class="p-item"><i class="fa-solid fa-check text-green"></i> Monthly Reports</div>
             </div>
 
-            <button onclick="authLogin()" class="btn btn-primary" style="background: #2ed573; padding: 15px 40px; font-size: 1.1rem; border-radius: 50px; box-shadow: 0 10px 30px rgba(46, 213, 115, 0.4);">
-                <span class="lang-en">Start Free Trial Now</span>
+            <button onclick="authLogin()" class="btn btn-primary" style="background: #2ed573; padding: 15px 30px; font-size: 1rem; border-radius: 50px; border:none; color: #0a3d25;">
+                <span class="lang-en">Start Free Trial</span>
                 <span class="lang-si hidden">දැන්ම පටන් ගන්න</span>
             </button>
         </div>
     </div>
 
     <!-- 6. FOOTER -->
-      <!-- FOOTER -->
     <footer>
         <div class="footer-grid">
             <div class="footer-col">
                 <h3>EatlyHub</h3>
-                <p style="color: #a4b0be; font-size: 0.9rem;">Connecting food lovers with the best local flavors. The fairest platform for merchants.</p>
+                <p style="color: #a4b0be; font-size: 0.85rem;">The fairest food platform for Sri Lankan merchants.</p>
                 <div class="social-links mt-2">
                     <a href="#"><i class="fa-brands fa-facebook-f"></i></a>
-                    <a href="#"><i class="fa-brands fa-instagram"></i></a>
-                    <a href="#"><i class="fa-brands fa-tiktok"></i></a>
+                    <a href="#"><i class="fa-brands fa-whatsapp"></i></a>
                 </div>
             </div>
             <div class="footer-col">
-                <h3>Accounts</h3>
+                <h3>Links</h3>
                 <ul>
-                    <li><a href="#" onclick="loginCustomer()">Customer Login</a></li>
-                    <li><a href="index.html">Merchant Login</a></li>
-                    <li><a href="riders.html">Rider Login</a></li>
-                </ul>
-            </div>
-            <div class="footer-col">
-                <h3>Company</h3>
-                <ul>
-                    <li><a href="#">About Us</a></li>
+                    <li><a href="#" onclick="authLogin()">Merchant Login</a></li>
                     <li><a href="#">Privacy Policy</a></li>
-                    <li><a href="#">Terms of Service</a></li>
-                    <li><a href="#">Contact Support</a></li>
+                    <li><a href="#">Contact Us</a></li>
                 </ul>
-            </div>
-            <div class="footer-col">
-                <h3>Newsletter</h3>
-                <p style="font-size:0.85rem; color:#a4b0be;">Get discounts and updates.</p>
-                <div style="display:flex; margin-top:10px;">
-                    <input type="email" placeholder="Email" style="padding:10px; border-radius:8px 0 0 8px; border:none; width:100%;">
-                    <button style="background:var(--primary); color:white; border:none; padding:0 15px; border-radius:0 8px 8px 0;"><i class="fa-solid fa-paper-plane"></i></button>
-                </div>
             </div>
         </div>
         <div class="copyright">
-            &copy; 2025 EatlyHub Technologies. All Rights Reserved.
+            &copy; 2025 EatlyHub Technologies.
         </div>
     </footer>
 
-
-    <!-- 7. PROFIT LOSS MODAL (UNCHANGED LOGIC) -->
+    <!-- 7. IMPROVED PROFIT MODAL -->
     <div id="profit-modal" class="profit-modal-overlay">
         <div class="profit-modal">
-            <div style="background: #FF4757; color: white; padding: 20px; text-align: center;">
+            <div class="modal-header">
                 <div class="flex justify-between center">
-                    <h3 style="color:white; margin:0; font-size: 1.2rem;"><i class="fa-solid fa-triangle-exclamation"></i> Are You Losing Money?</h3>
-                    <button onclick="closeProfitModal()" style="background:none; border:none; color:white; font-size:1.5rem; cursor:pointer;">&times;</button>
+                    <h3 style="margin:0; font-size: 1.1rem;"><i class="fa-solid fa-bell"></i> Quick Fact</h3>
+                    <i class="fa-solid fa-xmark" onclick="closeProfitModal()" style="cursor:pointer; font-size: 1.2rem;"></i>
                 </div>
             </div>
             
-            <div style="padding: 25px;">
-                <div class="text-center mb-1">
-                    <p class="lang-en text-gray" style="font-size: 0.9rem;">If you sell a Rice Packet for <b>Rs. 1,000</b> on other apps:</p>
-                    <p class="lang-si hidden text-gray" style="font-size: 0.9rem;">වෙනත් ඇප් වල රු. 1,000 ක කෑමක් විකුණුවොත්:</p>
+            <div style="padding: 15px;">
+                <p class="lang-en text-gray" style="font-size: 0.85rem; margin-bottom: 10px;">Cost for selling <b>Rs. 100,000</b> worth of food:</p>
+                <p class="lang-si hidden text-gray" style="font-size: 0.85rem; margin-bottom: 10px;">රු. 100,000 ක ආහාර විකුණන විට වියදම:</p>
+
+                <div class="modal-vs">
+                    <div class="vs-box vs-them">
+                        <span class="sub-text">Others Take</span>
+                        <span class="big-price">30%</span>
+                        <small style="font-size: 0.7rem;">- Rs 30,000</small>
+                    </div>
+                    <div class="vs-box vs-us">
+                        <span class="sub-text">We Take</span>
+                        <span class="big-price">0%</span>
+                        <small style="font-size: 0.7rem;">Rs 0.00</small>
+                    </div>
                 </div>
 
-                <div style="background: #FFF0F0; border: 1px solid #ff4757; color: #ff4757; padding: 15px; border-radius: 16px; margin-bottom: 15px; display:flex; justify-content:space-between; align-items:center;">
-                    <div class="text-left"><small class="bold">COMMISSION (30%)</small></div>
-                    <h3 style="margin:0; font-size:1.4rem;">- Rs. 300</h3>
+                <div style="padding: 15px 0;">
+                    <div style="background: #2f3542; color: white; padding: 10px; border-radius: 10px; font-size: 0.9rem;">
+                        <span class="lang-en">You Pay Fixed: <b>Rs. 1,500</b></span>
+                        <span class="lang-si hidden">මාසික ගාස්තුව: <b>රු. 1,500</b></span>
+                    </div>
                 </div>
 
-                <div style="background: #2f3542; color: white; padding: 20px; border-radius: 20px; text-align: center; margin-bottom: 20px;">
-                    <small style="text-transform: uppercase; color: #a4b0be; font-size:0.75rem; letter-spacing:1px;">10 Orders/Day = Monthly Loss</small>
-                    <h1 class="loss-text" style="color: #ff4757; font-size: 2.5rem; margin: 10px 0;">Rs. 90,000</h1>
-                    <small class="lang-en" style="color:#dfe4ea;">Don't let them eat your profit!</small>
-                    <small class="lang-si hidden" style="color:#dfe4ea;">ඔබේ ලාභය ඔවුන්ට කන්න දෙන්න එපා!</small>
-                </div>
-
-                <div style="background: #E7FFF0; border: 1px solid #2ed573; color: #2ed573; padding: 15px; border-radius: 16px; text-align:center; margin-bottom:20px;">
-                    <span class="lang-en">With <b>EatlyHub</b>, pay only <br><span style="font-size:1.3rem; font-weight:800;">Rs. 1,500 / Month</span></span>
-                    <span class="lang-si hidden"><b>EatlyHub</b> සමඟ මාසයටම <br><span style="font-size:1.3rem; font-weight:800;">රු. 1,500 ක් පමණයි</span></span>
-                </div>
-
-                <button class="btn btn-primary w-100" onclick="authLogin()" style="border-radius: 12px; padding: 15px; font-size: 1.1rem; margin:0;">
-                    <span class="lang-en">Start Saving Today</span>
-                    <span class="lang-si hidden">අදම ලාභ ලබන්න</span>
+                <button class="btn btn-primary w-100" onclick="authLogin()" style="border-radius: 50px; margin:0;">
+                    <span class="lang-en">Create Free Account</span>
+                    <span class="lang-si hidden">නොමිලේ ගිණුමක් හදන්න</span>
                 </button>
             </div>
         </div>
@@ -2271,45 +2327,65 @@
         }, 3000);
     }
 
-  // ============================================
-    // FINAL LANDING PAGE LOGIC (Language + Scroll + Modal)
+ // ============================================
+    // UPDATED LANDING PAGE LOGIC (Mobile + Scroll + Modal + Language)
     // ============================================
 
     let currentLang = 'en';
     let modalShown = false;
+    let lastScrollY = window.scrollY;
 
-    // 1. SCROLL LISTENER (Triggers the Modal)
+    // 1. MOBILE MENU TOGGLE
+    function toggleMobileMenu() {
+        const menu = document.getElementById('mobile-nav');
+        const backdrop = document.querySelector('.mobile-backdrop');
+        if (menu && backdrop) {
+            menu.classList.toggle('active');
+            backdrop.classList.toggle('active');
+        }
+    }
+
+    // 2. SCROLL LISTENER (Handles Navbar Hiding & Modal Trigger)
     window.addEventListener('scroll', () => {
-        // Only run if user is NOT logged in (Landing page only)
-        if (currentUser) return; 
+        // A. Navbar Hide/Show Logic
+        const navbar = document.getElementById('main-nav');
+        if (navbar) {
+            const currentScrollY = window.scrollY;
+            // Hide if scrolling down AND passed 50px
+            if (currentScrollY > lastScrollY && currentScrollY > 50) {
+                navbar.classList.add('nav-hidden');
+            } else {
+                navbar.classList.remove('nav-hidden');
+            }
+            lastScrollY = currentScrollY;
+        }
 
-        const scrollPosition = window.scrollY;
+        // B. Modal Trigger (Only if NOT logged in)
+        if (currentUser || modalShown) return; 
+
+        const scrollPosition = window.scrollY + window.innerHeight; // Bottom of viewport
         const fullHeight = document.body.scrollHeight;
         
-        // Trigger when scrolled down 15% of the page
-        if (!modalShown && scrollPosition > (fullHeight * 0.15)) { 
-            openProfitModal();
+        // Trigger when user scrolls past 50% of total height
+        if (scrollPosition > (fullHeight * 0.5)) { 
+            const m = document.getElementById('profit-modal');
+            if(m) m.classList.add('show');
             modalShown = true; // Ensures it only opens once
         }
     });
 
-    // 2. MODAL FUNCTIONS
-    function openProfitModal() {
-        const m = document.getElementById('profit-modal');
-        if(m) m.classList.add('show');
-    }
-
+    // 3. CLOSE MODAL FUNCTION
     function closeProfitModal() {
         const m = document.getElementById('profit-modal');
         if(m) m.classList.remove('show');
     }
 
-    // 3. LANGUAGE TOGGLE FUNCTION
+    // 4. LANGUAGE TOGGLE FUNCTION (Essential to keep!)
     function toggleLanguage() {
         // Toggle State
         currentLang = (currentLang === 'en') ? 'si' : 'en';
         
-        // Update Button Text
+        // Update Button Text (Desktop & Mobile)
         const btnTxt = document.getElementById('lang-btn-txt');
         if(btnTxt) btnTxt.innerText = (currentLang === 'en') ? 'සිංහල' : 'English';
 

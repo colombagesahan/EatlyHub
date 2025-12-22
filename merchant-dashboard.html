@@ -1483,8 +1483,8 @@
         resDiv.innerHTML = found.length ? `<div class="p-2 text-red" style="background:#fff0f0; border-radius:12px; margin-top:10px;">⚠ <b>${found.length} Unpaid Bill(s)!</b></div>` : '<div class="text-green p-1">No unpaid records.</div>';
     }
 
-    async function loadPublicPage(bizId) {
-        // 5. REMOVE EMPTY AREA UNDER FOOTER
+ async function loadPublicPage(bizId) {
+        // 5. REMOVE EMPTY AREA UNDER FOOTER (Kept from previous fix)
         document.body.style.paddingBottom = "0px"; 
 
         bizIdForCart = bizId;
@@ -1529,7 +1529,7 @@
                 }
             }
 
-            // Generate Menu HTML
+            // Generate Menu HTML with FIXED HOVER COLORS
             const menuDiv = document.createElement('div');
             const cats = [...new Set((data.foods||[]).map(f => f.cat))];
             let menuHtml = '';
@@ -1544,8 +1544,21 @@
                                 <div style="flex:1;">
                                     <div class="bold" style="font-size:1.1rem; margin-bottom:5px; color:#2f3542;">${f.name}</div>
                                     <div class="mt-1 flex" style="gap:8px; flex-wrap:wrap;">
-                                        ${f.half ? `<button class="btn btn-outline" style="border-color:${theme}; color:${theme}; width:auto;padding:6px 14px;font-size:12px;margin:0; border-radius:20px;" onclick="addToCart('${f.name}', 'Half', ${f.half})">Half: ${f.half}</button>` : ''}
-                                        ${f.full ? `<button class="luxury-btn" style="background:${theme}; color:white; width:auto;padding:6px 14px;font-size:12px;margin:0;" onclick="addToCart('${f.name}', 'Full', ${f.full})">Full: ${f.full}</button>` : ''}
+                                        ${f.half ? `
+                                        <button class="btn btn-outline" 
+                                            style="border-color:${theme}; color:${theme}; width:auto;padding:6px 14px;font-size:12px;margin:0; border-radius:20px; transition:0.3s;" 
+                                            onmouseover="this.style.background='${theme}'; this.style.color='white'"
+                                            onmouseout="this.style.background='transparent'; this.style.color='${theme}'"
+                                            onclick="addToCart('${f.name}', 'Half', ${f.half})">
+                                            Half: ${f.half}
+                                        </button>` : ''}
+                                        
+                                        ${f.full ? `
+                                        <button class="luxury-btn" 
+                                            style="background:${theme}; color:white; width:auto;padding:6px 14px;font-size:12px;margin:0;" 
+                                            onclick="addToCart('${f.name}', 'Full', ${f.full})">
+                                            Full: ${f.full}
+                                        </button>` : ''}
                                     </div>
                                 </div>
                             </div>
@@ -1619,9 +1632,8 @@
                         <h1 style="font-size:2.2rem; color:#2d3436; margin-bottom:5px;">${data.businessName}</h1>
                         <p style="color:#636e72; margin-bottom:20px; font-size:1rem; padding:0 10px;">${data.heroText || "Welcome to our finest dining experience."}</p>
                         
-                        <!-- Contact Buttons -->
+                        <!-- Contact Buttons (Phone Display Fix) -->
                         <div class="flex center" style="gap:15px; flex-wrap:wrap; justify-content:center;">
-                            <!-- 1. DISPLAY PHONE NUMBER HERE -->
                             <a href="tel:${data.hotline}" class="luxury-btn" style="background:white; color:${theme}; border:1px solid ${theme};">
                                 <i class="fa-solid fa-phone"></i> ${data.hotline}
                             </a>
@@ -1639,9 +1651,15 @@
                     <!-- 3. REVIEWS SECTION -->
                     ${reviewsHtml}
                     
-                    <!-- Write Review Button -->
+                    <!-- Write Review Button (Fixed Hover) -->
                     <div class="container p-2 text-center">
-                         <button class="btn btn-outline" style="width:auto; border-radius:50px; border-color:${theme}; color:${theme};" onclick="document.getElementById('write-review-area').classList.toggle('hidden')">Write a Review</button>
+                         <button class="btn btn-outline" 
+                            style="width:auto; border-radius:50px; border-color:${theme}; color:${theme}; transition:0.3s;" 
+                            onmouseover="this.style.background='${theme}'; this.style.color='white'"
+                            onmouseout="this.style.background='transparent'; this.style.color='${theme}'"
+                            onclick="document.getElementById('write-review-area').classList.toggle('hidden')">
+                            Write a Review
+                         </button>
                          <div id="write-review-area" class="mt-2 hidden text-left" style="background:#f8f9fa; padding:20px; border-radius:20px;">
                             <input id="rev-name" class="w-100 p-1 mb-1" placeholder="Your Name">
                             <select id="rev-star" class="w-100 p-1 mb-1"><option value="5">★★★★★</option><option value="4">★★★★</option></select>
@@ -1686,7 +1704,7 @@
                         </div>
                     </footer>
 
-                    <!-- Floating Cart with 3. FORCED COLORS -->
+                    <!-- Floating Cart (Forced Colors) -->
                     <div class="floating-cart" style="background:${theme}; box-shadow: 0 10px 30px ${theme}66;" onclick="showCartModal()">
                         <i class="fa-solid fa-cart-shopping"></i> 
                         <div class="cart-badge" id="cart-count" style="background-color: #000000 !important; color: #ffffff !important;">${cart.length}</div>
